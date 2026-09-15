@@ -20,6 +20,7 @@ Then add a catalog workflow (pin a tag in production):
 ```bash
 gh aw add svennijhuis/agentic-workflows/hello-org@v1
 gh aw add svennijhuis/agentic-workflows/with-agentpacks@v1
+gh aw add svennijhuis/agentic-workflows/squad-review@v1
 ```
 
 That copies the Markdown into `.github/workflows/`, compiles a `.lock.yml`, and records `source:` so later `gh aw update` can merge upstream changes.
@@ -75,6 +76,7 @@ Keep this repository **private or internal** so only org members can install. Us
 - [How it works](docs/HOW-IT-WORKS.md)
 - [Use this catalog from other repos](docs/CONSUMING.md)
 - [Reuse agentPacks and mcp-services](docs/AGENTPACKS.md)
+- [Squad review on Actions](docs/SQUAD-REVIEW.md)
 - [Governance and org defaults](docs/GOVERNANCE.md)
 - [Control plane (later)](docs/CONTROL-PLANE.md)
 - [Contributing](CONTRIBUTING.md)

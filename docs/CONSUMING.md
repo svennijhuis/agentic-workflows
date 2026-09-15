@@ -26,6 +26,7 @@ gh aw add-wizard svennijhuis/agentic-workflows/hello-org
 
 # Scripted, pinned
 gh aw add svennijhuis/agentic-workflows/hello-org@v1.0.0
+gh aw add svennijhuis/agentic-workflows/squad-review@v1.0.0
 ```
 
 What happens:

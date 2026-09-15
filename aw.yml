@@ -4,3 +4,4 @@ description: Org catalog of installable GitHub Agentic Workflows and shared frag
 includes:
   - workflows/hello-org.md
   - workflows/with-agentpacks.md
+  - workflows/squad-review.md

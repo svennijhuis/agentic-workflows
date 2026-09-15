@@ -12,6 +12,7 @@ Each file **must** have an `on:` trigger. Keep names kebab-case; they become the
 | --- | --- | --- |
 | [hello-org.md](hello-org.md) | Example | Smoke-test install + `workflow_dispatch` |
 | [with-agentpacks.md](with-agentpacks.md) | Example | Same, plus `plugins:` from agentPacks |
+| [squad-review.md](squad-review.md) | Installable | PR review using agentPacks `/squad-review` |
 
 Add rows here when you land real templates (issue triage, CI doctor, policy rollout, …). Remix from [githubnext/agentics](https://github.com/githubnext/agentics) rather than inventing from scratch.
 

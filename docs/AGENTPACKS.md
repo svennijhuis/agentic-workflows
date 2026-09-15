@@ -20,7 +20,7 @@ Path form is `owner/repo/path/to/plugin@ref`. **Ref is required** and is rewritt
 
 AgentPacks authors plugins under `plugins/<name>/` on `main`. IDE clients should install the **generated** tree from the `marketplace` branch ([agentPacks README](https://github.com/svennijhuis/agentPacks)). Prefer pinning `@marketplace` (or a marketplace SHA) in production workflows.
 
-Catalog fragment: [`workflows/shared/agentpacks.md`](../workflows/shared/agentpacks.md). Example workflow: [`workflows/with-agentpacks.md`](../workflows/with-agentpacks.md).
+Catalog fragment: [`workflows/shared/agentpacks.md`](../workflows/shared/agentpacks.md) (git only). Review stack: [`workflows/shared/squad.md`](../workflows/shared/squad.md). Example workflows: [`workflows/with-agentpacks.md`](../workflows/with-agentpacks.md) (smoke) and [`workflows/squad-review.md`](../workflows/squad-review.md) (real PR review).
 
 In a consuming repo you can also declare plugins locally:
 
@@ -49,7 +49,7 @@ Which packs to load:
 | `git` | Guard destructive git in the agent sandbox |
 | `dotnet` / `rust` / `typescript` | Language build/test/review skills when the target repo uses that stack |
 | `pack-check` | Stack detection; more useful in IDEs than in a workflow that already knows the repo |
-| `squad` | Heavy gated plan/implement/review loop; usually too interactive for unattended Actions. Prefer IDE. Use in Actions only with a clear `workflow_dispatch` and write limits |
+| `squad` | `/squad-review` on PRs via [`workflows/squad-review.md`](../workflows/squad-review.md). Full `/squad` plan/implement stays in the IDE |
 
 Do **not** add a second copy of these skills under `workflows/shared/prompts/`.
 
