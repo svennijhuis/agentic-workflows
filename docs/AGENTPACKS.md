@@ -55,12 +55,14 @@ Do **not** add a second copy of these skills under `workflows/shared/prompts/`.
 
 ## Load a single skill (`skills:`)
 
-When you need one skill, not a whole plugin:
+When you need one skill, not a whole plugin (or a skill that is `disable-model-invocation`, so it must be installed in the activation job):
 
 ```yaml
 skills:
-  - svennijhuis/agentPacks/plugins/dotnet/skills/<skill-name>@marketplace
+  - svennijhuis/agentPacks/plugins/squad/skills/squad@marketplace
 ```
+
+That is how [`workflows/shared/squad.md`](../workflows/shared/squad.md) loads the orchestrator skill. Agents still come from `plugins:` (same pack). Do not paste SKILL.md into this repo and also list it under `skills:` — pick the remote ref.
 
 Compiler pins the ref to a SHA. Private skill repos need `github-token` or `github-app` on the object form. Docs: [Frontmatter Skills](https://github.github.com/gh-aw/reference/frontmatter/).
 

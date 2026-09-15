@@ -1,5 +1,7 @@
 ---
-description: agentPacks squad + git + language packs for Actions review workflows.
+description: Import agentPacks squad (skill + plugin agents) and language packs. Do not copy SKILL.md or agent files into this catalog.
+skills:
+  - svennijhuis/agentPacks/plugins/squad/skills/squad@marketplace
 plugins:
   - svennijhuis/agentPacks/plugins/git@marketplace
   - svennijhuis/agentPacks/plugins/squad@marketplace
@@ -8,8 +10,6 @@ plugins:
   - svennijhuis/agentPacks/plugins/rust@marketplace
 ---
 
-Installs the same plugins a developer uses in the IDE. Do not copy SKILL.md from agentPacks into this catalog.
+`skills:` installs the `squad` skill into the activation job (it is `disable-model-invocation`, so it will not self-load). `plugins:` installs the same marketplace packs a developer uses in the IDE, which is how **agents** (`squad-reviewer`, `squad-simplifier`, `squad-security-reviewer`, `squad-orchestrator`) arrive — gh-aw agent-file imports only accept `.github/agents/`, which agentPacks does not use.
 
-The `squad` plugin supplies `/squad-review` agents (`squad-reviewer`, `squad-simplifier`, `squad-security-reviewer`, `squad-orchestrator`) and the review contract. Language packs supply `<lang>-review` and related loop skills. Load only the language skills that match the diff.
-
-Prefer `@marketplace` (generated tree) or a SHA on that branch.
+Do not also paste those skills or agents into `workflows/shared/prompts/` or inline `## agent:` blocks.

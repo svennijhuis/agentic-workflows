@@ -1,6 +1,16 @@
 # Squad review on GitHub Actions
 
-[`workflows/squad-review.md`](../workflows/squad-review.md) is the catalog template that runs **the same `/squad-review` loop** from [agentPacks](https://github.com/svennijhuis/agentPacks) inside GitHub Actions.
+[`workflows/squad-review.md`](../workflows/squad-review.md) is a thin Actions adapter. The review loop, skill, and agents stay in [agentPacks](https://github.com/svennijhuis/agentPacks). This catalog does not copy them.
+
+## What is imported (one source)
+
+| Frontmatter | From agentPacks | Why |
+| --- | --- | --- |
+| `skills:` | `plugins/squad/skills/squad@marketplace` | Installs the `squad` skill in the activation job (`disable-model-invocation`, so it will not self-load) |
+| `plugins:` | `squad`, `git`, `dotnet`, `typescript`, `rust` @marketplace | Copilot/Claude/Codex **agents** (`squad-reviewer`, …) live in the plugin. gh-aw `imports:` of agent files only accepts `.github/agents/`, which this pack does not use |
+| `imports:` | `plugins/squad/commands/squad-review.md@marketplace` | The `/squad-review` command text. Edit it in agentPacks, not here |
+
+The workflow Markdown in this repo only overrides I/O: pin this PR, post via safe-outputs, do not write `docs/reviews/`.
 
 ## Install in a product repo
 
@@ -13,34 +23,8 @@ git commit -m "Add squad-review agentic workflow"
 git push
 ```
 
-Then either:
+Then open a PR, comment `/squad-review`, or run it from Actions. Enable Copilot / `copilot-requests: write`.
 
-- Open a pull request (runs on `opened` / `synchronize` / `ready_for_review`), or
-- Comment `/squad-review` on a pull request (centralized slash command), or
-- Run **squad-review** from the Actions tab (`workflow_dispatch`).
+## Change the review behaviour
 
-Enable Actions and Copilot (or `copilot-requests: write`) on that repository.
-
-## What gets loaded
-
-`plugins:` (see [`workflows/shared/squad.md`](../workflows/shared/squad.md)):
-
-| Plugin | Why |
-| --- | --- |
-| `squad` | Review agents + review contract |
-| `git` | Block destructive git in the sandbox |
-| `dotnet` / `typescript` / `rust` | Language review skills; the agent must load only the stacks in the diff |
-
-Nothing is copied out of agentPacks. Compile pins each plugin ref to a commit SHA.
-
-## IDE vs Actions
-
-`/squad-review` in Cursor is interactive (save-markdown ask, local `docs/reviews/`). The Actions workflow is **report-only on the PR**: inline review comments + one `COMMENT` summary. It does not write files, assign a Squad `pass`/`fix` verdict, or start a fix round.
-
-Full `/squad` (grill, plan, implement, ≤2 fix rounds) stays in the IDE. Do not run that unattended against every PR.
-
-## After install, look at
-
-1. Frontmatter `plugins:` / `imports:` — this is how packs are wired.
-2. The compiled `.lock.yml` checkout steps for each plugin (SHA-pinned).
-3. A real PR: comments should look like a squad-review merged list, not a generic linter dump.
+Edit agentPacks (`skills/squad`, `agents/`, `commands/squad-review.md`), publish `marketplace`, then `gh aw compile` / `gh aw update` in the consuming repo. Do not duplicate the contract in this catalog.
