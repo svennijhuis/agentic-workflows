@@ -8,12 +8,8 @@ gh aw add svennijhuis/agentic-workflows/<file-stem>@v1
 
 Each file **must** have an `on:` trigger. Keep names kebab-case; they become the `gh aw add` identifier.
 
-| Workflow | Status | Purpose |
-| --- | --- | --- |
-| [hello-org.md](hello-org.md) | Example | Smoke-test install + `workflow_dispatch` |
-| [with-agentpacks.md](with-agentpacks.md) | Example | Same, plus `plugins:` from agentPacks |
-| [squad-review.md](squad-review.md) | Installable | PR review using agentPacks `/squad-review` |
-
-Add rows here when you land real templates (issue triage, CI doctor, policy rollout, …). Remix from [githubnext/agentics](https://github.com/githubnext/agentics) rather than inventing from scratch.
+| Workflow | Purpose |
+| --- | --- |
+| [squad-review.md](squad-review.md) | PR review using agentPacks `/squad-review` |
 
 Shared fragments: [shared/](shared/).

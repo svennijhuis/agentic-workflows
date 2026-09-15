@@ -23,8 +23,8 @@ flowchart TB
     cursor --> packs
   end
   subgraph gha [GitHub Actions in a product repo]
-    md[hello-org.md]
-    lock[hello-org.lock.yml]
+    md[squad-review.md]
+    lock[squad-review.lock.yml]
     agent[Agent job read-only]
     safe[Safe-output jobs]
     md --> lock --> agent --> safe
@@ -51,11 +51,11 @@ Relative `imports: [shared/foo.md]` resolve from the workflow file’s directory
 ## Compile and lock files
 
 ```text
-workflows/hello-org.md
+workflows/squad-review.md
         │  gh aw add   (in the consuming repo)
         ▼
-.github/workflows/hello-org.md      # source, with source: recorded
-.github/workflows/hello-org.lock.yml # generated Actions YAML
+.github/workflows/squad-review.md      # source, with source: recorded
+.github/workflows/squad-review.lock.yml # generated Actions YAML
 ```
 
 - `gh aw compile` regenerates `.lock.yml` after frontmatter changes.

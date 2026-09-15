@@ -22,36 +22,35 @@ Enable GitHub Actions and Copilot (or the engine you set) on the repository.
 
 ```bash
 # Interactive
-gh aw add-wizard svennijhuis/agentic-workflows/hello-org
+gh aw add-wizard svennijhuis/agentic-workflows/squad-review
 
 # Scripted, pinned
-gh aw add svennijhuis/agentic-workflows/hello-org@v1.0.0
 gh aw add svennijhuis/agentic-workflows/squad-review@v1.0.0
 ```
 
 What happens:
 
-1. Markdown is copied to `.github/workflows/hello-org.md`.
-2. Frontmatter gets `source: svennijhuis/agentic-workflows/hello-org@<ref>`.
-3. The compiler writes `.github/workflows/hello-org.lock.yml`.
+1. Markdown is copied to `.github/workflows/squad-review.md`.
+2. Frontmatter gets `source: svennijhuis/agentic-workflows/squad-review@<ref>`.
+3. The compiler writes `.github/workflows/squad-review.lock.yml`.
 4. Declared `imports`, `resources`, and `dispatch-workflow` dependencies are fetched.
 
 Then:
 
 ```bash
-git add .github/workflows/hello-org.md .github/workflows/hello-org.lock.yml
-git commit -m "Add hello-org agentic workflow"
+git add .github/workflows/squad-review.md .github/workflows/squad-review.lock.yml
+git commit -m "Add squad-review agentic workflow"
 git push
 ```
 
-Run it from the Actions tab (`workflow_dispatch` on the examples) or wait for the trigger you configured.
+Run it from the Actions tab, comment `/squad-review` on a PR, or wait for `pull_request` events.
 
 Keep the **catalog repository** internal/private for org-only sharing. `private: true` on a workflow file blocks `gh aw add` completely — do not set it on templates you want product repos to install.
 
 ## 3. Update later
 
 ```bash
-gh aw update hello-org     # one workflow
+gh aw update squad-review  # one workflow
 gh aw update               # all tracked sources
 ```
 

@@ -18,8 +18,6 @@ gh aw init
 Then add a catalog workflow (pin a tag in production):
 
 ```bash
-gh aw add svennijhuis/agentic-workflows/hello-org@v1
-gh aw add svennijhuis/agentic-workflows/with-agentpacks@v1
 gh aw add svennijhuis/agentic-workflows/squad-review@v1
 ```
 
@@ -37,7 +35,7 @@ In a local workflow’s frontmatter:
 imports:
   - svennijhuis/agentic-workflows/workflows/shared/org-defaults.md@v1
   - svennijhuis/agentic-workflows/workflows/shared/security.md@v1
-  - svennijhuis/agentic-workflows/workflows/shared/agentpacks.md@v1
+  - svennijhuis/agentic-workflows/workflows/shared/squad.md@v1
 ```
 
 ## Layout

@@ -12,7 +12,6 @@ imports:
 | --- | --- |
 | [org-defaults.md](org-defaults.md) | Baseline GitHub toolsets |
 | [security.md](security.md) | Network / safety notes for org workflows |
-| [agentpacks.md](agentpacks.md) | `plugins:` git pack only |
 | [squad.md](squad.md) | `skills:` + `plugins:` from agentPacks (no copied SKILL.md) |
 | [mcp/](mcp/) | MCP server snippets (point at mcp-services; do not vendor binaries) |
 | [prompts/](prompts/) | Prompt snippets unique to **Actions** (not copies of plugin SKILL.md) |

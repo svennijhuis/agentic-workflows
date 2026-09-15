@@ -20,7 +20,7 @@ Path form is `owner/repo/path/to/plugin@ref`. **Ref is required** and is rewritt
 
 AgentPacks authors plugins under `plugins/<name>/` on `main`. IDE clients should install the **generated** tree from the `marketplace` branch ([agentPacks README](https://github.com/svennijhuis/agentPacks)). Prefer pinning `@marketplace` (or a marketplace SHA) in production workflows.
 
-Catalog fragment: [`workflows/shared/agentpacks.md`](../workflows/shared/agentpacks.md) (git only). Review stack: [`workflows/shared/squad.md`](../workflows/shared/squad.md). Example workflows: [`workflows/with-agentpacks.md`](../workflows/with-agentpacks.md) (smoke) and [`workflows/squad-review.md`](../workflows/squad-review.md) (real PR review).
+Review stack: [`workflows/shared/squad.md`](../workflows/shared/squad.md). Installable workflow: [`workflows/squad-review.md`](../workflows/squad-review.md).
 
 In a consuming repo you can also declare plugins locally:
 
@@ -113,5 +113,5 @@ Only **one** agent file per workflow. AgentPacks today is plugin-based, not a `.
 ## Decision rule
 
 1. Human in an editor → install agentPacks from the `marketplace` branch (existing README).
-2. Unattended GitHub Action → install a workflow from **this** catalog; import `shared/agentpacks.md` or `shared/mcp/*` instead of copying plugin files.
+2. Unattended GitHub Action → install `squad-review` from **this** catalog; import `shared/squad.md` or `shared/mcp/*` instead of copying plugin files.
 3. New behaviour needed in **both** places → add it to agentPacks (or mcp-services), then reference it from a catalog fragment.
