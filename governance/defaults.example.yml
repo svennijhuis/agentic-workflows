@@ -1,0 +1,15 @@
+# Example org defaults for `gh aw env`
+#
+# This file is documentation only. It is not read at runtime.
+# Copy to a real file, fill values, then:
+#   gh aw env update org-defaults.yml --scope org --org YOUR_ORG
+#
+# Empty values delete the variable. See:
+# https://github.github.com/gh-aw/reference/compiler-enterprise-environment-controls/
+
+# default_max_ai_credits: "15M"
+# default_max_daily_ai_credits: "50M"
+# default_timeout_minutes: "30"
+# default_agent_job_timeout_minutes: "90"
+# default_model_copilot: ""
+# default_utc: "+00:00"
