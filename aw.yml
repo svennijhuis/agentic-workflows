@@ -1,0 +1,5 @@
+manifest-version: "1"
+name: Org Agentic Workflows
+description: Org catalog of installable GitHub Agentic Workflows and shared fragments.
+includes:
+  - workflows/squad-review.md

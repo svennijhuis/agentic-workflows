@@ -1,0 +1,39 @@
+name: Catalog workflow request
+description: Ask for a new installable workflow or shared fragment in this catalog.
+title: "[catalog] "
+labels: []
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What should we add?
+      options:
+        - Installable workflow (workflows/*.md)
+        - Shared fragment (workflows/shared/)
+        - Agent plugin wiring from agentPacks
+        - MCP fragment
+        - Docs only
+    validations:
+      required: true
+  - type: textarea
+    id: purpose
+    attributes:
+      label: What should it do in consuming repositories?
+      description: Triggers, safe outputs, and which repos would install it.
+    validations:
+      required: true
+  - type: textarea
+    id: reuse
+    attributes:
+      label: Existing sources to reuse
+      description: Links to agentPacks plugins, mcp-services, githubnext/agentics, or other catalogs. Do not copy skills into this repo.
+  - type: dropdown
+    id: writes
+    attributes:
+      label: Write behavior
+      options:
+        - Report only (issues/comments)
+        - Open pull requests
+        - Cross-repo (target-repo / allowed-repos)
+    validations:
+      required: true
