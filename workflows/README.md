@@ -1,15 +1,13 @@
 # Installable workflows
 
-Markdown in this directory is what other repositories install:
-
 ```bash
-gh aw add svennijhuis/agentic-workflows/<file-stem>@v1
+gh aw add svennijhuis/agentic-workflows/<name>@v1.0.0
 ```
 
-Each file **must** have an `on:` trigger. Keep names kebab-case; they become the `gh aw add` identifier.
+Each file needs `on:`. Kebab-case, job named, never equal to an agentPacks skill name.
 
-| Workflow | Purpose |
+| Workflow | Does |
 | --- | --- |
-| [squad-review.md](squad-review.md) | PR review using agentPacks `/squad-review` |
+| [pr-review.md](pr-review.md) | Report-only PR review via agentPacks `/squad-review` |
 
-Shared fragments: [shared/](shared/).
+Fragments: [shared/](shared/).

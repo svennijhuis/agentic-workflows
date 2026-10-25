@@ -1,82 +1,36 @@
-# Agentic workflows catalog
+# agentic-workflows
 
-Org source of truth for [GitHub Agentic Workflows](https://github.github.com/gh-aw/). Other repositories **install** templates from here; they do not copy-paste Markdown by hand.
+Catalog of [GitHub Agentic Workflows](https://github.github.com/gh-aw/). Repos install from here with `gh aw add`; no copy-paste.
 
-This repo is the CI/Actions catalog. Interactive IDE behaviour lives in [`agentPacks`](https://github.com/svennijhuis/agentPacks). MCP servers live in [`mcp-services`](https://github.com/svennijhuis/mcp-services). See [How it works](docs/HOW-IT-WORKS.md) and [Using agentPacks](docs/AGENTPACKS.md).
+Skills, agents and standards live in [agentPacks](https://github.com/svennijhuis/agentPacks). MCP servers live in [mcp-services](https://github.com/svennijhuis/mcp-services). This repo only wires them into Actions.
 
-Replace `svennijhuis` with the company org slug when this catalog moves.
-
-## Install into another repository
-
-Prerequisites in the **consuming** repo:
+## Install
 
 ```bash
 gh extension install github/gh-aw
 gh aw init
+gh aw add svennijhuis/agentic-workflows/pr-review@v1.0.0
 ```
 
-Then add a catalog workflow (pin a tag in production):
-
-```bash
-gh aw add svennijhuis/agentic-workflows/squad-review@v1
-```
-
-That copies the Markdown into `.github/workflows/`, compiles a `.lock.yml`, and records `source:` so later `gh aw update` can merge upstream changes.
-
-Commit both the `.md` and the generated `.lock.yml`. Enable GitHub Actions in the consuming repo.
-
-Full consumer guide: [docs/CONSUMING.md](docs/CONSUMING.md).
-
-## Import shared fragments without installing a whole workflow
-
-In a local workflow’s frontmatter:
-
-```yaml
-imports:
-  - svennijhuis/agentic-workflows/workflows/shared/org-defaults.md@v1
-  - svennijhuis/agentic-workflows/workflows/shared/security.md@v1
-  - svennijhuis/agentic-workflows/workflows/shared/squad.md@v1
-```
+Commit `.md` + `.lock.yml`. Set secret `COPILOT_GITHUB_TOKEN` (fine-grained PAT, Copilot Requests: Read). More: [docs/CONSUMING.md](docs/CONSUMING.md).
 
 ## Layout
 
 | Path | Role |
 | --- | --- |
-| [`aw.yml`](aw.yml) | Package manifest `gh aw add` reads |
-| [`workflows/*.md`](workflows/) | Installable templates (have `on:`) |
-| [`workflows/shared/`](workflows/shared/) | Importable fragments (no `on:`) |
-| [`.github/workflows/`](.github/workflows/) | Control-plane jobs that run **in this repo only** |
-| [`docs/`](docs/) | How consumption, packing, and governance work |
-| [`governance/`](governance/) | Example org `GH_AW_DEFAULT_*` variables |
-| [`.github/workflows/validate-catalog.yml`](.github/workflows/validate-catalog.yml) | CI: `gh aw compile --dir workflows --no-emit` |
+| `aw.yml` | Package manifest for `gh aw add` |
+| `workflows/*.md` | Installable workflows (have `on:`) |
+| `workflows/shared/` | Fragments, no `on:` (defaults, security, agentPacks, standards, prompts, mcp) |
+| `docs/` | [CONSUMING](docs/CONSUMING.md), [GOVERNANCE](docs/GOVERNANCE.md), [AGENTPACKS](docs/AGENTPACKS.md) |
+| `pbis/` | One file per backlog item |
+| `CHANGELOG.md` | Releases and tag scheme |
 
-## Versioning
+## Workflows
 
-| Ref | When to use |
+| Name | Does |
 | --- | --- |
-| `@v1.2.0` | Production pin |
-| `@v1` | Follow the current major |
-| `@main` | Catalog development only |
-| SHA | Audit / incident freeze |
+| [pr-review](workflows/pr-review.md) | Report-only PR review via agentPacks `/squad-review` + language standards |
 
-Keep this repository **private or internal** so only org members can install. Use `private: true` only on workflows that must **not** be `gh aw add`-able (control-plane jobs in `.github/workflows/`). Catalog templates under `workflows/` stay installable.
+## How it runs
 
-## Related repos
-
-| Repo | Use it for |
-| --- | --- |
-| [svennijhuis/agentPacks](https://github.com/svennijhuis/agentPacks) | Cursor / Copilot CLI / Claude / Codex plugins (`squad`, `git`, language packs) |
-| [svennijhuis/mcp-services](https://github.com/svennijhuis/mcp-services) | MCP servers (filesystem, roslyn, index, …) |
-| [githubnext/agentics](https://github.com/githubnext/agentics) | Public starter workflows to remix into this catalog |
-
-## Docs
-
-- [How it works](docs/HOW-IT-WORKS.md)
-- [Use this catalog from other repos](docs/CONSUMING.md)
-- [Reuse agentPacks and mcp-services](docs/AGENTPACKS.md)
-- [Squad review on Actions](docs/SQUAD-REVIEW.md)
-- [Governance and org defaults](docs/GOVERNANCE.md)
-- [Control plane (later)](docs/CONTROL-PLANE.md)
-- [Contributing](CONTRIBUTING.md)
-
-Official references: [Using at Scale](https://github.github.com/gh-aw/guides/using-at-scale/), [Sharing Workflows](https://github.github.com/gh-aw/practices/sharing-workflows/).
+`workflows/x.md` (frontmatter + prompt) compiles to `x.lock.yml`. Agent job is read-only; writes go through `safe-outputs` in a separate job. Every workflow sets low cost caps (see [GOVERNANCE](docs/GOVERNANCE.md#cost)).

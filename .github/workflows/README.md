@@ -6,4 +6,4 @@ Do not put installable templates here. Those belong in [`../../workflows/`](../.
 
 `validate-catalog.yml` is ordinary Actions CI for this repo (compile check). It is not an agentic workflow and is not listed in `aw.yml`.
 
-Add orchestrator Markdown here only when this catalog becomes a [control plane](../../docs/CONTROL-PLANE.md). Mark those files `private: true` so they are not installed into product repos.
+Add orchestrator Markdown here only when this catalog becomes a [control plane](../../docs/GOVERNANCE.md#control-plane-later). Mark those files `private: true` so they are not installed into product repos.

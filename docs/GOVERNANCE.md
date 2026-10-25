@@ -1,52 +1,52 @@
 # Governance
 
-Operational rules for an org catalog. Technical format is the easy part; ownership and pins are not.
+## Owners
 
-## Who owns what
+| Surface | Owner |
+| --- | --- |
+| This catalog | `CODEOWNERS` |
+| agentPacks | Skills, agents, standards |
+| mcp-services | MCP servers |
+| Consuming repos | Secrets, Actions on, `source:` pins |
 
-| Surface | Owner | Notes |
-| --- | --- | --- |
-| This catalog | Platform / you (`CODEOWNERS`) | Review `aw.yml`, `workflows/`, governance files |
-| agentPacks | Same or adjacent | Plugin trust boundary; hooks run on laptops |
-| mcp-services | Same or adjacent | Network and data access |
-| Consuming repos | App teams | Secrets, enabling Actions, local `source:` pins |
+## Visibility
 
-## What may be installed where
+- Repo visibility is the install boundary. `private: true` blocks `gh aw add` entirely; set it only on control-plane jobs in `.github/workflows/`, never on `workflows/` templates.
+- Review triggers, permissions, tools, network, safe outputs and lock file before merging a template.
 
-- Keep this repository **private or internal** so only org members can `gh aw add`. That is the org boundary.
-- Set `private: true` only on workflows that must not be installed anywhere (control-plane orchestrators). Catalog templates under `workflows/` must remain installable.
-- Review triggers, permissions, tools, network, safe outputs, and lock files before merging a new template.
+## Versions
 
-## Version pins (consumers)
-
-Prefer exact tags (`@v1.2.0`) or SHAs in production. Moving `@v1` is for teams that run `gh aw update` on a cadence. `@main` is for catalog development.
-
-Release process (when you have something real to ship): tag `v0.1.0` / `v1.0.0` on this repo; optionally move a `v1` ref. Document the tag in the PR that cuts it.
-
-## Org compiler defaults
-
-Do not bake model names and AIC budgets into every workflow. Set GitHub Actions variables at org scope.
-
-Example keys: [`governance/defaults.example.yml`](../governance/defaults.example.yml)
-
-```bash
-# Inspect
-gh aw env get org-defaults.yml --scope org --org YOUR_ORG
-
-# Apply after editing a real (non-example) file
-gh aw env update org-defaults.yml --scope org --org YOUR_ORG
-```
-
-Precedence: workflow frontmatter → repo variable → org → enterprise → compiler fallback.
-
-Policy gates such as `GH_AW_POLICY_ALLOW_CREATE_PULL_REQUEST=false` can disable PR creation org-wide. See [Governance](https://github.github.com/gh-aw/guides/governance/) and [Compiler enterprise controls](https://github.github.com/gh-aw/reference/compiler-enterprise-environment-controls/).
-
-## Safe rollout
-
-Start report-only (`create-issue` / comments, no `create-pull-request`). Pilot on one repo. Then enable writes with `max: 1`. Keep a way to disable the workflow (delete lock file, or `if:` / environment protection).
-
-Details: [Safe Rollout](https://github.github.com/gh-aw/guides/using-at-scale/) (Using at Scale) and [CentralRepoOps](https://github.github.com/gh-aw/patterns/central-repo-ops/).
+See [CHANGELOG](../CHANGELOG.md). Exact tag for prod, moving `v1` for followers, branch only for dev. agentPacks refs are pinned by SHA or tag, never a branch.
 
 ## Cost
 
-Use `max-ai-credits`, rate limits, and `gh aw outcomes` on accepted safe outputs. See [Cost Management](https://github.github.com/gh-aw/reference/cost-management/).
+Defaults are 1,000 AIC/run and 5,000/day. Copilot Pro is 1,500 AIC/month, so every workflow here sets:
+
+```yaml
+max-ai-credits: 50
+max-daily-ai-credits: 200
+max-turns: 15
+timeout-minutes: 10
+```
+
+Frontmatter only: the compiler ignores these keys in imported fragments. Cheapest run is no agent: `skip-if-match`, or `noop` from `steps:`. Prefer `schedule` / `workflow_dispatch` over `push`. Check spend: `gh aw logs`, `gh aw audit <run>`. Docs: [Cost Management](https://github.github.com/gh-aw/reference/cost-management/).
+
+Org or repo wide defaults via Actions variables (`gh aw env update defaults.yml --scope repo --repo OWNER/REPO`). Keys:
+
+```yaml
+# default_max_ai_credits: "50"
+# default_max_daily_ai_credits: "200"
+# default_max_turns: "15"
+# default_timeout_minutes: "10"
+# default_model_copilot: ""
+```
+
+Precedence: frontmatter > repo var > org > enterprise > compiler fallback.
+
+## Rollout
+
+Report-only first (comments, no `create-pull-request`). One pilot repo. Then writes with `max: 1`. Disable by deleting the lock file.
+
+## Control plane (later)
+
+Only when this repo should dispatch work to other repos ([CentralRepoOps](https://github.github.com/gh-aw/patterns/central-repo-ops/)): orchestrator in `.github/workflows/` with `private: true`, read-only token, `safe-outputs.dispatch-workflow` with `max:`; worker template in `workflows/`; GitHub App scoped to targets. No copied skills, no product CI, no unattended `/squad` loops.

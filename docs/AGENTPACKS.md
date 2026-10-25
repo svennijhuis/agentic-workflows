@@ -1,117 +1,41 @@
-# Reuse agentPacks and other agent repos
+# agentPacks in workflows
 
-The org already has agent behaviour in other repositories. This catalog **references** them. It does not duplicate skills, hooks, or MCP server code.
+Reference, never copy. Pin a SHA or tag, never a branch (`marketplace` is generated and can lag `main`).
 
-## What each repo owns
+## What pr-review imports, and why
 
-| Repo | Owns | Consumed by |
-| --- | --- | --- |
-| [svennijhuis/agentPacks](https://github.com/svennijhuis/agentPacks) | Agent Plugins: `squad`, `pack-check`, `git`, `dotnet`, `rust`, `typescript` | Cursor, Copilot CLI, Claude Code, Codex **and** gh-aw via `plugins:` |
-| [svennijhuis/mcp-services](https://github.com/svennijhuis/mcp-services) | MCP server binaries (filesystem, database, roslyn, index, learnings) | IDE MCP config **and** gh-aw `mcp-servers:` |
-| **this repo** | Scheduled/event-driven GitHub Actions agents | Product repos via `gh aw add` / `imports:` |
-
-Interactive `/squad` on a laptop is not the same as a Monday `schedule:` job in Actions. Same standards can apply if the Actions workflow loads the same plugins.
-
-## Load agentPacks from a workflow (`plugins:`)
-
-gh-aw checks out each plugin and installs it the way the engine expects (`copilot plugin install`, Claude `--plugin-dir`, Codex marketplace add). Support is experimental; compile emits a warning.
-
-Path form is `owner/repo/path/to/plugin@ref`. **Ref is required** and is rewritten to a commit SHA at compile time.
-
-AgentPacks authors plugins under `plugins/<name>/` on `main`. IDE clients should install the **generated** tree from the `marketplace` branch ([agentPacks README](https://github.com/svennijhuis/agentPacks)). Prefer pinning `@marketplace` (or a marketplace SHA) in production workflows.
-
-Review stack: [`workflows/shared/squad.md`](../workflows/shared/squad.md). Installable workflow: [`workflows/squad-review.md`](../workflows/squad-review.md).
-
-In a consuming repo you can also declare plugins locally:
-
-```yaml
-engine: copilot
-plugins:
-  - svennijhuis/agentPacks/plugins/git@marketplace
-  - svennijhuis/agentPacks/plugins/dotnet@marketplace
-```
-
-For a **private** plugin repo, the default `GITHUB_TOKEN` cannot clone it. Use the object form:
-
-```yaml
-plugins:
-  - plugin: svennijhuis/agentPacks/plugins/git@marketplace
-    github-token: ${{ secrets.AGENTPACKS_READ_TOKEN }}
-  # or github-app: { client-id, private-key }
-```
-
-See [Frontmatter — Agent Plugins](https://github.github.com/gh-aw/reference/frontmatter/).
-
-Which packs to load:
-
-| Plugin | Typical Actions use |
+| Import | Why |
 | --- | --- |
-| `git` | Guard destructive git in the agent sandbox |
-| `dotnet` / `rust` / `typescript` | Language build/test/review skills when the target repo uses that stack |
-| `pack-check` | Stack detection; more useful in IDEs than in a workflow that already knows the repo |
-| `squad` | `/squad-review` on PRs via [`workflows/squad-review.md`](../workflows/squad-review.md). Full `/squad` plan/implement stays in the IDE |
+| `skills: plugins/squad/skills/squad` | Review contract; `disable-model-invocation`, so it must be installed |
+| `plugins: plugins/squad` | Agents: `squad-reviewer`, `squad-simplifier`, `squad-security-reviewer`, `squad-orchestrator` |
+| `imports: plugins/squad/commands/squad-review.md` | The review steps. Edit in agentPacks |
+| `shared/standards/*.md` | Language standards as text (`<lang>-review` set from `standards.source.json`) |
 
-Do **not** add a second copy of these skills under `workflows/shared/prompts/`.
+Dropped: `git` plugin (guards local git, nothing to review) and `dotnet` / `typescript` / `rust` plugins (only needed for their standards, now imported directly; less to install).
 
-## Load a single skill (`skills:`)
+The adapter body only overrides I/O: pin this PR, post via safe-outputs, write no files, no retro, no fix rounds.
 
-When you need one skill, not a whole plugin (or a skill that is `disable-model-invocation`, so it must be installed in the activation job):
+## Change review behaviour
+
+Edit agentPacks, merge, tag. Bump the SHA/tag in `workflows/shared/agentpacks.md`, `workflows/shared/standards/*.md` and `workflows/pr-review.md`. Recompile.
+
+## Forms
 
 ```yaml
+plugins:
+  - svennijhuis/agentPacks/plugins/squad@<sha>
 skills:
-  - svennijhuis/agentPacks/plugins/squad/skills/squad@marketplace
-```
-
-That is how [`workflows/shared/squad.md`](../workflows/shared/squad.md) loads the orchestrator skill. Agents still come from `plugins:` (same pack). Do not paste SKILL.md into this repo and also list it under `skills:` — pick the remote ref.
-
-Compiler pins the ref to a SHA. Private skill repos need `github-token` or `github-app` on the object form. Docs: [Frontmatter Skills](https://github.github.com/gh-aw/reference/frontmatter/).
-
-## APM (optional, many primitives at once)
-
-[Agent Package Manager](https://github.github.com/gh-aw/reference/dependencies/) can pack skills/plugins from many repos into an Actions artifact. Vendor `shared/apm.md` from `microsoft/apm`, then:
-
-```yaml
+  - svennijhuis/agentPacks/plugins/squad/skills/squad@<sha>
 imports:
-  - uses: shared/apm.md
-    with:
-      packages:
-        - svennijhuis/agentPacks/plugins/git#marketplace
-        - github/awesome-copilot/skills/review-and-refactor
+  - svennijhuis/agentPacks/plugins/dotnet/standards/csharp.md@<sha>
 ```
 
-Use APM when a workflow needs a **tree** of packages with a lock file. Use `plugins:` / `skills:` when you only need one or two org packs.
+Private agentPacks: object form with `github-token: ${{ secrets.AGENTPACKS_READ_TOKEN }}` or `github-app:`. `plugins:` is experimental (compile warns).
 
-## MCP from mcp-services
+## MCP
 
-[`mcp-services`](https://github.com/svennijhuis/mcp-services) speaks stdio (local IDE) and Streamable HTTP (`--http` / Docker on ports 5100–5104).
+Point at a running mcp-services HTTP endpoint from `workflows/shared/mcp/`. Do not vendor servers.
 
-In an Actions workflow, prefer HTTP to a deployed instance and declare it in a shared fragment under `workflows/shared/mcp/` (see that folder’s README). Example shape:
+## Rule
 
-```yaml
-mcp-servers:
-  roslyn:
-    url: "https://mcp.example.internal/roslyn/mcp"
-    allowed: ["*"]
-network:
-  allowed:
-    - mcp.example.internal
-```
-
-Do not vendor the C# servers into this catalog. Point at the running service. Secrets stay in the consuming repo or org.
-
-## Copilot custom agents (`.github/agents/`)
-
-Specialized prompt files can live in a dedicated agents repo and be imported:
-
-```yaml
-imports:
-  - svennijhuis/agentPacks/.github/agents/code-reviewer.md@v1
-```
-
-Only **one** agent file per workflow. AgentPacks today is plugin-based, not a `.github/agents/` library. Add such files there or in this catalog’s future `agents/` package only if Copilot web agents need them independently of plugins.
-
-## Decision rule
-
-1. Human in an editor → install agentPacks from the `marketplace` branch (existing README).
-2. Unattended GitHub Action → install `squad-review` from **this** catalog; import `shared/squad.md` or `shared/mcp/*` instead of copying plugin files.
-3. New behaviour needed in **both** places → add it to agentPacks (or mcp-services), then reference it from a catalog fragment.
+Human in an editor: agentPacks plugins. Unattended Action: this catalog. New behaviour for both: add it to agentPacks, then import it here.

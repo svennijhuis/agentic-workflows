@@ -1,19 +1,18 @@
 # Shared fragments
 
-Files here are **not** installed as standalone Actions. They have no `on:` field. Catalog workflows and consuming repos import them:
+No `on:`. Imported, never run alone. Must stay at `workflows/shared/` (relative imports resolve from `workflows/`).
 
 ```yaml
 imports:
-  - shared/org-defaults.md                                          # local, from a file in workflows/
-  - svennijhuis/agentic-workflows/workflows/shared/org-defaults.md@v1  # remote, from another repo
+  - shared/defaults.md                                                  # local
+  - svennijhuis/agentic-workflows/workflows/shared/defaults.md@v1.0.0   # remote
 ```
 
 | Fragment | Use |
 | --- | --- |
-| [org-defaults.md](org-defaults.md) | Baseline GitHub toolsets |
-| [security.md](security.md) | Network / safety notes for org workflows |
-| [squad.md](squad.md) | `skills:` + `plugins:` from agentPacks (no copied SKILL.md) |
-| [mcp/](mcp/) | MCP server snippets (point at mcp-services; do not vendor binaries) |
-| [prompts/](prompts/) | Prompt snippets unique to **Actions** (not copies of plugin SKILL.md) |
-
-Relative imports resolve from `workflows/`, so this folder must stay at `workflows/shared/`.
+| [defaults.md](defaults.md) | Baseline GitHub toolsets |
+| [security.md](security.md) | Closed network baseline |
+| [agentpacks.md](agentpacks.md) | agentPacks squad skill + plugin (pinned) |
+| [standards/](standards/) | agentPacks review standards per stack: `common`, `dotnet`, `typescript`, `rust` |
+| [mcp/](mcp/) | MCP connection snippets (mcp-services) |
+| [prompts/](prompts/) | Actions-only prompt snippets |
