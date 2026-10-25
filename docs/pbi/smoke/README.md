@@ -7,6 +7,6 @@ flowchart LR
   SC -->|SM01 check| V[verify]
   PR --> M[merge] --> REL[release Action tst/acc]
   REL -->|deployment_status, SM05 allows| RUN[SM03 runner]
-  RUN -->|SM04 OIDC JWT| API[API tst/acc]
+  RUN -->|SM04 OIDC app token| APIM[APIM validate-jwt, party, roles] --> API[API tst/acc]
   RUN --> REP[SM06 report + issue]
 ```
