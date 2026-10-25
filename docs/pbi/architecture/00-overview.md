@@ -4,14 +4,14 @@
 
 ## PBIs
 
-- [ARC01: Context and containers](ARC01-context.md)
-- [ARC02: Repo topology](ARC02-repo-topology.md)
-- [ARC03: Identity and auth](ARC03-identity-auth.md)
-- [ARC04: Safe output flow](ARC04-safe-output-flow.md)
-- [ARC05: Release flow](ARC05-release-flow.md)
-- [ARC06: Org switch](ARC06-org-switch.md)
+- [ARC01: Context and containers](../done/ARC01-context.md)
+- [ARC02: Repo topology](../done/ARC02-repo-topology.md)
+- [ARC03: Identity and auth](../done/ARC03-identity-auth.md)
+- [ARC04: Safe output flow](../done/ARC04-safe-output-flow.md)
+- [ARC05: Release flow](../done/ARC05-release-flow.md)
+- [ARC06: Org switch](../done/ARC06-org-switch.md)
 
-Related governance: [G00-org-target-structure](../governance/G00-org-target-structure.md), [G05-org-only-appendix](../governance/G05-org-only-appendix.md).
+Related governance: [G00-org-target-structure](../done/G00-org-target-structure.md), [G05-org-only-appendix](../governance/G05-org-only-appendix.md).
 
 ## Dependency sketch
 

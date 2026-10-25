@@ -1,9 +1,9 @@
 ---
-description: Org safety baseline. Tighten allowed domains per workflow.
+description: Safety baseline. Closed network, threat detection on. Importers add named hosts only.
 network:
-  allowed: []
+  allowed: [defaults]
+safe-outputs:
+  threat-detection: true
 ---
 
-Keep outbound network closed unless the workflow needs a named MCP or API host. Add hosts on the importing workflow; they union with this list.
-
-Do not put secrets in this file. Prefer GitHub Apps over PATs for any cross-repo access declared by the importer.
+Network stays closed except the gh-aw defaults. Add named hosts on the importing workflow; no wildcards (POL06). Threat detection stays on (POL13). No secrets in this file (POL04).

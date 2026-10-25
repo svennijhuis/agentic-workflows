@@ -1,0 +1,8 @@
+id: POL07
+title: 'Tool, MCP and bash allowlists'
+rule: 'tools.bash is an explicit command list without a bare wildcard; github toolsets never `all`; every mcp-servers entry has an allowed: list without ''*''.'
+why: 'Default-deny tools. MCP servers are named and scoped.'
+check: policies/checks/POL07.sh
+bad_fixture: test/fixtures/bad/POL07.md
+good_fixture: test/fixtures/good/POL07.md
+pbi: docs/pbi/done/POL07-tool-mcp-bash-allowlists.md

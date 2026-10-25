@@ -10,7 +10,7 @@
 ## Goal
 Document CorrectionOps loop: conformance failures become gate rules or docs fixes so the same mistake cannot recur.
 ## Context
-Inspired by gh-aw blog on conformance to eslint rules. Links verify fixtures ([X03](../testing/X03-gate-fixtures.md)) and policy checks. **Findings rule (gist A5):** the same FAIL from Reviewer or Tester twice on the same item, or any revert, becomes a POL check PBI in the next nF findings block (no prose-only lesson).
+Inspired by gh-aw blog on conformance to eslint rules. Links verify fixtures ([X03](../done/X03-gate-fixtures.md)) and policy checks. **Findings rule (gist A5):** the same FAIL from Reviewer or Tester twice on the same item, or any revert, becomes a POL check PBI in the next nF findings block (no prose-only lesson).
 ## Steps
 1. Summarize CorrectionOps experimental pattern.
 2. Define process: failed run -> issue -> policy or fixture -> scripts/verify.sh.

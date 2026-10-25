@@ -64,5 +64,5 @@ M tier, ~30-50 AIC per review (unverified)
 ## Sources
 - https://github.github.com/gh-aw/gallery/automated-pr-review/
 - https://github.com/svennijhuis/agentic-workflows/pull/2
-- docs/pbi/core/C12-agentpacks-import-contract.md
+- docs/pbi/done/C12-agentpacks-import-contract.md
 - docs/pbi/workflow-ratings.md

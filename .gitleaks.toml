@@ -1,0 +1,11 @@
+# gitleaks config for scripts/verify.sh (POL04). Default rules plus one allowlist:
+# the two bad fixtures carry fake token strings on purpose so POL04 and POL20 can prove they fail.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "POL04/POL20 bad fixtures (fake tokens by design)"
+paths = [
+  '''test/fixtures/bad/POL04\.md''',
+  '''test/fixtures/bad/POL20\.md''',
+]

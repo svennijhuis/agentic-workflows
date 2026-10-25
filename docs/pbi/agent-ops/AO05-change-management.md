@@ -11,7 +11,7 @@
 ## Goal
 Prompt version and model in each workflow frontmatter; CHANGELOG per workflow; canary in test repo first (X07 run). Rollback by pinning previous tag. **Release, prompt bump, model bump, or gh-aw bump runs X07 first; a lower score than baseline blocks the change.**
 ## Context
-Implements regression rule from plan v3.7 with [ARC05](../architecture/ARC05-release-flow.md). Canary pattern from S5. Tied to L01 tagged releases.
+Implements regression rule from plan v3.7 with [ARC05](../done/ARC05-release-flow.md). Canary pattern from S5. Tied to L01 tagged releases.
 ## Steps
 1. Require `prompt-version` and `model` keys in workflow frontmatter (POL check).
 2. CHANGELOG section per workflow on every prompt or model edit.

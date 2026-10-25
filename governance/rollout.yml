@@ -1,0 +1,4 @@
+# POL03 promotion list. A workflow listed here may use triggers other than workflow_dispatch and
+# unstaged write outputs. Adding a name needs Sven's exact yes plus 3 audited staged runs (Bar H).
+# Empty: nothing is enabled.
+promoted: []

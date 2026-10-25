@@ -112,7 +112,7 @@ Full table with Decision column (not ours, PICK, F71 analytics bucket) lives in 
 | F73 | Group related issues before work | Medium: one fix per root cause | M | 5 | [F73](F73-issue-grouping.md) |
 | F74 | Findings buffer on one pinned issue | High: cheap gardening, pattern visibility | S | 3 | [F74](F74-findings-buffer.md) |
 | F75 | Weekly merged PR sample (3 picks) | High: sample review, feeds new guards | S | 5 | [F75](F75-weekly-merged-pr-sample.md) |
-| X06 | Verification skill + script for this repo | High: one shared proof path for Tester | n/a | 1 | [X06](../testing/X06-verification-skill.md) |
+| X06 | Verification skill + script for this repo | High: one shared proof path for Tester | n/a | 1 | [X06](../done/X06-verification-skill.md) |
 ## Steps
 1. Keep this index aligned when adding or retiring F PBIs.
 2. On each new PICK, add a row here and open the matching F PBI file.

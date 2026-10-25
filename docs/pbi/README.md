@@ -27,7 +27,7 @@ Workflow PBIs must meet Bar H (plan v3 + gist A7):
 - Audit of first 3 runs
 - Measured cost per run in PBI Evidence
 - **Workflow fetches its own context with tools and imports; the prompt never pastes repo content** (gist A7)
-- Benchmark score at or above baseline ([X07](testing/X07-workflow-benchmark.md): 5 or more fixed cases per workflow in `docs/benchmarks/<workflow>.md`). A lower score blocks [L01](release/L01-v1-moving-v1-changelog.md), [L02](release/L02-update-vs-upgrade-safe-update.md) and [AO05](agent-ops/AO05-change-management.md); [C03](core/C03-shared-defaults.md) and [B03a](observability/B03a-value-vs-cost.md) use the score
+- Benchmark score at or above baseline ([X07](testing/X07-workflow-benchmark.md): 5 or more fixed cases per workflow in `docs/benchmarks/<workflow>.md`). A lower score blocks [L01](release/L01-v1-moving-v1-changelog.md), [L02](release/L02-update-vs-upgrade-safe-update.md) and [AO05](agent-ops/AO05-change-management.md); [C03](done/C03-shared-defaults.md) and [B03a](observability/B03a-value-vs-cost.md) use the score
 
 ## Block flow (B0 to B6)
 
@@ -77,48 +77,48 @@ flowchart LR
 | LP00 | Improvement loop | 0 | two-way | loops | PR 0 | todo | M05, M01, P04, F01, F16, F72, X07, AO01, AO03, POL12, Y02, O04, O05, C03 | Builder | [loops/LP00-improvement-loop.md](loops/LP00-improvement-loop.md) |
 | LP01 | Delivery loop | 0 | two-way | loops | PR 0 | todo | P05, P12, P13, P14, P04, F01, F16, X07, AO01 | Builder | [loops/LP01-delivery-loop.md](loops/LP01-delivery-loop.md) |
 | LP02 | Event map | 0 | two-way | loops | PR 0 | todo | R01, R02, R03, R04, R06, M05, P04, P12, P13, P14, F01, F01b, F16, AO01, AO02, AO03, M01, L02 | Builder | [loops/LP02-event-map.md](loops/LP02-event-map.md) |
-| ARC01 | Context and containers | 1 | two-way | architecture | PR 0 | todo | G00 | Cursor CLI | [architecture/ARC01-context.md](architecture/ARC01-context.md) |
-| ARC02 | Repo topology | 1 | two-way | architecture | PR 0 | todo | G00 | Cursor CLI | [architecture/ARC02-repo-topology.md](architecture/ARC02-repo-topology.md) |
-| ARC03 | Identity and auth | 1 | two-way | architecture | PR 0 | todo | G00 | Cursor CLI | [architecture/ARC03-identity-auth.md](architecture/ARC03-identity-auth.md) |
-| ARC04 | Safe output flow | 1 | two-way | architecture | PR 0 | todo | G00 | Cursor CLI | [architecture/ARC04-safe-output-flow.md](architecture/ARC04-safe-output-flow.md) |
-| ARC05 | Release flow | 1 | two-way | architecture | PR 0 | todo | G00 | Cursor CLI | [architecture/ARC05-release-flow.md](architecture/ARC05-release-flow.md) |
-| ARC06 | Org switch | 1 | two-way | architecture | PR 0 | todo | G00 | Cursor CLI | [architecture/ARC06-org-switch.md](architecture/ARC06-org-switch.md) |
-| C01 | Verify script (`scripts/verify.sh`) | 1 | two-way | core | W1 | todo | none | Builder | [core/C01-verify-script.md](core/C01-verify-script.md) |
-| C02 | Org-ready repository layout | 1 | two-way | core | W1 | todo | G00, C01 | Builder | [core/C02-org-ready-layout.md](core/C02-org-ready-layout.md) |
-| C03 | shared/defaults: Copilot engine, caps, admission | 1 | two-way | core | W1 | todo | C02, C05 | Builder | [core/C03-shared-defaults.md](core/C03-shared-defaults.md) |
-| C04 | Auth: COPILOT_GITHUB_TOKEN, GH_AW_GITHUB_TOKEN, GitHub App | 1 | one-way | core | W1 | todo | C03 | Builder | [core/C04-auth-copilot-pat.md](core/C04-auth-copilot-pat.md) |
-| C05 | Imports, import-schema, inlined imports, shared fragments | 1 | two-way | core | W1 | todo | C02 | Builder | [core/C05-imports-import-schema.md](core/C05-imports-import-schema.md) |
-| C06 | Copilot engine version and checksum pins | 1 | two-way | core | W1 | todo | C03, C05 | Builder | [core/C06-copilot-engine-version-pins.md](core/C06-copilot-engine-version-pins.md) |
-| C11 | Instructions: copilot-instructions, AGENTS.md, aw-author agent | 1 | two-way | core | W1 | todo | C02 | Builder | [core/C11-instructions-copilot-agents-md.md](core/C11-instructions-copilot-agents-md.md) |
-| C12 | agentPacks import contract v1.1 | 1 | two-way | core | W1 | todo | C05, G00a | Builder | [core/C12-agentpacks-import-contract.md](core/C12-agentpacks-import-contract.md) |
-| G00 | Org target structure | 1 | two-way | governance | W1 | todo | none | Cursor CLI | [governance/G00-org-target-structure.md](governance/G00-org-target-structure.md) |
-| G00a | Consumer strategy | 1 | one-way | governance | W1 | todo | G00, L01 | Cursor CLI | [governance/G00a-consumer-strategy.md](governance/G00a-consumer-strategy.md) |
-| POL01 | Pinned versions only (no @main, tag or SHA) | 1 | two-way | policies | W1 | todo | C01 | Cursor CLI | [policies/POL01-pinned-versions-only.md](policies/POL01-pinned-versions-only.md) |
-| POL02 | Cost caps required | 1 | two-way | policies | W1 | todo | C01, C03 | Cursor CLI | [policies/POL02-cost-caps-required.md](policies/POL02-cost-caps-required.md) |
-| POL03 | Staged and report-only before writes | 1 | two-way | policies | W1 | todo | C01, O02 | Cursor CLI | [policies/POL03-staged-report-only-before-writes.md](policies/POL03-staged-report-only-before-writes.md) |
-| POL04 | No secrets in files | 1 | two-way | policies | W1 | todo | C01 | Cursor CLI | [policies/POL04-no-secrets-in-files.md](policies/POL04-no-secrets-in-files.md) |
-| POL05 | min-integrity required | 1 | two-way | policies | W1 | todo | C01, S02 | Cursor CLI | [policies/POL05-min-integrity-required.md](policies/POL05-min-integrity-required.md) |
-| POL06 | Network allowlist, no wildcard | 1 | two-way | policies | W1 | todo | C01, S01 | Cursor CLI | [policies/POL06-network-allowlist-no-wildcard.md](policies/POL06-network-allowlist-no-wildcard.md) |
-| POL07 | Tool, MCP, and bash allowlists | 1 | two-way | policies | W1 | todo | C01, S04 | Cursor CLI | [policies/POL07-tool-mcp-bash-allowlists.md](policies/POL07-tool-mcp-bash-allowlists.md) |
-| POL08 | safe-output max on every output | 1 | two-way | policies | W1 | todo | C01, O01 | Cursor CLI | [policies/POL08-safe-output-max-on-every-output.md](policies/POL08-safe-output-max-on-every-output.md) |
-| POL09 | Rate limits, concurrency, and cooldown | 1 | two-way | policies | W1 | todo | C01, R01 | Cursor CLI | [policies/POL09-rate-limits-concurrency-cooldown.md](policies/POL09-rate-limits-concurrency-cooldown.md) |
-| POL10 | Who can trigger (on.roles, skip-bots, author association) | 1 | two-way | policies | W1 | todo | C01 | Cursor CLI | [policies/POL10-who-can-trigger.md](policies/POL10-who-can-trigger.md) |
-| POL11 | Least permissions, read-only agent | 1 | two-way | policies | W1 | todo | C01, S00 | Cursor CLI | [policies/POL11-least-permissions-read-only-agent.md](policies/POL11-least-permissions-read-only-agent.md) |
-| POL12 | Explicit allowed-repos and target-repo | 1 | two-way | policies | W1 | todo | C01, C04 | Cursor CLI | [policies/POL12-explicit-allowed-repos-target-repo.md](policies/POL12-explicit-allowed-repos-target-repo.md) |
-| POL13 | Threat detection never off | 1 | two-way | policies | W1 | todo | C01, S03 | Cursor CLI | [policies/POL13-threat-detection-never-off.md](policies/POL13-threat-detection-never-off.md) |
-| POL14 | No merge-pull-request, no unsafe pull_request_target | 1 | two-way | policies | W1 | todo | C01 | Cursor CLI | [policies/POL14-no-merge-pull-request-unsafe-pr-target.md](policies/POL14-no-merge-pull-request-unsafe-pr-target.md) |
-| POL15 | Timeouts required | 1 | two-way | policies | W1 | todo | C01, C03 | Cursor CLI | [policies/POL15-timeouts-required.md](policies/POL15-timeouts-required.md) |
-| POL16 | House style (no em dash, fixed report format) | 1 | two-way | policies | W1 | todo | C01, C11 | Cursor CLI | [policies/POL16-house-style-no-em-dash-fixed-report.md](policies/POL16-house-style-no-em-dash-fixed-report.md) |
-| POL17 | Lock file committed and fresh | 1 | two-way | policies | W1 | todo | C01, C05 | Cursor CLI | [policies/POL17-lock-file-committed-fresh.md](policies/POL17-lock-file-committed-fresh.md) |
-| POL18 | gh aw env runtime policy vars | 1 | two-way | policies | W1 | todo | C01 | Cursor CLI | [policies/POL18-gh-aw-env-runtime-policy-vars.md](policies/POL18-gh-aw-env-runtime-policy-vars.md) |
-| POL19 | No force push | 1 | one-way | policies | W1 | todo | C01 | Builder | [policies/POL19-no-force-push.md](policies/POL19-no-force-push.md) |
-| POL20 | No tokens in markdown | 1 | two-way | policies | W1 | todo | C01, POL04 | Builder | [policies/POL20-no-tokens-in-markdown.md](policies/POL20-no-tokens-in-markdown.md) |
-| POL21 | `copilot-requests: none` required | 1 | two-way | policies | W1 | todo | C01, C04 | Builder | [policies/POL21-copilot-requests-none.md](policies/POL21-copilot-requests-none.md) |
-| POL22 | PR review output COMMENT only | 1 | two-way | policies | W1 | todo | C01, O01 | Builder | [policies/POL22-pr-review-comment-only.md](policies/POL22-pr-review-comment-only.md) |
-| POL23 | No tautological policy checks | 1 | two-way | policies | W1 | todo | C01, X03 | Builder | [policies/POL23-no-tautological-checks.md](policies/POL23-no-tautological-checks.md) |
+| ARC01 | Context and containers | 1 | two-way | architecture | PR 0 | done | G00 | Cursor CLI | [done/ARC01-context.md](done/ARC01-context.md) |
+| ARC02 | Repo topology | 1 | two-way | architecture | PR 0 | done | G00 | Cursor CLI | [done/ARC02-repo-topology.md](done/ARC02-repo-topology.md) |
+| ARC03 | Identity and auth | 1 | two-way | architecture | PR 0 | done | G00 | Cursor CLI | [done/ARC03-identity-auth.md](done/ARC03-identity-auth.md) |
+| ARC04 | Safe output flow | 1 | two-way | architecture | PR 0 | done | G00 | Cursor CLI | [done/ARC04-safe-output-flow.md](done/ARC04-safe-output-flow.md) |
+| ARC05 | Release flow | 1 | two-way | architecture | PR 0 | done | G00 | Cursor CLI | [done/ARC05-release-flow.md](done/ARC05-release-flow.md) |
+| ARC06 | Org switch | 1 | two-way | architecture | PR 0 | done | G00 | Cursor CLI | [done/ARC06-org-switch.md](done/ARC06-org-switch.md) |
+| C01 | Verify script (`scripts/verify.sh`) | 1 | two-way | core | W1 | done | none | Builder | [done/C01-verify-script.md](done/C01-verify-script.md) |
+| C02 | Org-ready repository layout | 1 | two-way | core | W1 | done | G00, C01 | Builder | [done/C02-org-ready-layout.md](done/C02-org-ready-layout.md) |
+| C03 | shared/defaults: Copilot engine, caps, admission | 1 | two-way | core | W1 | done | C02, C05 | Builder | [done/C03-shared-defaults.md](done/C03-shared-defaults.md) |
+| C04 | Auth: COPILOT_GITHUB_TOKEN, GH_AW_GITHUB_TOKEN, GitHub App | 1 | one-way | core | W1 | done | C03 | Builder | [done/C04-auth-copilot-pat.md](done/C04-auth-copilot-pat.md) |
+| C05 | Imports, import-schema, inlined imports, shared fragments | 1 | two-way | core | W1 | done | C02 | Builder | [done/C05-imports-import-schema.md](done/C05-imports-import-schema.md) |
+| C06 | Copilot engine version and checksum pins | 1 | two-way | core | W1 | done | C03, C05 | Builder | [done/C06-copilot-engine-version-pins.md](done/C06-copilot-engine-version-pins.md) |
+| C11 | Instructions: copilot-instructions, AGENTS.md, aw-author agent | 1 | two-way | core | W1 | done | C02 | Builder | [done/C11-instructions-copilot-agents-md.md](done/C11-instructions-copilot-agents-md.md) |
+| C12 | agentPacks import contract v1.1 | 1 | two-way | core | W1 | done | C05, G00a | Builder | [done/C12-agentpacks-import-contract.md](done/C12-agentpacks-import-contract.md) |
+| G00 | Org target structure | 1 | two-way | governance | W1 | done | none | Cursor CLI | [done/G00-org-target-structure.md](done/G00-org-target-structure.md) |
+| G00a | Consumer strategy | 1 | one-way | governance | W1 | done | G00, L01 | Cursor CLI | [done/G00a-consumer-strategy.md](done/G00a-consumer-strategy.md) |
+| POL01 | Pinned versions only (no @main, tag or SHA) | 1 | two-way | policies | W1 | done | C01 | Cursor CLI | [done/POL01-pinned-versions-only.md](done/POL01-pinned-versions-only.md) |
+| POL02 | Cost caps required | 1 | two-way | policies | W1 | done | C01, C03 | Cursor CLI | [done/POL02-cost-caps-required.md](done/POL02-cost-caps-required.md) |
+| POL03 | Staged and report-only before writes | 1 | two-way | policies | W1 | done | C01, O02 | Cursor CLI | [done/POL03-staged-report-only-before-writes.md](done/POL03-staged-report-only-before-writes.md) |
+| POL04 | No secrets in files | 1 | two-way | policies | W1 | done | C01 | Cursor CLI | [done/POL04-no-secrets-in-files.md](done/POL04-no-secrets-in-files.md) |
+| POL05 | min-integrity required | 1 | two-way | policies | W1 | done | C01, S02 | Cursor CLI | [done/POL05-min-integrity-required.md](done/POL05-min-integrity-required.md) |
+| POL06 | Network allowlist, no wildcard | 1 | two-way | policies | W1 | done | C01, S01 | Cursor CLI | [done/POL06-network-allowlist-no-wildcard.md](done/POL06-network-allowlist-no-wildcard.md) |
+| POL07 | Tool, MCP, and bash allowlists | 1 | two-way | policies | W1 | done | C01, S04 | Cursor CLI | [done/POL07-tool-mcp-bash-allowlists.md](done/POL07-tool-mcp-bash-allowlists.md) |
+| POL08 | safe-output max on every output | 1 | two-way | policies | W1 | done | C01, O01 | Cursor CLI | [done/POL08-safe-output-max-on-every-output.md](done/POL08-safe-output-max-on-every-output.md) |
+| POL09 | Rate limits, concurrency, and cooldown | 1 | two-way | policies | W1 | done | C01, R01 | Cursor CLI | [done/POL09-rate-limits-concurrency-cooldown.md](done/POL09-rate-limits-concurrency-cooldown.md) |
+| POL10 | Who can trigger (on.roles, skip-bots, author association) | 1 | two-way | policies | W1 | done | C01 | Cursor CLI | [done/POL10-who-can-trigger.md](done/POL10-who-can-trigger.md) |
+| POL11 | Least permissions, read-only agent | 1 | two-way | policies | W1 | done | C01, S00 | Cursor CLI | [done/POL11-least-permissions-read-only-agent.md](done/POL11-least-permissions-read-only-agent.md) |
+| POL12 | Explicit allowed-repos and target-repo | 1 | two-way | policies | W1 | done | C01, C04 | Cursor CLI | [done/POL12-explicit-allowed-repos-target-repo.md](done/POL12-explicit-allowed-repos-target-repo.md) |
+| POL13 | Threat detection never off | 1 | two-way | policies | W1 | done | C01, S03 | Cursor CLI | [done/POL13-threat-detection-never-off.md](done/POL13-threat-detection-never-off.md) |
+| POL14 | No merge-pull-request, no unsafe pull_request_target | 1 | two-way | policies | W1 | done | C01 | Cursor CLI | [done/POL14-no-merge-pull-request-unsafe-pr-target.md](done/POL14-no-merge-pull-request-unsafe-pr-target.md) |
+| POL15 | Timeouts required | 1 | two-way | policies | W1 | done | C01, C03 | Cursor CLI | [done/POL15-timeouts-required.md](done/POL15-timeouts-required.md) |
+| POL16 | House style (no em dash, fixed report format) | 1 | two-way | policies | W1 | done | C01, C11 | Cursor CLI | [done/POL16-house-style-no-em-dash-fixed-report.md](done/POL16-house-style-no-em-dash-fixed-report.md) |
+| POL17 | Lock file committed and fresh | 1 | two-way | policies | W1 | done | C01, C05 | Cursor CLI | [done/POL17-lock-file-committed-fresh.md](done/POL17-lock-file-committed-fresh.md) |
+| POL18 | gh aw env runtime policy vars | 1 | two-way | policies | W1 | done | C01 | Cursor CLI | [done/POL18-gh-aw-env-runtime-policy-vars.md](done/POL18-gh-aw-env-runtime-policy-vars.md) |
+| POL19 | No force push | 1 | one-way | policies | W1 | done | C01 | Builder | [done/POL19-no-force-push.md](done/POL19-no-force-push.md) |
+| POL20 | No tokens in markdown | 1 | two-way | policies | W1 | done | C01, POL04 | Builder | [done/POL20-no-tokens-in-markdown.md](done/POL20-no-tokens-in-markdown.md) |
+| POL21 | `copilot-requests: none` required | 1 | two-way | policies | W1 | done | C01, C04 | Builder | [done/POL21-copilot-requests-none.md](done/POL21-copilot-requests-none.md) |
+| POL22 | PR review output COMMENT only | 1 | two-way | policies | W1 | done | C01, O01 | Builder | [done/POL22-pr-review-comment-only.md](done/POL22-pr-review-comment-only.md) |
+| POL23 | No tautological policy checks | 1 | two-way | policies | W1 | done | C01, X03 | Builder | [done/POL23-no-tautological-checks.md](done/POL23-no-tautological-checks.md) |
 | X01 | Test repo + TrialOps | 1 | one-way | testing | PR 0 | todo | C01, G01 | Cursor CLI | [testing/X01-test-repo-trialops.md](testing/X01-test-repo-trialops.md) |
-| X03 | Verify fixtures | 1 | two-way | testing | PR 0 | todo | C01, POL01-POL23 | Builder | [testing/X03-gate-fixtures.md](testing/X03-gate-fixtures.md) |
-| X06 | Verification skill (repo-local) | 1 | two-way | testing | W1 | todo | none | Builder | [testing/X06-verification-skill.md](testing/X06-verification-skill.md) |
+| X03 | Verify fixtures | 1 | two-way | testing | PR 0 | done | C01, POL01-POL23 | Builder | [done/X03-gate-fixtures.md](done/X03-gate-fixtures.md) |
+| X06 | Verification skill (repo-local) | 1 | two-way | testing | W1 | done | none | Builder | [done/X06-verification-skill.md](done/X06-verification-skill.md) |
 | AO03 | Kill switch | 2 | two-way | agent-ops | W2 | todo | POL10 | Builder | [agent-ops/AO03-kill-switch.md](agent-ops/AO03-kill-switch.md) |
 | D01 | Quick start and consumer guide | 2 | two-way | docs | W2 | todo | D00, C04, L01, X01, G00a | Cursor CLI | [docs/D01-quick-start-consumer-guide.md](docs/D01-quick-start-consumer-guide.md) |
 | D03 | Governance overview | 2 | two-way | docs | W5 | todo | G01, G02, D00 | Cursor CLI | [docs/D03-governance-overview.md](docs/D03-governance-overview.md) |
@@ -335,7 +335,7 @@ Related: [agentPacks PR #80](https://github.com/svennijhuis/agentPacks/pull/80) 
 - [workflow-ratings.md](workflow-ratings.md) (62 agentics, 18 gallery, 348 factory rows)
 - [_template.md](_template.md) PBI template (technical design required)
 - [decisions/](decisions/) ADRs
-- [done/](done/) completed PBI moves (empty until first completion)
+- [done/](done/) completed PBI moves (Block 1 from PR #4)
 
 
 ## Block 0
@@ -395,7 +395,7 @@ Empty until Sven tests block 2; new PBIs get the next free id per area.
 
 **What Sven can test:** NOW workflows in trial repo; F01 manual only; cost dashboard.
 
-**Exit criteria:** B03a value vs cost row per workflow (kill rule: 2 blocks below cost = disable). Bar H per workflow: 3 audited runs, measured AIC cost, noop pre-check proven. F01 pr-review runs manual only (`workflow_dispatch` + `/pr-review`), no push trigger; auto on push ([F01b](agent-factory/F01b-pr-review-auto-on-push.md)) waits on its 3 audited runs plus Sven's yes. Every agentPacks pin is a [C12](core/C12-agentpacks-import-contract.md) v1.1 tag (replaces `@34e1dec`). [PR #2](https://github.com/svennijhuis/agentic-workflows/pull/2) closed unmerged after PR 0, with a comment linking the replacing PBIs (C01, POL01, POL02, POL21, POL22, C12, F01, L02).
+**Exit criteria:** B03a value vs cost row per workflow (kill rule: 2 blocks below cost = disable). Bar H per workflow: 3 audited runs, measured AIC cost, noop pre-check proven. F01 pr-review runs manual only (`workflow_dispatch` + `/pr-review`), no push trigger; auto on push ([F01b](agent-factory/F01b-pr-review-auto-on-push.md)) waits on its 3 audited runs plus Sven's yes. Every agentPacks pin is a [C12](done/C12-agentpacks-import-contract.md) v1.1 tag (replaces `@34e1dec`). [PR #2](https://github.com/svennijhuis/agentic-workflows/pull/2) closed unmerged after PR 0, with a comment linking the replacing PBIs (C01, POL01, POL02, POL21, POL22, C12, F01, L02).
 
 **Named asks (first PBI in block that needs them):** F01b yes optional; cost cap confirmation; M05 rollout step 1 yes; M05_READ_TOKEN; BOARD_TOKEN (P05).
 

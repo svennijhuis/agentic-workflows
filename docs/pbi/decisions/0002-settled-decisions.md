@@ -20,9 +20,9 @@
 12. **Repo layout**: ADR 0001 (root `workflows/`, root `shared/`, `aw.yml`, policies, verify script).
 13. **Named asks**: Q0-Q8, Q11 (X07 per-run budget), M02, X01, Y06, B04, F01b yes, M05_READ_TOKEN, P04_ASSIGN_TOKEN, Copilot enablement per repo, P14 poll yes, PR #2 close policy. Secrets via masked fields only.
 14. **gist A1 (proof and door)**: Every PBI file lists `proof:` (command that proves DoD) and `door: two-way|one-way`. One-way actions need Sven's yes in the block asks plus a rollback note on the PBI.
-15. **gist A2**: [X06](../testing/X06-verification-skill.md) is the first PBI in Block 1 (before C01); thin wrapper spec over `scripts/verify.sh`.
+15. **gist A2**: [X06](../done/X06-verification-skill.md) is the first PBI in Block 1 (before C01); thin wrapper spec over `scripts/verify.sh`.
 16. **gist A3**: C01 `scripts/verify.sh` prints `file:line rule-id message` per failure, last line `N failures`, exit 0 only when N is 0.
-17. **gist A4**: [POL23](../policies/POL23-no-tautological-checks.md) meta-check: every POL check must fail bad fixtures and pass good fixtures.
+17. **gist A4**: [POL23](../done/POL23-no-tautological-checks.md) meta-check: every POL check must fail bad fixtures and pass good fixtures.
 18. **gist A5 (findings rule)**: Same FAIL from Reviewer or Tester twice, or any revert, becomes a POL check PBI in the next nF block (not prose only).
 19. **gist A6**: [B03a](../observability/B03a-value-vs-cost.md) in Block 3; kill rule after two below-cost blocks; full [B03](../observability/B03-outcomes-impact.md) stays Block 5.
 20. **gist A7 (Bar H)**: Workflows fetch context via tools and imports; prompts do not paste repo content.

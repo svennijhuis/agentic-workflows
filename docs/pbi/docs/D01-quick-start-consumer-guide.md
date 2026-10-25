@@ -10,7 +10,7 @@
 ## Goal
 A newcomer installs `gh aw`, adds a pinned workflow, compiles, and runs dispatch safely without mentor help.
 ## Context
-Extends docs/CONSUMING.md into full Diataxis tutorial + how-to. Uses personal `svennijhuis/agentic-workflows` and COPILOT_GITHUB_TOKEN setup (masked, not in files). Consumer install/configure/update strategy: [G00a consumer strategy](../governance/G00a-consumer-strategy.md).
+Extends docs/CONSUMING.md into full Diataxis tutorial + how-to. Uses personal `svennijhuis/agentic-workflows` and COPILOT_GITHUB_TOKEN setup (masked, not in files). Consumer install/configure/update strategy: [G00a consumer strategy](../done/G00a-consumer-strategy.md).
 ## Steps
 1. Prerequisites: Actions, Copilot Pro, gh aw CLI.
 2. Walkthrough: add squad-review or ci-doctor @v1.0.0, compile, dispatch report-only.

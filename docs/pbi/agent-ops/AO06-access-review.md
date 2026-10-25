@@ -8,7 +8,7 @@
 - proof: docs/runbooks/access-review.md with token table snapshot; quarterly checklist issue template
 - door: two-way
 ## Goal
-Each token and app gets owner, scope, expiry, and last used. Reviewed every quarter; unused scope removed. Mirrors [ARC03](../architecture/ARC03-identity-auth.md) table including M05 and P04 PATs.
+Each token and app gets owner, scope, expiry, and last used. Reviewed every quarter; unused scope removed. Mirrors [ARC03](../done/ARC03-identity-auth.md) table including M05 and P04 PATs.
 ## Context
 Supports OWASP LLM06 least privilege (S10) and NIST Govern (S11). No org tokens until G05.
 ## Steps

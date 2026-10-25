@@ -1,0 +1,12 @@
+id: POL18
+title: 'gh aw env runtime policy vars'
+rule: 'Workflow env: keys are on the allowlist; cap overrides stay at or below the POL02 ceilings.'
+why: 'Runtime vars must not quietly weaken caps.'
+check: policies/checks/POL18.sh
+bad_fixture: test/fixtures/bad/POL18.md
+good_fixture: test/fixtures/good/POL18.md
+pbi: docs/pbi/done/POL18-gh-aw-env-runtime-policy-vars.md
+allowed_env: [GH_AW_DEFAULT_MAX_AI_CREDITS, GH_AW_DEFAULT_MAX_DAILY_AI_CREDITS, GH_AW_LOG_LEVEL]
+caps:
+  GH_AW_DEFAULT_MAX_AI_CREDITS: max-ai-credits
+  GH_AW_DEFAULT_MAX_DAILY_AI_CREDITS: max-daily-ai-credits

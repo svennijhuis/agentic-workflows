@@ -4,8 +4,8 @@
 
 ## PBIs
 
-- [G00: G00-org-target-structure](G00-org-target-structure.md)
-- [G00a: G00a-consumer-strategy](G00a-consumer-strategy.md)
+- [G00: G00-org-target-structure](../done/G00-org-target-structure.md)
+- [G00a: G00a-consumer-strategy](../done/G00a-consumer-strategy.md)
 - [G01: G01-rollout-ladder-human-review](G01-rollout-ladder-human-review.md)
 - [G02: G02-raci](G02-raci.md)
 - [G03: G03-onboarding-support](G03-onboarding-support.md)

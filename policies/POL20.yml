@@ -1,0 +1,15 @@
+id: POL20
+title: 'No tokens in markdown'
+rule: 'No secret pattern in tracked markdown.'
+why: 'Docs get copied into prompts and issues; a token there leaks.'
+check: policies/checks/POL20.sh
+bad_fixture: test/fixtures/bad/POL20.md
+good_fixture: test/fixtures/good/POL20.md
+pbi: docs/pbi/done/POL20-no-tokens-in-markdown.md
+patterns:
+  - 'gh[pousr]_[A-Za-z0-9]{36}'
+  - 'github_pat_[A-Za-z0-9_]{22,}'
+  - 'AKIA[0-9A-Z]{16}'
+  - '-----BEGIN [A-Z ]*PRIVATE KEY'
+  - 'sk-[A-Za-z0-9]{20,}'
+  - 'xox[bp]-[A-Za-z0-9-]{10,}'

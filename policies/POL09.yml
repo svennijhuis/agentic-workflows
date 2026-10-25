@@ -1,0 +1,8 @@
+id: POL09
+title: 'Rate limits and concurrency'
+rule: 'Every workflow sets concurrency.group; schedules run at most hourly.'
+why: 'Prevent trigger storms and runaway spend.'
+check: policies/checks/POL09.sh
+bad_fixture: test/fixtures/bad/POL09.md
+good_fixture: test/fixtures/good/POL09.md
+pbi: docs/pbi/done/POL09-rate-limits-concurrency-cooldown.md
