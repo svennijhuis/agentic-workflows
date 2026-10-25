@@ -4,7 +4,8 @@ Tags: exact `vX.Y.Z` per release (immutable), plus moving major `v1` pointed at 
 
 ## Unreleased (target v1.0.0)
 
-- Layout: `workflows/`, `workflows/shared/`, `docs/CONSUMING.md`, `docs/GOVERNANCE.md`, `pbis/`.
+- Layout: `workflows/`, `workflows/shared/`, `docs/CONSUMING.md`, `docs/GOVERNANCE.md`.
+- Backlog `pbis/`: 105 PBIs (001-005 done in this PR), index `pbis/README.md`.
 - Rename `squad-review` to `pr-review` (slash command `/pr-review`).
 - Rename `shared/org-defaults.md` to `shared/defaults.md`, `shared/squad.md` to `shared/agentpacks.md`.
 - agentPacks pinned to SHA `34e1dec` (was branch `@marketplace`). Only squad skill, squad plugin, review command and review standards imported.

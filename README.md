@@ -22,7 +22,7 @@ Commit `.md` + `.lock.yml`. Set secret `COPILOT_GITHUB_TOKEN` (fine-grained PAT,
 | `workflows/*.md` | Installable workflows (have `on:`) |
 | `workflows/shared/` | Fragments, no `on:` (defaults, security, agentPacks, standards, prompts, mcp) |
 | `docs/` | [CONSUMING](docs/CONSUMING.md), [GOVERNANCE](docs/GOVERNANCE.md), [AGENTPACKS](docs/AGENTPACKS.md) |
-| `pbis/` | One file per backlog item |
+| `pbis/` | Backlog: [index](pbis/README.md), one strict PBI per file `NNN-slug.md` |
 | `CHANGELOG.md` | Releases and tag scheme |
 
 ## Workflows
