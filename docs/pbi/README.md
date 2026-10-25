@@ -53,6 +53,7 @@ flowchart LR
 - [loops/](loops/00-overview.md): [LP00](loops/LP00-improvement-loop.md) improvement loop (incl. LP00 v2 cross-repo self-fix), [LP01](loops/LP01-delivery-loop.md) delivery loop (P05 board, P12 planning, P13 grilling, P14 pick-up at WIP 1), [LP02](loops/LP02-event-map.md) event map (automatic events, human triggers incl. slash commands and `/stop`, guards, rollout, doors).
 - [architecture/](architecture/00-overview.md): ARC01-ARC06 (context, topology, identity, safe-output flow incl. cross-repo, release, org switch). G00 owns these pages.
 - [agent-ops/](agent-ops/00-overview.md): AO01-AO14, sourced (S1-S11). AO01 retro and AO02 scorecards in B3, AO03 kill switch in B2 (guard dependency for `/stop`), the rest in B5. AO10 absorbs F75.
+- [smoke/](smoke/README.md): SM01-SM07 post-deploy API smoke on tst and acc (Block 3, todo, docs only). Build order: SM07 (Sven, parallel), then SM01, SM05, SM04, SM03, SM06, SM02 (agentic, last). Nothing enabled until Sven's yes.
 - Folds: F76 log insights is in [M05](monitoring/M05-github-log-watcher.md), F77 issue to PR is in [P04](multi-repo/P04-research-plan-assign-copilot.md). The human go label is `agent-ok`. C01 is `scripts/verify.sh` only.
 
 ```mermaid
@@ -187,6 +188,13 @@ flowchart LR
 | HX05 | Tool description lint | 3 | two-way | harness | W3 | todo | HX02 | Builder | [harness/HX05-tool-description-lint.md](harness/HX05-tool-description-lint.md) |
 | R05a | Event guards: untrusted payload, fail-closed filters, dedupe | 3 | two-way | triggers | W3 | todo | R05, M01, AO08 | Builder | [triggers/R05a-event-guards.md](triggers/R05a-event-guards.md) |
 | LP02a | Lint: two workflows sharing a trigger and filter | 3 | two-way | loops | W3 | todo | LP02, POL25 | Builder | [loops/LP02a-duplicate-trigger-lint.md](loops/LP02a-duplicate-trigger-lint.md) |
+| SM01 | Smoke scenario format and folder per feature | 3 | two-way | smoke | W3 | todo | none | Builder | [smoke/SM01.md](smoke/SM01.md) |
+| SM02 | Scenario generator at PR time | 3 | two-way | smoke | W3 | todo | SM01, BH08, P14 | Builder | [smoke/SM02.md](smoke/SM02.md) |
+| SM03 | Post-deploy smoke runner for tst and acc (no AI) | 3 | two-way | smoke | W3 | todo | SM01, SM04, SM05 | Builder | [smoke/SM03.md](smoke/SM03.md) |
+| SM04 | Azure AD JWT via GitHub OIDC federated credential | 3 | one-way | smoke | W3 | todo | SM07 | Builder | [smoke/SM04.md](smoke/SM04.md) |
+| SM05 | POL03 + POL25 allow deployment_status for deterministic workflows only | 3 | two-way | smoke | W3 | todo | POL25, POL03, scripts/lib/on-triggers.sh | Builder | [smoke/SM05.md](smoke/SM05.md) |
+| SM06 | Smoke reporting on PR or release, ping on fail | 3 | two-way | smoke | W3 | todo | SM03 | Builder | [smoke/SM06.md](smoke/SM06.md) |
+| SM07 | Setup steps only Sven does | 3 | one-way | smoke | W3 | todo | none | Sven | [smoke/SM07.md](smoke/SM07.md) |
 | M01 | Exception watcher (dispatch-only, deterministic pre-step) | 4 | one-way | monitoring | W4 | todo | C03, C04, M02, O03, S00 | Builder | [monitoring/M01-exception-watcher-dispatch.md](monitoring/M01-exception-watcher-dispatch.md) |
 | M02 | Azure OIDC Reader role and login step | 4 | one-way | monitoring | W4 | todo | C04, S00 | Builder | [monitoring/M02-azure-oidc-reader.md](monitoring/M02-azure-oidc-reader.md) |
 | M03 | Hourly cron exception watcher | 4 | one-way | monitoring | W4 | todo | M01, M02, B02 | Builder | [monitoring/M03-hourly-cron-watcher.md](monitoring/M03-hourly-cron-watcher.md) |
@@ -418,7 +426,7 @@ Empty until Sven tests block 2; new PBIs get the next free id per area.
 
 ## Block 3
 
-**PBIs:** BH01, P12a, F01a, BH08, BH03 (doc), LP00b, HX05, R05a, LP02a (v3.12, docs only so far), F02-F07, F11, F13-F15, F17, F72, F74, F01 live, F01b gated, B01, B02, B03a, Y01, R04, M05 step 1 (report-only on 1 repo), P05 board, P12 planning, P13 grilling, AO01 retro, AO02 scorecards. Each NOW workflow gets 5 or more X07 cases and a passing score in its DoD.
+**PBIs:** BH01, P12a, F01a, BH08, BH03 (doc), LP00b, HX05, R05a, LP02a (v3.12, docs only so far), SM01-SM07 smoke (docs only so far), F02-F07, F11, F13-F15, F17, F72, F74, F01 live, F01b gated, B01, B02, B03a, Y01, R04, M05 step 1 (report-only on 1 repo), P05 board, P12 planning, P13 grilling, AO01 retro, AO02 scorecards. Each NOW workflow gets 5 or more X07 cases and a passing score in its DoD.
 
 **What Sven can test:** NOW workflows in trial repo; F01 manual only; cost dashboard.
 
