@@ -189,12 +189,12 @@ flowchart LR
 | R05a | Event guards: untrusted payload, fail-closed filters, dedupe | 3 | two-way | triggers | W3 | todo | R05, M01, AO08 | Builder | [triggers/R05a-event-guards.md](triggers/R05a-event-guards.md) |
 | LP02a | Lint: two workflows sharing a trigger and filter | 3 | two-way | loops | W3 | todo | LP02, POL25 | Builder | [loops/LP02a-duplicate-trigger-lint.md](loops/LP02a-duplicate-trigger-lint.md) |
 | SM01 | Smoke scenario format and folder per feature | 3 | two-way | smoke | W3 | todo | none | Builder | [smoke/SM01.md](smoke/SM01.md) |
-| SM02 | Scenario generator at PR time | 3 | two-way | smoke | W3 | todo | SM01, BH08, P14 | Builder | [smoke/SM02.md](smoke/SM02.md) |
-| SM03 | Post-deploy smoke runner for tst and acc (no AI) | 3 | two-way | smoke | W3 | todo | SM01, SM04, SM05 | Builder | [smoke/SM03.md](smoke/SM03.md) |
+| SM02 | Scenario generator at PR time | 3 | one-way | smoke | W3 | todo | SM01, BH08, P14 | Builder | [smoke/SM02.md](smoke/SM02.md) |
+| SM03 | Post-deploy smoke runner for tst and acc (no AI) | 3 | one-way | smoke | W3 | todo | SM01, SM04, SM05, SM07 | Builder | [smoke/SM03.md](smoke/SM03.md) |
 | SM04 | Smoke token: GitHub OIDC to Entra to APIM validate-jwt to backend | 3 | one-way | smoke | W3 | todo | SM07 | Builder | [smoke/SM04.md](smoke/SM04.md) |
-| SM05 | POL03 + POL25 allow deployment_status for deterministic workflows only | 3 | two-way | smoke | W3 | todo | POL25, POL03, scripts/lib/on-triggers.sh | Builder | [smoke/SM05.md](smoke/SM05.md) |
+| SM05 | POL03 + POL25 allow deployment_status for the smoke runner only | 3 | two-way | smoke | W3 | todo | POL25, POL03, scripts/lib/on-triggers.sh | Builder | [smoke/SM05.md](smoke/SM05.md) |
 | SM06 | Smoke reporting on PR or release, ping on fail | 3 | two-way | smoke | W3 | todo | SM03 | Builder | [smoke/SM06.md](smoke/SM06.md) |
-| SM07 | Setup steps only Sven does | 3 | one-way | smoke | W3 | todo | none | Sven | [smoke/SM07.md](smoke/SM07.md) |
+| SM07 | Setup steps only Sven does | 3 | one-way | smoke | W3 | todo | none | Builder | [smoke/SM07.md](smoke/SM07.md) |
 | M01 | Exception watcher (dispatch-only, deterministic pre-step) | 4 | one-way | monitoring | W4 | todo | C03, C04, M02, O03, S00 | Builder | [monitoring/M01-exception-watcher-dispatch.md](monitoring/M01-exception-watcher-dispatch.md) |
 | M02 | Azure OIDC Reader role and login step | 4 | one-way | monitoring | W4 | todo | C04, S00 | Builder | [monitoring/M02-azure-oidc-reader.md](monitoring/M02-azure-oidc-reader.md) |
 | M03 | Hourly cron exception watcher | 4 | one-way | monitoring | W4 | todo | M01, M02, B02 | Builder | [monitoring/M03-hourly-cron-watcher.md](monitoring/M03-hourly-cron-watcher.md) |

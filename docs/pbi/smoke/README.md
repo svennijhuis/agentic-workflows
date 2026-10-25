@@ -1,6 +1,7 @@
 # docs/pbi/smoke/
 Post-deploy API smoke on tst and acc. Order: SM07 (Sven, parallel) -> SM01 -> SM05 -> SM04 -> SM03 -> SM06 -> SM02 (agentic, last).
 Nothing enabled until Sven yes; Actions billing blocked today.
+Where things live: the API repo `svennijhuis/<api repo>` (placeholder, named in SM07) holds the live runner workflow, the GitHub environments `smoke-tst` and `smoke-acc`, the federated subject and the `smoke/<feature>/` scenarios. This catalog holds the authoring copies (`smoke/`, `workflows/smoke-writer.md`), the checks and the fixtures.
 ```mermaid
 flowchart LR
   PR[Feature PR] -->|SM02 writes| SC[smoke/feature/scenarios.yml]
