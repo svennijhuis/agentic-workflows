@@ -6,7 +6,7 @@ Verdicts: covered, partly, gap, not ours (reason). Every gap/partly row names th
 | # | Point (short quote) | AW: where (PBI, block) | AP: where (PBI) | Verdict | Fix |
 |---|---|---|---|---|---|
 | 1 | Verification is the key skill ("allow it to verify") | [X06](testing/X06-verification-skill.md) in B1, [C01](core/C01-verify-script.md) verify.sh B1 | squad verify-harness exists | gap (no proof per PBI) | A1 `proof:` field, A2 [X06](testing/X06-verification-skill.md) first in B1 |
-| 2 | Self-verify, score, "hill climbing" | [C01](core/C01-verify-script.md) pass/fail B1, [X04](testing/X04-graders-evals.md) graders B5 | scenarios-md | partly | A3 verify.sh ends with failure count (the score) |
+| 2 | Self-verify, score, "hill climbing" | [C01](core/C01-verify-script.md) pass/fail B1, [X07](testing/X07-workflow-benchmark.md) benchmark score vs baseline B2 (5+ cases per NOW workflow in B3, lower score blocks L01, L02, AO05), [X04](testing/X04-graders-evals.md) graders B5 | scenarios-md | covered | A3 verify.sh ends with failure count; X07 score is the hill-climbing number |
 | 3 | Own verification skill per app, kept current | [X06](testing/X06-verification-skill.md) B1 | none for harness drift | partly | A2; AP20 harness drift check |
 | 4 | "deterministic parts" into script, skill thin | [C01](core/C01-verify-script.md) B1, [L02](release/L02-update-vs-upgrade-safe-update.md) bump-pin.sh B5 | none | partly | AP19 determinism sweep |
 | 5 | Shared script, not rebuilt per agent | [C01](core/C01-verify-script.md) one script for local + CI, B1 | PackCheckScriptTwin (#78) | covered | none |
@@ -24,14 +24,14 @@ Verdicts: covered, partly, gap, not ours (reason). Every gap/partly row names th
 | 17 | "reproduce the issue" on main first | [F72](agent-factory/F72-issue-triage-repro.md) triage with repro B3 | squad-planner prose only | covered (AW), gap (AP) | AP16 repro-first contract test |
 | 18 | Findings "buffer", act in batches | [F74](agent-factory/F74-findings-buffer.md) buffer B3, nF findings blocks | learnings.md | covered | none |
 | 19 | Most volume is "gardening" | [F07](agent-factory/F07-doc-updater.md) doc updater, [F14](agent-factory/F14-link-checker.md) links, [F15](agent-factory/F15-markdown-linter.md) md lint B3 | #78 redundancy | covered | none |
-| 20 | Sample review, fix env on repeats | [F75](agent-factory/F75-weekly-merged-pr-sample.md) weekly sample B5 | none | partly | A5 |
+| 20 | Sample review, fix env on repeats | [AO10](agent-ops/AO10-sampled-human-review.md) sampled human review B5 (absorbs [F75](agent-factory/F75-weekly-merged-pr-sample.md)) | none | partly | A5 |
 | 21 | Autopilot verifiers "fuzz", count = cost knob | none | none | not ours (token heavy, caps [POL02](policies/POL02-cost-caps-required.md) bound spend; revisit in B6 if [B03](observability/B03-outcomes-impact.md) shows value) | none |
-| 22 | Review after landing, "revert" + lint | [F75](agent-factory/F75-weekly-merged-pr-sample.md) B5, squash merge per PBI | Sven merges | partly | A5 (a revert counts as a repeat) |
+| 22 | Review after landing, "revert" + lint | [AO10](agent-ops/AO10-sampled-human-review.md) B5 (absorbs F75), squash merge per PBI | Sven merges | partly | A5 (a revert counts as a repeat) |
 | 23 | "two-way doors" automate, one-way gate | Sven-yes asks per block | planning-contract has rollout row only | gap | A1 `door:` field; AP15 |
 | 24 | Formal verification (TLA+, Lean) | none | none | not ours (no concurrent state machine in catalog or pack) | none |
 | 25 | Clear "intent and your goals" | PBI goal + DoD, [G00a](governance/G00a-consumer-strategy.md) doc | PBI template | covered | none |
 | 26 | Kill "tautological" tests | [X03](testing/X03-gate-fixtures.md) fixtures B1 (no rule) | testing-principles 0 hits | gap | A4 [POL23](policies/POL23-no-tautological-checks.md); AP: line stays #77 fold-in |
-| 27 | "Grilling", agent questions you | Q0-Q10 asks per block, room process | squad-planner + review contract | covered | none |
+| 27 | "Grilling", agent questions you | [P13](multi-repo/P13-grilling-workflow.md) grilling workflow B3, Q0-Q11 asks per block, room process | squad-planner + review contract | covered | none |
 | 28 | Mine "transcripts" for corrections | Fleet retro (fleet process) | squad-retro | partly | A5; AP17 |
 | 29 | Skills "get smaller and smaller" | [X06](testing/X06-verification-skill.md) thin wrapper over [C01](core/C01-verify-script.md) | Matt-tiny skills direction | covered | none |
 | 30 | Own your knives, mix libraries | n/a | pstack + Matt picks (#73) | not ours (AW) / covered (AP) | none |

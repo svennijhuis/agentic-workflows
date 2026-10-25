@@ -21,6 +21,29 @@ Bar H requires pinned gh-aw plus import SHA or tag. Engine updates flow through 
 - [ ] `gh aw compile --strict` succeeds with pins
 - [ ] No unpinned `@main` action references in compiled output
 - [ ] Version bump procedure linked to L04
+## Technical design
+- Components and files: `.github/aw.json` (action pins), engine version in `shared/defaults.md`
+- Interfaces: Copilot engine version + checksum
+- Sequence:
+
+```mermaid
+sequenceDiagram
+  participant D as Dependabot
+  participant R as repo
+  participant V as verify.sh
+  participant M as Merger per room merge rule
+  D->>R: pin bump PR
+  V->>R: compile and check lock
+  M->>R: squash merge after all gates
+```
+
+- Failure modes: Checksum mismatch fails the run (wanted)
+- Security: Supply chain (S05)
+- Observability: Lock shows the pinned version
+- Cost: 0 AIC
+- Rollback: Pin the previous version
+- Proof: Lock file shows the pinned version
+- Door: two-way (pin)
 ## Evidence
 (commands, logs, verify log on SHA, run links)
 ## Flow

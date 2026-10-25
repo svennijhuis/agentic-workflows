@@ -28,6 +28,7 @@ Connects outer loop (issues) to inner loop without Sven as proxy. Token spend re
 - [ ] on.roles, skip-bots (POL10)
 - [ ] X01 trial + verify log (Q0)
 - [ ] Three audited runs with measured AIC
+- [ ] [X07](../testing/X07-workflow-benchmark.md) benchmark: 5 or more fixed cases with known answers in `docs/benchmarks/<workflow>.md`, score at or above baseline (Bar H)
 ## Evidence
 (verify log, run links, AIC table)
 ## Flow

@@ -34,6 +34,29 @@ Twin track: agentPacks [PR #80](https://github.com/svennijhuis/agentPacks/pull/8
 - [ ] One workflow with pinned agentPacks import compiles `--strict`
 - [ ] Mermaid flow in this PBI
 - [ ] X01 bump trial recorded before first pin change on main
+## Technical design
+- Components and files: `docs/pbi/core/C12-agentpacks-import-contract.md` (links agentPacks #80 README, the one source)
+- Interfaces: `imports:` and `plugins:` pinned to a tag on the generated agentPacks commit (POL01)
+- Sequence:
+
+```mermaid
+sequenceDiagram
+  participant AP as agentPacks
+  participant AW as AW workflow
+  participant V as verify.sh
+  participant P as POL01
+  AP->>AP: tag vX.Y.Z on generated commit
+  AW->>AP: import @vX.Y.Z
+  V->>P: check pin
+```
+
+- Failure modes: A main SHA is used, so POL01 fails
+- Security: Allowlist v1 of importable files only
+- Observability: POL01 output line
+- Cost: 0 AIC
+- Rollback: Pin the previous tag
+- Proof: One workflow imports a pinned agentPacks file and compiles `--strict`
+- Door: two-way (pin)
 ## Evidence
 (compile log, POL01 fixture results, test-repo run link)
 ## Flow

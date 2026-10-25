@@ -22,6 +22,30 @@ gh-aw separates inference auth from GitHub API auth. Personal accounts cannot us
 - [ ] Copilot engine paths use PAT model from gh-aw auth reference
 - [ ] Cross-repo workflows declare `target-repo` / `allowed-repos` per POL12
 - [ ] Q3 decision recorded before App rollout
+## Technical design
+- Components and files: `docs/reference/auth.md` (from the ARC03 table)
+- Interfaces: Secrets COPILOT_GITHUB_TOKEN, GH_AW_GITHUB_TOKEN, `ignore-if-missing` (Q3)
+- Sequence:
+
+```mermaid
+sequenceDiagram
+  participant T as Trigger
+  participant A as Agent job
+  participant C as Copilot engine
+  participant S as Safe-output job
+  T->>A: start, on.roles checked
+  A->>C: prompt with COPILOT_GITHUB_TOKEN
+  A-->>S: staged outputs
+  S->>S: write within max
+```
+
+- Failure modes: Missing secret, so the run fails at start with a clear message
+- Security: Fine-grained PAT, one repo, set by Sven through the masked secret field; never in files (POL04, POL20)
+- Observability: Run log shows which secret is missing, not its value
+- Cost: 0 AIC
+- Rollback: Revoke the PAT
+- Proof: Doc plus secret names in `gh secret list` (names only)
+- Door: one-way (Sven sets the secret)
 ## Evidence
 (commands, logs, verify log on SHA, run links)
 ## Flow

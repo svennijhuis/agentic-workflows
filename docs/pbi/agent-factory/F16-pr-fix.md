@@ -2,20 +2,20 @@
 - Status: todo
 - Area: agent-factory
 - Wave: W6
-- Block: 6
+- Block: 5
 - Lane: Builder
-- Depends on: C03, C04, C06, O01, O02, O03, X01, F02, F00
+- Depends on: C03, C04, C06, O01, O02, O03, X01, F01, F02, F00, P04
 - proof: gh aw compile --dir workflows --strict workflows/f16.md; gh aw audit <run-id> (Block exit runs)
 - door: one-way
 - one-way gate: Sven's exact yes required (named ask in its block). Rollback: disable workflow via workflow_dispatch off or remove schedule trigger
 ## Goal
-`/pr-fix` pushes a fix commit for failing CI on a PR (high risk, staged long).
+Close the review-to-fix loop next to [P04](../multi-repo/P04-research-plan-assign-copilot.md): on human review "changes requested", push a fix commit on the PR branch (max 2 fix rounds per PR).
 ## Context
-Upstream reference: `pr-fix` (https://github.com/githubnext/agentics/tree/main/workflows/pr-fix.md).
-**What it does:** `/pr-fix` pushes a fix commit for failing CI on a PR (high risk, staged long).
+Upstream reference: `pr-fix` (https://github.com/githubnext/agentics/tree/main/workflows/pr-fix.md). LP00 and LP01: after [F01](F01-pr-review.md) FAIL, F16 runs before re-review. Block 5 with P04 chain.
+**What it does:** fix commit on PR after changes requested (high risk, staged).
 **Value for Sven repos:** See workflow-ratings.md row; prioritize NOW set for daily maintenance and security.
 **How ours beats the example (Bar H):** Never on default branch; human must merge
-**Trigger:** `workflow_dispatch` and slash after extended staged
+**Trigger:** `pull_request_review` with changes requested (human); optional `workflow_dispatch` and slash after extended staged
 **Safe outputs and limits:** `create-commit-on-branch` capped
 **Issue/PR format:** Title prefix `[F16]`, body uses `shared/reporting.md` audit footer with workflow id, run URL, and AIC when known.
 Engine: `copilot` with `COPILOT_GITHUB_TOKEN` (personal PAT). No `copilot-requests: write` (org billing only).
@@ -42,6 +42,7 @@ Engine: `copilot` with `COPILOT_GITHUB_TOKEN` (personal PAT). No `copilot-reques
 - [ ] Issue/PR bodies follow `shared/reporting.md` footer format (POL16)
 - [ ] Trial run on X01 test repo with verify log on exact SHA (Q0: local `scripts/verify.sh` until Actions billing fixed)
 - [ ] `gh aw audit` on first 3 runs; measured AIC recorded in this PBI Evidence section (B02)
+- [ ] Max 2 fix rounds per PR enforced
 ## Evidence
 (commands, logs, verify log on SHA, run links)
 ## Flow

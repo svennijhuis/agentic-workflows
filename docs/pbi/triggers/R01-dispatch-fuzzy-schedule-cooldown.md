@@ -35,6 +35,7 @@ sequenceDiagram
     W->>W: noop 0 AIC
   else
     W->>A: activate (capped)
+  end
 ```
 ## Named asks for Sven
 (none (M03 schedule needs separate yes))

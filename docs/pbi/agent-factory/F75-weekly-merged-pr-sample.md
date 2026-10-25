@@ -1,5 +1,5 @@
 # F75: Weekly merged PR sample
-- Status: todo
+- Status: folded into AO10
 - Area: agent-factory
 - Wave: W5
 - Block: 5
@@ -9,7 +9,7 @@
 - door: one-way
 - one-way gate: Sven's exact yes required (named ask in its block). Rollback: disable workflow via workflow_dispatch off or remove schedule trigger
 ## Goal
-Weekly digest of merged PRs with three picked for human sample review (gist candidate 4, sample review over blocking review).
+Folded into [AO10 sampled human review](../agent-ops/AO10-sampled-human-review.md). Weekly digest of merged PRs with three picked for human sample review (gist candidate 4, sample review over blocking review).
 ## Context
 Block 5. Report-only issue or discussion post. Schedule needs Sven yes; start with `workflow_dispatch`.
 ## Steps

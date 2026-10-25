@@ -28,6 +28,28 @@ Bad fixture `test/fixtures/bad/POL13.md`: Workflow disabling threat detection.
 - [ ] `policies/checks/POL13.sh` fails on bad fixture and passes on good catalog
 - [ ] Policy text included in this PBI and in `shared/policies/` or `policies/` doc
 - [ ] Gate log on SHA shows POL13 executed
+## Technical design
+- Components and files: `policies/POL13.yml` (rule + why), `policies/checks/POL13.sh`, `test/fixtures/bad/POL13.md` (shared POL design, see [00-overview.md](00-overview.md#shared-technical-design-pol01-pol23))
+- Interfaces: Check gets the repo root, prints `file:line POL13 message`, exit 1 on hit; verify.sh loops all checks. This check: not `false`
+- Sequence:
+
+```mermaid
+sequenceDiagram
+  participant V as verify.sh
+  participant P as POL13.sh
+  participant F as workflows/ and shared/
+  V->>P: run on repo root
+  P->>F: read only
+  P-->>V: file:line POL13 lines + exit code
+```
+
+- Failure modes: Tautological check that never fails, so POL23 runs it on its bad fixture `test/fixtures/bad/POL13.md` (`threat-detection: false`) and needs exit 1
+- Security: Read-only grep or yq, no tokens, no network
+- Observability: One line per hit `file:line POL13 message` in verify.sh output
+- Cost: 0 AIC (script)
+- Rollback: Remove POL13.sh from the verify.sh loop (the policy doc stays)
+- Proof: verify.sh fails on `test/fixtures/bad/POL13.md` and passes on `test/fixtures/good/`
+- Door: two-way (script)
 ## Evidence
 (commands, logs, verify log on SHA, run links)
 ## Flow

@@ -21,6 +21,30 @@ Bar H requires trial-repo run. TrialOps experimental pattern from gh-aw. X01 tes
 - [ ] Test repo documented in CONSUMING.md cross-link (Builder).
 - [ ] Every workflow PBI cites X01 trial before prod.
 - [ ] TrialOps steps mirrored in X02 checklist.
+## Technical design
+- Components and files: Test repo (name Q0), `docs/how-to/trial.md`
+- Interfaces: `gh aw trial` commands documented, not run in B1
+- Sequence:
+
+```mermaid
+sequenceDiagram
+  actor S as Sven
+  participant G as GitHub
+  participant B as Builder
+  participant T as Tester
+  participant K as X06 skill
+  S->>G: create test repo
+  B->>G: trial commands doc
+  T->>K: dry run
+```
+
+- Failure modes: A trial hits a real repo, so a trial always targets the test repo
+- Security: The test repo gets its own PAT later (Sven sets it)
+- Observability: Trial run links in Evidence
+- Cost: 0 AIC in B1; trial runs need Sven's yes (B2)
+- Rollback: Archive the test repo
+- Proof: Test repo exists and the doc is merged
+- Door: one-way (Sven creates the repo)
 ## Evidence
 (commands, logs, verify log on SHA, run links)
 ## Flow

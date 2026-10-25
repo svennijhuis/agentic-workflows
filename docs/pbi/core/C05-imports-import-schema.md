@@ -25,6 +25,28 @@ Consumers either commit `.github/aw/imports/` after compile or set `inlined-impo
 - [ ] `.lock.yml` committed and fresh (POL17)
 - [ ] import-schema documented with at least one worked example
 - [ ] Packet flow (a) central distribution documented in CONSUMING
+## Technical design
+- Components and files: `shared/*.md` with `import-schema`
+- Interfaces: Typed inputs (string, number, bool, enum); unknown keys rejected
+- Sequence:
+
+```mermaid
+sequenceDiagram
+  participant W as consumer workflow
+  participant S as shared file
+  participant K as compiler
+  W->>S: import with inputs
+  K->>S: validate schema
+  K-->>W: lock or error
+```
+
+- Failure modes: Schema break on update, so CHANGELOG marks it breaking and the tag is a major
+- Security: Inputs never hold secrets
+- Observability: Compile error names the bad input
+- Cost: 0 AIC
+- Rollback: Pin the previous tag
+- Proof: Good and bad input fixture
+- Door: two-way (files)
 ## Evidence
 (commands, logs, verify log on SHA, run links)
 ## Flow

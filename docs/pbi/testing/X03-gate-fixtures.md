@@ -20,6 +20,27 @@ C01 local verify replaces CI until Q0 fixed. Fixtures prove policies fail closed
 - [ ] POL23 linked; verify.sh fails if any check is tautological.
 - [ ] scripts/verify.sh on clean SHA passes; bad fixtures fail in tests.
 - [ ] Evidence records verify log on exact SHA.
+## Technical design
+- Components and files: `test/fixtures/good/`, `test/fixtures/bad/POLnn.md` (one per POL)
+- Interfaces: verify.sh `--fixtures` mode
+- Sequence:
+
+```mermaid
+sequenceDiagram
+  participant V as verify.sh
+  participant G as good fixtures
+  participant B as bad fixtures
+  V->>G: run, expect 0
+  V->>B: run, expect 1 per POL
+```
+
+- Failure modes: A fixture passes by accident; POL23 catches it
+- Security: Fake token strings are clearly fake (no real prefix length)
+- Observability: Fixture run output in the PR
+- Cost: 0 AIC
+- Rollback: Revert the PR
+- Proof: Fixture run output in the PR
+- Door: two-way (files)
 ## Evidence
 (commands, logs, verify log on SHA, run links)
 ## Flow

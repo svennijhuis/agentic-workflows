@@ -23,6 +23,30 @@ Plan v3.2. Install: `gh aw add svennijhuis/agentic-workflows/<wf>@v1` or exact t
 - [ ] D01 quick start links to this PBI
 - [ ] Block 2 proof checklist attached in Evidence after v1.0.1 trial
 - [ ] Mermaid flow covers install through update
+## Technical design
+- Components and files: `docs/how-to/consume.md`, `docs/pbi/governance/G00a-consumer-strategy.md`
+- Interfaces: `gh aw add svennijhuis/agentic-workflows/<wf>@v1`, settings only via `import-schema` inputs, `gh aw update`
+- Sequence:
+
+```mermaid
+sequenceDiagram
+  participant U as Consumer
+  participant CLI as gh aw CLI
+  participant M as Maintainer
+  participant R as agentic-workflows
+  U->>CLI: gh aw add wf@v1 with inputs
+  M->>R: tag v1.0.1
+  U->>CLI: gh aw update
+  CLI-->>U: new lock, inputs kept
+```
+
+- Failure modes: Consumer edits our file, so update conflicts. Fix: doc says inputs only; C05 schema rejects unknown keys
+- Security: Consumer owns their own secrets; inputs never hold secrets
+- Observability: CHANGELOG upgrade notes per tag
+- Cost: 0 AIC (doc); the B2 proof run spends trial AIC with Sven's yes
+- Rollback: Pin back to the previous tag
+- Proof: (B2) a 2nd test repo updates in one command with its settings kept
+- Door: two-way for the doc; the B2 proof run is one-way (Sven's yes)
 ## Evidence
 (Block 2: X01 second repo, v1.0.1 tag, `gh aw update` log, settings preserved)
 ## Flow

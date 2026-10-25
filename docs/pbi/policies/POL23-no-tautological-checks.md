@@ -23,6 +23,28 @@ Gist review point 26 (kill tautological tests). [X03](../testing/X03-gate-fixtur
 - [ ] `scripts/verify.sh` invokes POL23 on green SHA after POL01 through POL22 checks exist
 - [ ] X03 documents good and bad paths and references POL23
 - [ ] Mermaid flow present
+## Technical design
+- Components and files: `policies/POL23.yml` (rule + why), `policies/checks/POL23.sh`, `test/fixtures/bad/POL23.md` (shared POL design, see [00-overview.md](00-overview.md#shared-technical-design-pol01-pol23))
+- Interfaces: Check gets the repo root, prints `file:line POL23 message`, exit 1 on hit; verify.sh loops all checks. This check: every POL check exits 1 on its bad fixture
+- Sequence:
+
+```mermaid
+sequenceDiagram
+  participant V as verify.sh
+  participant P as POL23.sh
+  participant F as workflows/ and shared/
+  V->>P: run on repo root
+  P->>F: read only
+  P-->>V: file:line POL23 lines + exit code
+```
+
+- Failure modes: Tautological check that never fails, so POL23 runs it on its bad fixture `test/fixtures/bad/POL23.md` (check that always passes) and needs exit 1
+- Security: Read-only grep or yq, no tokens, no network
+- Observability: One line per hit `file:line POL23 message` in verify.sh output
+- Cost: 0 AIC (script)
+- Rollback: Remove POL23.sh from the verify.sh loop (the policy doc stays)
+- Proof: verify.sh fails on `test/fixtures/bad/POL23.md` and passes on `test/fixtures/good/`
+- Door: two-way (script)
 ## Evidence
 (verify log on SHA showing POL23 fail on tautological stub, then pass after fix)
 ## Flow

@@ -40,6 +40,7 @@ Engine: `copilot` with `COPILOT_GITHUB_TOKEN` (personal fine-grained PAT). `copi
 - [ ] Trial on X01 with verify log on exact SHA (Q0)
 - [ ] `gh aw audit` on first 3 Block 3 runs; AIC recorded in Evidence (B02)
 - [ ] Triggers are `workflow_dispatch` and `/pr-review` only (no `pull_request` until F01b)
+- [ ] [X07](../testing/X07-workflow-benchmark.md) benchmark: 5 or more fixed cases with known answers in `docs/benchmarks/<workflow>.md`, score at or above baseline (Bar H)
 ## Evidence
 (commands, verify log on SHA, run links, three-run AIC table)
 ## Flow

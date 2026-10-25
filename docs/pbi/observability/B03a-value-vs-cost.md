@@ -11,7 +11,7 @@
 ## Goal
 For each catalog workflow in the Block 3 NOW set, maintain one table row comparing AIC spend (from [B02](B02-weekly-spend-overview.md)) to outcome signals (issues triaged, PR review comments kept, noop rate). Apply kill rule: two consecutive blocks where value is below cost disables the workflow and opens a PBI to remove it. Full outcomes narrative stays in [B03](B03-outcomes-impact.md) (Block 5).
 ## Context
-Gist review point 31 (measure skill impact). Split from B03 so Block 3 exit can gate shipping workflows on economics. Links [X07](../testing/X07-workflow-benchmark.md) benchmark dimensions where available.
+Gist review point 31 (measure skill impact). Split from B03 so Block 3 exit can gate shipping workflows on economics. The value side of the kill rule is the [X07](../testing/X07-workflow-benchmark.md) benchmark score (same case set as cost per AIC from B02).
 ## Steps
 1. Define value columns (accepted outcomes) and cost columns (AIC from B02 rollup) per workflow id.
 2. Publish weekly row in B02 report attachment (markdown table + CSV).

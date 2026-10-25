@@ -21,6 +21,7 @@ Moving @v1 stays in major unless --major. Local edits preserved when possible.
 - [ ] Rollback path: pin previous @vX.Y.Z tag.
 - [ ] `scripts/bump-pin.sh` documented with example tag ref and verify gate
 - [ ] Bump script refuses branch refs (POL01)
+- [ ] X07 runs first; a score below baseline blocks the bump
 ## Evidence
 (commands, logs, verify log on SHA, run links)
 ## Flow

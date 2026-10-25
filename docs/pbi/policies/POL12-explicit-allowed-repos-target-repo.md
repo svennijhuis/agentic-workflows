@@ -17,6 +17,8 @@ Policy text: `target-repo: '*'` requires documented runtime choice and read guar
 `policies/checks/POL12.sh` behaviour: Fail cross-repo workflows missing allowed-repos or target-repo declarations.
 
 Bad fixture `test/fixtures/bad/POL12.md`: Cross-repo output without target-repo.
+
+M05 allowlist (plan v3.9): every entry in `aw.yml` key `m05.repos` must have owner `svennijhuis`. Any other owner (any org) fails the check. See [M05](../monitoring/M05-github-log-watcher.md).
 ## Steps
 1. Write `policies/POL12.yml` with machine-readable rules.
 2. Implement `policies/checks/POL12.sh` (bash, exit codes, clear stderr).
@@ -27,7 +29,30 @@ Bad fixture `test/fixtures/bad/POL12.md`: Cross-repo output without target-repo.
 - [ ] Policy YAML, check script, and bad fixture exist for POL12
 - [ ] `policies/checks/POL12.sh` fails on bad fixture and passes on good catalog
 - [ ] Policy text included in this PBI and in `shared/policies/` or `policies/` doc
+- [ ] Fails on an `aw.yml` `m05.repos` entry whose owner is not svennijhuis
 - [ ] Gate log on SHA shows POL12 executed
+## Technical design
+- Components and files: `policies/POL12.yml` (rule + why), `policies/checks/POL12.sh`, `test/fixtures/bad/POL12.md` (shared POL design, see [00-overview.md](00-overview.md#shared-technical-design-pol01-pol23))
+- Interfaces: Check gets the repo root, prints `file:line POL12 message`, exit 1 on hit; verify.sh loops all checks. This check: `target-repo`/`allowed-repos` explicit for cross-repo; every `aw.yml` `m05.repos` entry has owner svennijhuis
+- Sequence:
+
+```mermaid
+sequenceDiagram
+  participant V as verify.sh
+  participant P as POL12.sh
+  participant F as workflows/ and shared/
+  V->>P: run on repo root
+  P->>F: read only
+  P-->>V: file:line POL12 lines + exit code
+```
+
+- Failure modes: Tautological check that never fails, so POL23 runs it on its bad fixture `test/fixtures/bad/POL12.md` (cross-repo with none; m05.repos entry with another owner) and needs exit 1
+- Security: Read-only grep or yq, no tokens, no network
+- Observability: One line per hit `file:line POL12 message` in verify.sh output
+- Cost: 0 AIC (script)
+- Rollback: Remove POL12.sh from the verify.sh loop (the policy doc stays)
+- Proof: verify.sh fails on `test/fixtures/bad/POL12.md` and passes on `test/fixtures/good/`
+- Door: two-way (script)
 ## Evidence
 (commands, logs, verify log on SHA, run links)
 ## Flow

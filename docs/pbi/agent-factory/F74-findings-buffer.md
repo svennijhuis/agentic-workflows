@@ -23,6 +23,7 @@ Cheap gardening; batch review shows patterns. Schedule and token spend need Sven
 - [ ] Pinned issue input documented in import-schema
 - [ ] X01 trial + verify log
 - [ ] Three audited runs with measured AIC
+- [ ] [X07](../testing/X07-workflow-benchmark.md) benchmark: 5 or more fixed cases with known answers in `docs/benchmarks/<workflow>.md`, score at or above baseline (Bar H)
 ## Evidence
 (verify log, tracking issue link, AIC table)
 ## Flow

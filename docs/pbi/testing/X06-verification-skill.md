@@ -21,6 +21,29 @@ First PBI in Block 1 (before [C01](../core/C01-verify-script.md)): specs the thi
 - [ ] Script or makefile target callable from CI optional job (non-spending)
 - [ ] Linked from X02 and D06
 - [ ] Mermaid flow present
+## Technical design
+- Components and files: `.github/skills/verify-aw/SKILL.md`, reference to `scripts/verify.sh`
+- Interfaces: Input: a workflow path. Output: PASS/FAIL checklist (compile --strict, lock fresh, POL checks, `gh aw trial` dry run command printed, not run)
+- Sequence:
+
+```mermaid
+sequenceDiagram
+  participant T as Tester
+  participant K as verify-aw skill
+  participant V as scripts/verify.sh
+  T->>K: verify workflows/x.md
+  K->>V: run
+  V-->>K: N failures
+  K-->>T: PASS/FAIL + file:line
+```
+
+- Failure modes: Skill drifts from verify.sh, so the skill only calls verify.sh and holds no rules of its own
+- Security: No tokens. The trial run is printed only (a trial spends tokens and needs Sven's yes)
+- Observability: One output line per failure, same lines as verify.sh
+- Cost: 0 AIC (script)
+- Rollback: Delete the `.github/skills/verify-aw/` folder
+- Proof: Tester runs the skill on one good and one bad fixture
+- Door: two-way (repo-local file, no spend)
 ## Evidence
 (sample log from verify.sh + optional trial transcript)
 ## Flow

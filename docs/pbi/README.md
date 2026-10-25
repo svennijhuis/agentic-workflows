@@ -1,10 +1,10 @@
 # PBI backlog (PR 0)
 
-PR 0 is **Block 0**: documentation only. Builder opens the merge PR; agents add files under `docs/pbi/` only.
+PR 0 is **Block 0**: documentation only. Agents add files under `docs/pbi/` only. Builder squash merges PR 0 after all gates (Tester PASS, Reviewer PASS, local gate on the exact SHA, 0 unresolved threads, Product Owner GO), under this room's merge exception. Fix PRs that M05, P04 or P14 cause in any repo are merged by Sven; an agent never merges them.
 
 **Block rule** (from `agentic-workflows-blocks.md`): Sven names the stop block ("work to block 3"). Work stops at the end of that block. Inside a block: one PBI per PR, normal gates (`scripts/verify.sh`). **Findings rule:** Same FAIL from Reviewer or Tester twice on the same item, or any revert, becomes a POL check PBI in the next nF block (gist A5). After each block, Sven tests and fills **Block nF findings**; new PBIs get the next free id per area.
 
-**How to read**: Each PBI uses the same template (Status, Area, Wave, Block, Lane, Depends on, proof, door, Goal, Context, Steps, Definition of Done, Evidence, mermaid Flow, Named asks, Cost, Sources). Workflow PBIs include every Bar H item in DoD. `proof:` is the exact command that proves the DoD (for example `./scripts/verify.sh`, `gh aw compile --dir workflows --strict`, or a policy fixture that must exit 1). `door:` is `two-way` (safe to iterate locally) or `one-way` (token spend, writes outside the repo, tags, secrets, Azure, rulesets, org switch); one-way PBIs also list `one-way gate` with Sven's yes and rollback. Settled rules live in [decisions/0002-settled-decisions.md](decisions/0002-settled-decisions.md). Gist review: [gist-review.md](gist-review.md).
+**How to read**: Each PBI uses the same template (Status, Area, Wave, Block, Lane, Depends on, proof, door, Goal, Context, Steps, Definition of Done, Evidence, mermaid Flow, Named asks, Cost, Sources). Workflow PBIs include every Bar H item in DoD. `proof:` is the exact command that proves the DoD (for example `./scripts/verify.sh`, `gh aw compile --dir workflows --strict`, or a policy fixture that must exit 1). `door:` is `two-way` (safe to iterate locally) or `one-way` (token spend, writes outside the repo, tags, secrets, Azure, rulesets, org switch); one-way PBIs also list `one-way gate` with Sven's yes and rollback. Every PBI has a required `## Technical design` section (components and files, interfaces, sequence mermaid, failure modes, security, observability, cost, rollback, proof, door); copy [_template.md](_template.md). An empty field is a Reviewer FAIL. Mermaid lives only in fenced `mermaid` blocks. Settled rules live in [decisions/0002-settled-decisions.md](decisions/0002-settled-decisions.md). Gist review: [gist-review.md](gist-review.md).
 
 
 ## Bar H (every workflow PBI)
@@ -27,6 +27,7 @@ Workflow PBIs must meet Bar H (plan v3 + gist A7):
 - Audit of first 3 runs
 - Measured cost per run in PBI Evidence
 - **Workflow fetches its own context with tools and imports; the prompt never pastes repo content** (gist A7)
+- Benchmark score at or above baseline ([X07](testing/X07-workflow-benchmark.md): 5 or more fixed cases per workflow in `docs/benchmarks/<workflow>.md`). A lower score blocks [L01](release/L01-v1-moving-v1-changelog.md), [L02](release/L02-update-vs-upgrade-safe-update.md) and [AO05](agent-ops/AO05-change-management.md); [C03](core/C03-shared-defaults.md) and [B03a](observability/B03a-value-vs-cost.md) use the score
 
 ## Block flow (B0 to B6)
 
@@ -47,6 +48,24 @@ flowchart LR
   B6 -.-> B6F[6F findings]
 ```
 
+## Loops, architecture, agent ops
+
+- [loops/](loops/00-overview.md): [LP00](loops/LP00-improvement-loop.md) improvement loop (incl. LP00 v2 cross-repo self-fix), [LP01](loops/LP01-delivery-loop.md) delivery loop (P05 board, P12 planning, P13 grilling, P14 pick-up at WIP 1), [LP02](loops/LP02-event-map.md) event map (automatic events, human triggers incl. slash commands and `/stop`, guards, rollout, doors).
+- [architecture/](architecture/00-overview.md): ARC01-ARC06 (context, topology, identity, safe-output flow incl. cross-repo, release, org switch). G00 owns these pages.
+- [agent-ops/](agent-ops/00-overview.md): AO01-AO14, sourced (S1-S11). AO01 retro and AO02 scorecards in B3, AO03 kill switch in B2 (guard dependency for `/stop`), the rest in B5. AO10 absorbs F75.
+- Folds: F76 log insights is in [M05](monitoring/M05-github-log-watcher.md), F77 issue to PR is in [P04](multi-repo/P04-research-plan-assign-copilot.md). The human go label is `agent-ok`. C01 is `scripts/verify.sh` only.
+
+```mermaid
+flowchart LR
+  M05[M05 log watcher, allowlisted repos] -->|agent:improve issue| I[issue in target repo]
+  I -->|risk:low, same run| P04[P04 assign Copilot]
+  I -->|risk:high| S((Sven decides))
+  S -->|adds agent-ok| P04
+  BRD[P05 board Ready] -->|P14 30 min poll, off until Sven yes| P04
+  P04 --> PR[Copilot draft PR in that repo] --> RV[F01 + verify.sh + Tester] --> MG((Sven merges))
+  KS[AO03 kill switch, /stop] -.noop.-> M05 & P04
+```
+
 ## Index (by Block, then ID)
 
 | ID | Title | Block | Door | Area | Wave | Status | Depends on | Lane | File |
@@ -55,7 +74,15 @@ flowchart LR
 | 0002 | Settled decisions | 0 | two-way | decisions | PR 0 | accepted |  | Cursor CLI | [decisions/0002-settled-decisions.md](decisions/0002-settled-decisions.md) |
 | D00 | Documentation overview (Diataxis map) | 0 | two-way | docs | PR 0 | todo | C02 | Cursor CLI | [docs/D00-docs-overview.md](docs/D00-docs-overview.md) |
 | F00 | Agent factory fit index | 0 | two-way | agent-factory | PR 0 | todo | none | Cursor CLI | [agent-factory/F00-fit-index.md](agent-factory/F00-fit-index.md) |
-| X06 | Verification skill (repo-local) | 1 | two-way | testing | W1 | todo | none | Builder | [testing/X06-verification-skill.md](testing/X06-verification-skill.md) |
+| LP00 | Improvement loop | 0 | two-way | loops | PR 0 | todo | M05, M01, P04, F01, F16, F72, X07, AO01, AO03, POL12, Y02, O04, O05, C03 | Builder | [loops/LP00-improvement-loop.md](loops/LP00-improvement-loop.md) |
+| LP01 | Delivery loop | 0 | two-way | loops | PR 0 | todo | P05, P12, P13, P14, P04, F01, F16, X07, AO01 | Builder | [loops/LP01-delivery-loop.md](loops/LP01-delivery-loop.md) |
+| LP02 | Event map | 0 | two-way | loops | PR 0 | todo | R01, R02, R03, R04, R06, M05, P04, P12, P13, P14, F01, F01b, F16, AO01, AO02, AO03, M01, L02 | Builder | [loops/LP02-event-map.md](loops/LP02-event-map.md) |
+| ARC01 | Context and containers | 1 | two-way | architecture | PR 0 | todo | G00 | Cursor CLI | [architecture/ARC01-context.md](architecture/ARC01-context.md) |
+| ARC02 | Repo topology | 1 | two-way | architecture | PR 0 | todo | G00 | Cursor CLI | [architecture/ARC02-repo-topology.md](architecture/ARC02-repo-topology.md) |
+| ARC03 | Identity and auth | 1 | two-way | architecture | PR 0 | todo | G00 | Cursor CLI | [architecture/ARC03-identity-auth.md](architecture/ARC03-identity-auth.md) |
+| ARC04 | Safe output flow | 1 | two-way | architecture | PR 0 | todo | G00 | Cursor CLI | [architecture/ARC04-safe-output-flow.md](architecture/ARC04-safe-output-flow.md) |
+| ARC05 | Release flow | 1 | two-way | architecture | PR 0 | todo | G00 | Cursor CLI | [architecture/ARC05-release-flow.md](architecture/ARC05-release-flow.md) |
+| ARC06 | Org switch | 1 | two-way | architecture | PR 0 | todo | G00 | Cursor CLI | [architecture/ARC06-org-switch.md](architecture/ARC06-org-switch.md) |
 | C01 | Verify script (`scripts/verify.sh`) | 1 | two-way | core | W1 | todo | none | Builder | [core/C01-verify-script.md](core/C01-verify-script.md) |
 | C02 | Org-ready repository layout | 1 | two-way | core | W1 | todo | G00, C01 | Builder | [core/C02-org-ready-layout.md](core/C02-org-ready-layout.md) |
 | C03 | shared/defaults: Copilot engine, caps, admission | 1 | two-way | core | W1 | todo | C02, C05 | Builder | [core/C03-shared-defaults.md](core/C03-shared-defaults.md) |
@@ -90,9 +117,12 @@ flowchart LR
 | POL22 | PR review output COMMENT only | 1 | two-way | policies | W1 | todo | C01, O01 | Builder | [policies/POL22-pr-review-comment-only.md](policies/POL22-pr-review-comment-only.md) |
 | POL23 | No tautological policy checks | 1 | two-way | policies | W1 | todo | C01, X03 | Builder | [policies/POL23-no-tautological-checks.md](policies/POL23-no-tautological-checks.md) |
 | X01 | Test repo + TrialOps | 1 | one-way | testing | PR 0 | todo | C01, G01 | Cursor CLI | [testing/X01-test-repo-trialops.md](testing/X01-test-repo-trialops.md) |
-| X03 | Verify fixtures | 1 | two-way | testing | PR 0 | todo | C01, POL01-POL18 | Builder | [testing/X03-gate-fixtures.md](testing/X03-gate-fixtures.md) |
+| X03 | Verify fixtures | 1 | two-way | testing | PR 0 | todo | C01, POL01-POL23 | Builder | [testing/X03-gate-fixtures.md](testing/X03-gate-fixtures.md) |
+| X06 | Verification skill (repo-local) | 1 | two-way | testing | W1 | todo | none | Builder | [testing/X06-verification-skill.md](testing/X06-verification-skill.md) |
+| AO03 | Kill switch | 2 | two-way | agent-ops | W2 | todo | POL10 | Builder | [agent-ops/AO03-kill-switch.md](agent-ops/AO03-kill-switch.md) |
 | D01 | Quick start and consumer guide | 2 | two-way | docs | W2 | todo | D00, C04, L01, X01, G00a | Cursor CLI | [docs/D01-quick-start-consumer-guide.md](docs/D01-quick-start-consumer-guide.md) |
 | D03 | Governance overview | 2 | two-way | docs | W5 | todo | G01, G02, D00 | Cursor CLI | [docs/D03-governance-overview.md](docs/D03-governance-overview.md) |
+| F01 | PR review (replaces squad-review) | 2, 3 | one-way | agent-factory | W3 | todo | C03, C04, C05, C06, C12, O01, O02, O03, X01, F00, POL21, POL22 | Builder | [agent-factory/F01-pr-review.md](agent-factory/F01-pr-review.md) |
 | G01 | Rollout ladder + human review | 2 | two-way | governance | PR 0 | todo | O02, POL03 | Cursor CLI | [governance/G01-rollout-ladder-human-review.md](governance/G01-rollout-ladder-human-review.md) |
 | G02 | RACI | 2 | two-way | governance | PR 0 | todo | G01 | Cursor CLI | [governance/G02-raci.md](governance/G02-raci.md) |
 | G03 | Onboarding + support | 2 | two-way | governance | PR 0 | todo | G02, D01 | Cursor CLI | [governance/G03-onboarding-support.md](governance/G03-onboarding-support.md) |
@@ -110,6 +140,9 @@ flowchart LR
 | S04 | Sandbox AWF and MCP gateway | 2 | two-way | security | W2 | todo | S00, POL07 | Builder | [security/S04-sandbox-awf-mcp-gateway.md](security/S04-sandbox-awf-mcp-gateway.md) |
 | S05 | Action pins, actions-lock, frontmatter hash, Dependabot | 2 | two-way | security | W2 | todo | C06, POL01, POL17 | Builder | [security/S05-action-pins-actions-lock.md](security/S05-action-pins-actions-lock.md) |
 | S06 | Checkout and forks | 2 | two-way | security | W2 | todo | S00, POL14 | Builder | [security/S06-checkout-forks.md](security/S06-checkout-forks.md) |
+| X07 | Workflow benchmark harness | 2 | one-way | testing | W2 | todo | X01, X06, O02 | Builder | [testing/X07-workflow-benchmark.md](testing/X07-workflow-benchmark.md) |
+| AO01 | Retro workflow | 3 | one-way | agent-ops | W3 | todo | B01, AO02, X07 | Builder | [agent-ops/AO01-retro-workflow.md](agent-ops/AO01-retro-workflow.md) |
+| AO02 | Agent scorecards | 3 | two-way | agent-ops | W3 | todo | B01, AO10 | Builder | [agent-ops/AO02-agent-scorecards.md](agent-ops/AO02-agent-scorecards.md) |
 | B01 | Logs + audit + session runbook | 3 | one-way | observability | PR 0 | todo | C01 | Cursor CLI | [observability/B01-logs-audit-session-runbook.md](observability/B01-logs-audit-session-runbook.md) |
 | B02 | Weekly spend overview | 3 | one-way | observability | PR 0 | todo | B01, F04, C03 | Builder | [observability/B02-weekly-spend-overview.md](observability/B02-weekly-spend-overview.md) |
 | B03a | Value vs cost (per workflow) | 3 | one-way | observability | W3 | todo | B02 | Builder | [observability/B03a-value-vs-cost.md](observability/B03a-value-vs-cost.md) |
@@ -127,13 +160,27 @@ flowchart LR
 | F17 | Workflow optimizer (/q) | 3 | one-way | agent-factory | W3 | todo | C03, C04, C06, O01, O02, O03, X01, POL01-POL18, F00 | Builder | [agent-factory/F17-q.md](agent-factory/F17-q.md) |
 | F72 | Issue triage with repro | 3 | one-way | agent-factory | W3 | todo | C03, C04, O01, O02, O03, R02, X01, F00 | Builder | [agent-factory/F72-issue-triage-repro.md](agent-factory/F72-issue-triage-repro.md) |
 | F74 | Findings buffer | 3 | one-way | agent-factory | W3 | todo | C03, C04, O01, O02, O03, R01, X01 | Builder | [agent-factory/F74-findings-buffer.md](agent-factory/F74-findings-buffer.md) |
+| M05 | GitHub log watcher (cross-repo self-fix) | 3, 4, 5 | one-way | monitoring | W3 | todo | B01, Y02, AO03, POL12, C03, O05, P04 | Builder | [monitoring/M05-github-log-watcher.md](monitoring/M05-github-log-watcher.md) |
+| P05 | Project board expanded (sync) | 3 | two-way | multi-repo | W5 | todo | C04 | Builder | [multi-repo/P05-project-board-monitoring.md](multi-repo/P05-project-board-monitoring.md) |
+| P12 | Planning workflow | 3 | one-way | multi-repo | W5 | todo | C03, C04, O01, O02, O03, P05, G01 | Builder | [multi-repo/P12-planning-workflow.md](multi-repo/P12-planning-workflow.md) |
+| P13 | Grilling workflow | 3 | one-way | multi-repo | W5 | todo | C03, C04, O01, O02, O03, P05, G01 | Builder | [multi-repo/P13-grilling-workflow.md](multi-repo/P13-grilling-workflow.md) |
 | R04 | workflow_run + deployment_status | 3 | two-way | triggers | PR 0 | todo | R01, R02 | Cursor CLI | [triggers/R04-workflow-run-deployment-status.md](triggers/R04-workflow-run-deployment-status.md) |
-| X07 | Workflow benchmark harness | 3 | two-way | testing | W3 | todo | X01, B02 | Builder | [testing/X07-workflow-benchmark.md](testing/X07-workflow-benchmark.md) |
 | Y01 | Cache memory | 3 | two-way | memory | PR 0 | todo | C03 | Cursor CLI | [memory/Y01-cache-memory.md](memory/Y01-cache-memory.md) |
 | M01 | Exception watcher (dispatch-only, deterministic pre-step) | 4 | one-way | monitoring | W4 | todo | C03, C04, M02, O03, S00 | Builder | [monitoring/M01-exception-watcher-dispatch.md](monitoring/M01-exception-watcher-dispatch.md) |
 | M02 | Azure OIDC Reader role and login step | 4 | one-way | monitoring | W4 | todo | C04, S00 | Builder | [monitoring/M02-azure-oidc-reader.md](monitoring/M02-azure-oidc-reader.md) |
 | M03 | Hourly cron exception watcher | 4 | one-way | monitoring | W4 | todo | M01, M02, B02 | Builder | [monitoring/M03-hourly-cron-watcher.md](monitoring/M03-hourly-cron-watcher.md) |
 | M04 | Azure MCP read-only via shared azure-auth | 4 | one-way | monitoring | W4 | todo | M02, S04, POL07 | Builder | [monitoring/M04-azure-mcp-read-only.md](monitoring/M04-azure-mcp-read-only.md) |
+| AO04 | Incident runbook + postmortem | 5 | two-way | agent-ops | W5 | todo | AO03, ARC04 | Builder | [agent-ops/AO04-incident-runbook-postmortem.md](agent-ops/AO04-incident-runbook-postmortem.md) |
+| AO05 | Change management | 5 | one-way | agent-ops | W5 | todo | X07, ARC05, L01 | Builder | [agent-ops/AO05-change-management.md](agent-ops/AO05-change-management.md) |
+| AO06 | Access review | 5 | two-way | agent-ops | W5 | todo | ARC03, C04 | Builder | [agent-ops/AO06-access-review.md](agent-ops/AO06-access-review.md) |
+| AO07 | Audit trail | 5 | two-way | agent-ops | W5 | todo | B01, shared/reporting | Builder | [agent-ops/AO07-audit-trail.md](agent-ops/AO07-audit-trail.md) |
+| AO08 | Red-team set in X07 | 5 | one-way | agent-ops | W5 | todo | X07, S2 threat detection | Builder | [agent-ops/AO08-red-team-set.md](agent-ops/AO08-red-team-set.md) |
+| AO09 | Data + privacy rules | 5 | two-way | agent-ops | W5 | todo | C01, POL16 | Builder | [agent-ops/AO09-data-privacy-rules.md](agent-ops/AO09-data-privacy-rules.md) |
+| AO10 | Sampled human review | 5 | two-way | agent-ops | W5 | todo | AO02, X07 | Builder | [agent-ops/AO10-sampled-human-review.md](agent-ops/AO10-sampled-human-review.md) |
+| AO11 | Error budget per workflow | 5 | two-way | agent-ops | W5 | todo | AO02, AO01, POL02 | Builder | [agent-ops/AO11-error-budget.md](agent-ops/AO11-error-budget.md) |
+| AO12 | Risk-based review routing | 5 | one-way | agent-ops | W5 | todo | F01, POL hits | Builder | [agent-ops/AO12-risk-based-review-routing.md](agent-ops/AO12-risk-based-review-routing.md) |
+| AO13 | Calibrated judge for X07 | 5 | one-way | agent-ops | W5 | todo | AO10, X07 | Builder | [agent-ops/AO13-calibrated-judge.md](agent-ops/AO13-calibrated-judge.md) |
+| AO14 | NIST mapping doc | 5 | two-way | agent-ops | W5 | todo | POL01-POL23, AO01-AO13 | Builder | [agent-ops/AO14-nist-mapping.md](agent-ops/AO14-nist-mapping.md) |
 | B03 | Outcomes + impact | 5 | two-way | observability | PR 0 | todo | B01, O01 | Cursor CLI | [observability/B03-outcomes-impact.md](observability/B03-outcomes-impact.md) |
 | B04 | OpenTelemetry | 5 | two-way | observability | PR 0 | todo | B01 | Builder | [observability/B04-open-telemetry.md](observability/B04-open-telemetry.md) |
 | B05 | Spend forecast | 5 | two-way | observability | PR 0 | todo | B02, C03 | Cursor CLI | [observability/B05-spend-forecast.md](observability/B05-spend-forecast.md) |
@@ -145,8 +192,9 @@ flowchart LR
 | D05 | Workflow authoring guide | 5 | two-way | docs | W5 | todo | C11, POL01-POL18, D00 | Cursor CLI | [docs/D05-authoring-guide.md](docs/D05-authoring-guide.md) |
 | D06 | gh aw CLI runbook | 5 | two-way | docs | W5 | todo | D01, B01 | Cursor CLI | [docs/D06-cli-runbook.md](docs/D06-cli-runbook.md) |
 | D07 | Troubleshooting guide | 5 | two-way | docs | W5 | todo | D01, D06, C04 | Cursor CLI | [docs/D07-troubleshooting.md](docs/D07-troubleshooting.md) |
+| F16 | PR fix for failing CI | 5 | one-way | agent-factory | W6 | todo | C03, C04, C06, O01, O02, O03, X01, F01, F02, F00, P04 | Builder | [agent-factory/F16-pr-fix.md](agent-factory/F16-pr-fix.md) |
 | F73 | Issue grouping | 5 | one-way | agent-factory | W5 | todo | C03, C04, O01, O03, R02, X01, F72 | Builder | [agent-factory/F73-issue-grouping.md](agent-factory/F73-issue-grouping.md) |
-| F75 | Weekly merged PR sample | 5 | one-way | agent-factory | W5 | todo | C03, C04, O01, O03, R01, X01 | Builder | [agent-factory/F75-weekly-merged-pr-sample.md](agent-factory/F75-weekly-merged-pr-sample.md) |
+| F75 | Weekly merged PR sample | 5 | one-way | agent-factory | W5 | folded into AO10 | C03, C04, O01, O03, R01, X01 | Builder | [agent-factory/F75-weekly-merged-pr-sample.md](agent-factory/F75-weekly-merged-pr-sample.md) |
 | G04 | Config governance | 5 | two-way | governance | PR 0 | todo | C03, POL18 | Cursor CLI | [governance/G04-config-governance.md](governance/G04-config-governance.md) |
 | G05 | Org switch checklist (org-only features) | 5 | one-way | governance | W5 | todo | G00, C02 | Cursor CLI | [governance/G05-org-only-appendix.md](governance/G05-org-only-appendix.md) |
 | G06 | CorrectionOps feedback loop | 5 | two-way | governance | PR 0 | todo | G01, C01 | Cursor CLI | [governance/G06-correctionops-feedback-loop.md](governance/G06-correctionops-feedback-loop.md) |
@@ -162,8 +210,8 @@ flowchart LR
 | P01 | CentralRepoOps hub and aggregated tracking | 5 | one-way | multi-repo | W5 | todo | C02, C04, O05, G01, X01 | Builder | [multi-repo/P01-central-repo-ops-hub.md](multi-repo/P01-central-repo-ops-hub.md) |
 | P02 | Orchestrator and worker (Dependabot rollout) | 5 | one-way | multi-repo | W5 | todo | P01, C04, R01, O05 | Builder | [multi-repo/P02-orchestrator-worker-dependabot-rollout.md](multi-repo/P02-orchestrator-worker-dependabot-rollout.md) |
 | P03 | Side repo, slash bridge, and code quality monitoring | 5 | one-way | multi-repo | W5 | todo | C04, R03, P01 | Builder | [multi-repo/P03-side-repo-slash-bridge.md](multi-repo/P03-side-repo-slash-bridge.md) |
-| P04 | Research, plan, assign to Copilot cloud agent | 5 | one-way | multi-repo | W5 | todo | C04, T01, G01 | Builder | [multi-repo/P04-research-plan-assign-copilot.md](multi-repo/P04-research-plan-assign-copilot.md) |
-| P05 | User Project board and monitoring | 5 | one-way | multi-repo | W5 | todo | C04, M01, B07 | Builder | [multi-repo/P05-project-board-monitoring.md](multi-repo/P05-project-board-monitoring.md) |
+| P04 | Issue to Copilot cloud agent (research, plan, assign) | 5 | one-way | multi-repo | W5 | todo | C04, O04, O05, M05, AO03, G01 | Builder | [multi-repo/P04-research-plan-assign-copilot.md](multi-repo/P04-research-plan-assign-copilot.md) |
+| P14 | Board pick-up (Ready to Copilot) | 5 | one-way | multi-repo | W5 | todo | P05, P04, O04, O05, AO03, G01 | Builder | [multi-repo/P14-board-pick-up.md](multi-repo/P14-board-pick-up.md) |
 | T01 | Microsoft Teams setup and feasibility | 5 | two-way | docs | PR 0 | todo | D00 | Cursor CLI | [copilot-teams/T01-teams-setup-feasibility.md](copilot-teams/T01-teams-setup-feasibility.md) |
 | T02 | Teams use cases for agentic workflows | 5 | two-way | docs | W5 | todo | T01, D02, P04 | Cursor CLI | [copilot-teams/T02-teams-use-cases.md](copilot-teams/T02-teams-use-cases.md) |
 | X02 | Staged dry-run checklist | 5 | two-way | testing | PR 0 | todo | X01, O02, G01 | Cursor CLI | [testing/X02-staged-dry-run-checklist.md](testing/X02-staged-dry-run-checklist.md) |
@@ -176,7 +224,6 @@ flowchart LR
 | F09 | AI release notes | 6 | one-way | agent-factory | W6 | todo | C03, C04, C06, O01, O02, O03, X01, L01, F00 | Builder | [agent-factory/F09-release-notes.md](agent-factory/F09-release-notes.md) |
 | F10 | Repository maintainer assist | 6 | one-way | agent-factory | W6 | todo | C03, C04, C06, O01, O02, O03, X01, F06, F07, F00 | Builder | [agent-factory/F10-repo-assist.md](agent-factory/F10-repo-assist.md) |
 | F12 | Code simplifier | 6 | one-way | agent-factory | W6 | todo | C03, C04, C06, O01, O02, O03, X01, F01, F00 | Builder | [agent-factory/F12-code-simplifier.md](agent-factory/F12-code-simplifier.md) |
-| F16 | PR fix for failing CI | 6 | one-way | agent-factory | W6 | todo | C03, C04, C06, O01, O02, O03, X01, F02, F00 | Builder | [agent-factory/F16-pr-fix.md](agent-factory/F16-pr-fix.md) |
 | F18 | Test improver | 6 | one-way | agent-factory | W6 | todo | C03, C04, C06, O01, O02, O03, X01, X04, F00 | Builder | [agent-factory/F18-test-improver.md](agent-factory/F18-test-improver.md) |
 | F19 | Documentation unbloat | 6 | one-way | agent-factory | W6 | todo | C03, C04, C06, O01, O02, O03, X01, F07, F00 | Builder | [agent-factory/F19-unbloat-docs.md](agent-factory/F19-unbloat-docs.md) |
 | F20 | Dependency analysis | 6 | one-way | agent-factory | W6 | todo | C03, C04, C06, O01, O02, O03, X01, S05, F00 | Builder | [agent-factory/F20-dependency-analysis.md](agent-factory/F20-dependency-analysis.md) |
@@ -246,7 +293,6 @@ flowchart LR
 | Y04 | QMD doc search | 6 | two-way | memory | PR 0 | todo | Y01, D05 | Cursor CLI | [memory/Y04-qmd-doc-search.md](memory/Y04-qmd-doc-search.md) |
 | Y05 | Serena | 6 | two-way | memory | PR 0 | todo | S04, POL07 | Cursor CLI | [memory/Y05-serena.md](memory/Y05-serena.md) |
 | Y06 | Web search (Tavily) | 6 | one-way | memory | PR 0 | todo | S01, POL06 | Cursor CLI | [memory/Y06-web-search.md](memory/Y06-web-search.md) |
-| F01 | PR review (replaces squad-review) | 2, 3 | one-way | agent-factory | W3 | todo | C03, C04, C05, C06, C12, O01, O02, O03, X01, F00, POL21, POL22 | Builder | [agent-factory/F01-pr-review.md](agent-factory/F01-pr-review.md) |
 ## Named asks for Sven
 
 | Id | Topic | First block |
@@ -258,14 +304,19 @@ flowchart LR
 | Q4 | Budget + Copilot plan | 1 |
 | Q5 | App Insights vs Log Analytics + repo to resource map | 4 |
 | Q6 | Issues per repo vs central tracker | 5 |
-| Q7 | Tags v1.0.0, moving v1, drop @marketplace import | 5 |
+| Q7 | Tags v1.0.0, moving v1, drop @marketplace import | 2 |
 | Q8 | Teams tenant + admin | 5 |
+| Q11 | X07 per-run AIC budget (Sven's yes per benchmark run; budget from measured cost of first trial runs and B02, no guess) | 2 |
 | M02 | Azure OIDC Reader app registration | 4 |
 | X01 | Test repo name / TrialOps | 1 |
-| X07 | Per-block yes before benchmark runs that spend AIC | 3 |
 | Y06 | Tavily API key | 6 |
 | B04 | OTLP export target | 5 |
 | F01b | Exact yes to enable pr-review on `pull_request` | 3 |
+| M05 rollout | Sven's yes per step after 3 audited runs: 1 report-only on 1 repo (B3), 2 all allowlisted repos (B4), 3 auto-fix risk:low (B5) | 3 |
+| M05_READ_TOKEN | Fine-grained PAT on the allowlisted svennijhuis repos: Actions read, Contents read, Issues write, nothing else. Sven sets it himself as a repo secret (one-way) | 3 |
+| P04_ASSIGN_TOKEN | Fine-grained PAT, allowlisted repos only: Issues write, Metadata read. Separate from M05_READ_TOKEN. Sven sets it himself (one-way) | 5 |
+| Copilot per repo | Open item: Copilot cloud agent enabled per target repo (Sven, one-way); the first B5 proof run decides if assign needs more scope or a second token | 5 |
+| P14 poll | Exact yes to turn on the P14 30 min scheduled poll (48 runs a day count toward measured cost) | 5 |
 | PR #2 close | PO closes #2 unmerged after PR 0 with links | 3 |
 
 Keys and tokens: masked GitHub fields only, never committed files (POL20).
@@ -281,13 +332,14 @@ Related: [agentPacks PR #80](https://github.com/svennijhuis/agentPacks/pull/80) 
 - [gist-review.md](gist-review.md) (Matt Pocock x poteto vs backlog, gist A1 to A7)
 - [feature-matrix.md](feature-matrix.md) (300 gh-aw pages)
 - [workflow-ratings.md](workflow-ratings.md) (62 agentics, 18 gallery, 348 factory rows)
+- [_template.md](_template.md) PBI template (technical design required)
 - [decisions/](decisions/) ADRs
 - [done/](done/) completed PBI moves (empty until first completion)
 
 
 ## Block 0
 
-**PBIs:** All PBI markdown files, `feature-matrix.md`, `workflow-ratings.md`, `decisions/0001` and `0002`, per-folder `00-overview.md` flows.
+**PBIs:** All PBI markdown files, `feature-matrix.md`, `workflow-ratings.md`, `decisions/0001` and `0002`, per-folder `00-overview.md` flows, `_template.md`, map docs LP00-LP02.
 
 **What Sven can test:** Read index, open any PBI, confirm DoD, mermaid Flow, Block line, Sources.
 
@@ -304,7 +356,7 @@ Empty until Sven tests block 0; new PBIs get the next free id per area.
 
 ## Block 1
 
-**PBIs:** X06 (first), G00, G00a, C01, C02, C03, C04, C05, C06, C11, C12, POL01-POL23, X01, X03.
+**PBIs:** X06 (first), G00 (ARC01-ARC06), G00a, C01, C02, C03, C04, C05, C06, C11, C12, POL01-POL23, X01, X03. Every Block 1 PBI has a filled technical design section.
 
 **What Sven can test:** Run `scripts/verify.sh` locally; good fixtures pass; bad fixtures fail per POL; compile strict clean.
 
@@ -321,13 +373,13 @@ Empty until Sven tests block 1; new PBIs get the next free id per area.
 
 ## Block 2
 
-**PBIs:** S00-S06, O01-O03, R01-R03, L01, D01, G01-G03, F01 staged smoke, G00a proof run.
+**PBIs:** S00-S06, O01-O03, R01-R03, L01, D01, G01-G03, X07 benchmark harness, AO03 kill switch (guard for `/stop`), LP02 guards (POL10 actor check, concurrency), F01 staged smoke, G00a proof run.
 
 **What Sven can test:** Tag v0.1; `gh aw add` F01 into trial repo; staged run shows safe-output preview, no writes.
 
 **Exit criteria:** v0.1 tag; trial staged run green; threat detection on; audit clean.
 
-**Named asks (first PBI in block that needs them):** Q3 (COPILOT_GITHUB_TOKEN PAT, masked).
+**Named asks (first PBI in block that needs them):** Q3 (COPILOT_GITHUB_TOKEN PAT, masked), Q7 (tags for L01), Q11 (X07 per-run budget, yes per run).
 
 ## Block 2F: findings
 
@@ -338,13 +390,13 @@ Empty until Sven tests block 2; new PBIs get the next free id per area.
 
 ## Block 3
 
-**PBIs:** F02-F07, F11, F13-F15, F17, F72, F74, F01 live, F01b gated, B01, B02, B03a, X07, Y01, R04.
+**PBIs:** F02-F07, F11, F13-F15, F17, F72, F74, F01 live, F01b gated, B01, B02, B03a, Y01, R04, M05 step 1 (report-only on 1 repo), P05 board, P12 planning, P13 grilling, AO01 retro, AO02 scorecards. Each NOW workflow gets 5 or more X07 cases and a passing score in its DoD.
 
 **What Sven can test:** NOW workflows in trial repo; F01 manual only; cost dashboard.
 
 **Exit criteria:** B03a value vs cost row per workflow (kill rule: 2 blocks below cost = disable). Bar H per workflow: 3 audited runs, measured AIC cost, noop pre-check proven. F01 pr-review runs manual only (`workflow_dispatch` + `/pr-review`), no push trigger; auto on push ([F01b](agent-factory/F01b-pr-review-auto-on-push.md)) waits on its 3 audited runs plus Sven's yes. Every agentPacks pin is a [C12](core/C12-agentpacks-import-contract.md) v1.1 tag (replaces `@34e1dec`). [PR #2](https://github.com/svennijhuis/agentic-workflows/pull/2) closed unmerged after PR 0, with a comment linking the replacing PBIs (C01, POL01, POL02, POL21, POL22, C12, F01, L02).
 
-**Named asks (first PBI in block that needs them):** F01b yes optional; cost cap confirmation.
+**Named asks (first PBI in block that needs them):** F01b yes optional; cost cap confirmation; M05 rollout step 1 yes; M05_READ_TOKEN.
 
 ## Block 3F: findings
 
@@ -355,13 +407,13 @@ Empty until Sven tests block 3; new PBIs get the next free id per area.
 
 ## Block 4
 
-**PBIs:** M01-M04.
+**PBIs:** M01-M04, M05 step 2 (issues on all allowlisted repos, with the multi-repo PBIs).
 
 **What Sven can test:** Exception watcher dispatch; Azure read-only MCP.
 
 **Exit criteria:** 24h hourly runs where approved; 0 Azure writes; dedupe proven.
 
-**Named asks (first PBI in block that needs them):** M02 (Azure app reg + federated cred).
+**Named asks (first PBI in block that needs them):** M02 (Azure app reg + federated cred); M05 rollout step 2 yes.
 
 ## Block 4F: findings
 
@@ -372,13 +424,13 @@ Empty until Sven tests block 4; new PBIs get the next free id per area.
 
 ## Block 5
 
-**PBIs:** P01-P05, O04-O06, Y02, B03-B08, L02-L07, G04-G06, G05, D02-D07, T01, T02, X02, X04, F73, F75.
+**PBIs:** P01-P04, P14, O04-O06, Y02, B03-B08, L02-L07, G04-G06, D02-D07, T01, T02, X02, X04, F73, F16 (moved from B6), M05 step 3 (auto-fix risk:low via P04), AO04-AO14 (AO10 absorbs F75). First sub-block: O04, P04, F16.
 
 **What Sven can test:** Two consumer repos on pinned tag; upgrade path; org checklist doc.
 
 **Exit criteria:** Clean upgrade v0.x to next; G05 checklist reviewed.
 
-**Named asks (first PBI in block that needs them):** Q1, Q2, Q6, Q7, B04 OTLP, Q8 Teams.
+**Named asks (first PBI in block that needs them):** Q1, Q2, Q6, B04 OTLP, Q8 Teams, M05 rollout step 3 yes, P04_ASSIGN_TOKEN, Copilot enablement per repo (open item, first B5 proof run), P14 poll yes.
 
 ## Block 5F: findings
 
@@ -389,7 +441,7 @@ Empty until Sven tests block 5; new PBIs get the next free id per area.
 
 ## Block 6
 
-**PBIs:** F09-F71 later set, P06-P11, C07-C10, S07, S08, R05, R06, Y03-Y06, X05.
+**PBIs:** F09-F71 later set (F16 moved to B5), P06-P11, C07-C10, S07, S08, R05, R06, Y03-Y06, X05.
 
 **What Sven can test:** Pick from ratings on demand; sub-blocks of max 5 PBIs.
 

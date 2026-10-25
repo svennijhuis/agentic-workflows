@@ -21,6 +21,7 @@ Drop @marketplace branch imports (Q7). Consumers pin @v1.2.0 or SHA; @v1 moves o
 - [ ] Release runbook section lists exact git tag commands (no force push).
 - [ ] Q7 decisions reflected in consumer docs.
 - [ ] Lock files committed with each release.
+- [ ] X07 runs first; a score below baseline blocks the release
 ## Evidence
 (commands, logs, verify log on SHA, run links)
 ## Flow

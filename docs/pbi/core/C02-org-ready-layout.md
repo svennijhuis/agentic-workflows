@@ -22,6 +22,28 @@ Decision 0001 picks agentics-style flat `workflows/` plus `aw.yml` manifest. Org
 - [ ] Removal list drafted for post-F01 squad-review deletion (every path named)
 - [ ] Gate (C01) passes on layout migration SHA
 - [ ] No org-only features enabled; owner variable documented for future org switch
+## Technical design
+- Components and files: Layout from the plan Repo structure: `aw.yml`, `workflows/`, `shared/`, `policies/`, `test/`, `docs/`, `governance/`. Keeps squad-review until F01
+- Interfaces: `aw.yml` package manifest, `.github/aw.json` compiler config
+- Sequence:
+
+```mermaid
+sequenceDiagram
+  participant B as Builder
+  participant R as repo
+  participant V as verify.sh
+  B->>R: move files
+  V->>R: run
+  R-->>V: green
+```
+
+- Failure modes: Moved paths break `gh aw add` paths, so `workflows/` stays flat
+- Security: CODEOWNERS on `workflows/`, `shared/`, `policies/`
+- Observability: `tree -L 2` output in the PR
+- Cost: 0 AIC (files)
+- Rollback: Revert the PR
+- Proof: `tree -L 2` in the PR plus verify.sh green
+- Door: two-way (file moves)
 ## Evidence
 (commands, logs, verify log on SHA, run links)
 ## Flow

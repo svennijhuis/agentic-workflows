@@ -54,7 +54,7 @@ sequenceDiagram
   H->>T1: read issues/labels (token)
   H->>T2: read issues/labels (token)
   H->>I: draft summary issue or comment (staged)
-  Note over H,I: dedupe by title; no writes until prod gate
+  Note over H,I: dedupe by title, no writes until prod gate
 ```
 ## Named asks for Sven
 Q1 (central-run vs installed), Q3 (PAT vs App), Q6 (issue target)

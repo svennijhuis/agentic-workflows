@@ -21,6 +21,28 @@ POL16 house style (no em dash, fixed report format) should be reflected in instr
 - [ ] House style and POL16 rules echoed in authoring instructions
 - [ ] aw-author agent references scripts/verify.sh and policy checks
 - [ ] No secrets or real emails in instruction files
+## Technical design
+- Components and files: `.github/copilot-instructions.md`, `AGENTS.md`, `.github/instructions/aw.instructions.md`, `.github/agents/aw-author.agent.md`
+- Interfaces: `applyTo` globs `workflows/**`
+- Sequence:
+
+```mermaid
+sequenceDiagram
+  participant C as Copilot
+  participant R as repo
+  participant V as verify.sh
+  C->>R: read instructions
+  C->>V: run before PR
+  V-->>C: N failures
+```
+
+- Failure modes: Instructions contradict POLs, so instructions link POL files and never restate rules
+- Security: Instructions say never merge, never force push
+- Observability: Links resolve (verify.sh link check)
+- Cost: 0 AIC (files)
+- Rollback: Revert the PR
+- Proof: Files exist and links resolve
+- Door: two-way (files)
 ## Evidence
 (commands, logs, verify log on SHA, run links)
 ## Flow

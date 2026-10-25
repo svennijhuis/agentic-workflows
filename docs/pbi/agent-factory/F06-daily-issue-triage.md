@@ -42,6 +42,7 @@ Engine: `copilot` with `COPILOT_GITHUB_TOKEN` (personal PAT). No `copilot-reques
 - [ ] Issue/PR bodies follow `shared/reporting.md` footer format (POL16)
 - [ ] Trial run on X01 test repo with verify log on exact SHA (Q0: local `scripts/verify.sh` until Actions billing fixed)
 - [ ] `gh aw audit` on first 3 runs; measured AIC recorded in this PBI Evidence section (B02)
+- [ ] [X07](../testing/X07-workflow-benchmark.md) benchmark: 5 or more fixed cases with known answers in `docs/benchmarks/<workflow>.md`, score at or above baseline (Bar H)
 ## Evidence
 (commands, logs, verify log on SHA, run links)
 ## Flow

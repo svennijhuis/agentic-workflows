@@ -29,6 +29,34 @@ Plan W1 starts with [X06](../testing/X06-verification-skill.md) (verification sk
 - [ ] Verify fails on each `test/fixtures/bad/POL*.md` (one bad fixture per policy)
 - [ ] CI workflow calls the same script as local (when Q0 unblocks Actions billing)
 - [ ] Evidence: verify log attached for at least one green SHA on `builder/pbi-docs`
+## Technical design
+- Components and files: `scripts/verify.sh`, `policies/checks/*.sh`, CI job `verify` (later). verify.sh is the one name
+- Interfaces: No args. Exit 0 on pass, 1 on fail. Stdout one line per failure `file:line rule-id message`, last line `N failures`
+- Sequence:
+
+```mermaid
+sequenceDiagram
+  participant Dev as Maintainer
+  participant V as verify.sh
+  participant A as gh aw
+  participant G as git
+  participant L as actionlint, gitleaks, dash scan
+  participant P as policies/checks
+  Dev->>V: run
+  V->>A: compile --dir workflows --strict
+  V->>G: diff --exit-code *.lock.yml
+  V->>L: lint and scan
+  V->>P: run every POL check
+  V-->>Dev: N failures
+```
+
+- Failure modes: Missing tool fails loud (`missing: actionlint`), never skips. Lock drift fails with `run gh aw compile`
+- Security: gitleaks on the diff; no network beyond tool installs
+- Observability: Same output local and CI
+- Cost: 0 AIC (script)
+- Rollback: Revert the script commit
+- Proof: `scripts/verify.sh` green on main, red on each bad fixture
+- Door: two-way (local script)
 ## Evidence
 (commands, logs, verify log on SHA, run links)
 ## Flow
