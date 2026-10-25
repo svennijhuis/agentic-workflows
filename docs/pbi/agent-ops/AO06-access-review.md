@@ -7,8 +7,14 @@
 - Depends on: ARC03, C04
 - proof: docs/runbooks/access-review.md with token table snapshot; quarterly checklist issue template
 - door: two-way
+- triage: build
+- feedback: the runbook token table check in the proof line
+- harness: none (runbook)
+- review-input: diff + this PBI + DoD (+ linked spec) + PR description, never builder session logs (PA6)
+- kind: skill
+- Source: PA8 (pre-link PBI edited in PR #4, origin in its Sources) https://github.com/svennijhuis/agentic-workflows/pull/4
 ## Goal
-Each token and app gets owner, scope, expiry, and last used. Reviewed every quarter; unused scope removed. Mirrors [ARC03](../architecture/ARC03-identity-auth.md) table including M05 and P04 PATs.
+Each token and app gets owner, scope, expiry, and last used. Reviewed every quarter; unused scope removed. Mirrors [ARC03](../done/ARC03-identity-auth.md) table including M05 and P04 PATs.
 ## Context
 Supports OWASP LLM06 least privilege (S10) and NIST Govern (S11). No org tokens until G05.
 ## Steps
@@ -23,6 +29,7 @@ Supports OWASP LLM06 least privilege (S10) and NIST Govern (S11). No org tokens 
 - [ ] Links to C04 auth reference
 ## Technical design
 - Components and files: `docs/runbooks/access-review.md`, ARC03 table as source, GitHub fine-grained PAT UI exports (manual).
+- Module boundary: the token table is the interface; GitHub token settings are behind it
 - Interfaces: checklist issue template; `gh api` read token metadata where available.
 - Sequence:
 

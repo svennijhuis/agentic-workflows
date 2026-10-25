@@ -1,0 +1,9 @@
+id: POL16
+title: 'House style'
+rule: 'No U+2013 or U+2014 in tracked text. Workflows that write issues, PRs or comments import shared/reporting.md.'
+why: 'One house style; fixed report format.'
+check: policies/checks/POL16.sh
+bad_fixture: test/fixtures/bad/POL16.md
+good_fixture: test/fixtures/good/POL16.md
+pbi: docs/pbi/done/POL16-house-style-no-em-dash-fixed-report.md
+reporting_fragment: workflows/shared/reporting.md

@@ -1,0 +1,12 @@
+# gh-aw-metadata: {"schema_version":"v4"}
+# Bad POL25 case: a compiled agentic lock that gained a pull_request trigger after compile.
+name: bad-pol25-lock
+on:
+  pull_request:
+    types: [opened]
+  workflow_dispatch:
+jobs:
+  agent:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo fixture

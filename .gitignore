@@ -2,3 +2,6 @@
 .github/aw/actions-lock.json
 *.log
 .DS_Store
+
+# Run logs stay local, redacted, never committed (POL26, PA3). gh aw logs and gh aw audit write here.
+/.github/aw/logs/

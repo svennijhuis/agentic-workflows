@@ -1,0 +1,8 @@
+id: POL13
+title: 'Threat detection never off'
+rule: 'safe-outputs.threat-detection is never false (or enabled: false).'
+why: 'Threat detection screens agent output before any write.'
+check: policies/checks/POL13.sh
+bad_fixture: test/fixtures/bad/POL13.md
+good_fixture: test/fixtures/good/POL13.md
+pbi: docs/pbi/done/POL13-threat-detection-never-off.md

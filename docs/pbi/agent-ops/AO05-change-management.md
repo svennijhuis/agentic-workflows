@@ -8,10 +8,16 @@
 - proof: CHANGELOG entry + X07 row showing same or higher than baseline before tag; canary note in test repo
 - door: one-way
 - one-way gate: Sven's exact yes required (named ask in its block). Rollback: pin consumers and workflows to previous annotated tag
+- triage: build
+- feedback: CHANGELOG entry plus X07 row at or above baseline
+- harness: none (process and release job)
+- review-input: diff + this PBI + DoD (+ linked spec) + PR description, never builder session logs (PA6)
+- kind: script
+- Source: PA8 (pre-link PBI edited in PR #4, origin in its Sources) https://github.com/svennijhuis/agentic-workflows/pull/4
 ## Goal
 Prompt version and model in each workflow frontmatter; CHANGELOG per workflow; canary in test repo first (X07 run). Rollback by pinning previous tag. **Release, prompt bump, model bump, or gh-aw bump runs X07 first; a lower score than baseline blocks the change.**
 ## Context
-Implements regression rule from plan v3.7 with [ARC05](../architecture/ARC05-release-flow.md). Canary pattern from S5. Tied to L01 tagged releases.
+Implements regression rule from plan v3.7 with [ARC05](../done/ARC05-release-flow.md). Canary pattern from S5. Tied to L01 tagged releases.
 ## Steps
 1. Require `prompt-version` and `model` keys in workflow frontmatter (POL check).
 2. CHANGELOG section per workflow on every prompt or model edit.
@@ -24,6 +30,7 @@ Implements regression rule from plan v3.7 with [ARC05](../architecture/ARC05-rel
 - [ ] Canary order matches ARC02 environments
 ## Technical design
 - Components and files: `CHANGELOG`, `docs/benchmarks/*.md`, workflow frontmatter, L01 tag job.
+- Module boundary: CHANGELOG and X07 rows are the interface; the L01 tag job is behind it
 - Interfaces: X07 harness CLI; semver tags; `gh aw update` on consumers.
 - Sequence:
 

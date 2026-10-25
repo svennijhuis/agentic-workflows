@@ -7,6 +7,12 @@
 - Depends on: R01, R02, R03, R04, R06, M05, P04, P12, P13, P14, F01, F01b, F16, AO01, AO02, AO03, M01, L02
 - proof: test -f docs/pbi/loops/LP02-event-map.md && grep -q 'M05 risk:low handoff' docs/pbi/loops/LP02-event-map.md
 - door: two-way
+- triage: build (map doc)
+- feedback: the grep proof above plus mmdc render
+- harness: none (map doc)
+- review-input: diff + this PBI + DoD (+ linked spec) + PR description, never builder session logs (PA6)
+- kind: skill
+- Source: PA8 (pre-link PBI edited in PR #4, origin in its Sources) https://github.com/svennijhuis/agentic-workflows/pull/4
 ## Goal
 Map who starts what: automatic GitHub events, human triggers (slash commands, labels, board poll), shared guards, and every one-way door in the loop system.
 ## Context
@@ -94,7 +100,7 @@ Manual first: `workflow_dispatch` and slash commands. Each automatic `on:` event
 | `BOARD_TOKEN` secret | Projects read and write on the user board only; P05 sync and P14 pre-step, never an agent job | B3 | Revoke or rotate token |
 | F01b | `pull_request` opened/sync auto review | B3 | Remove pull_request trigger |
 | M05 rollout step 1 | Report-only issues on 1 repo | B4 | Turn off M05 workflow |
-| M05 rollout step 2 | Writes `agent:improve` on all allowlisted repos | B4 | AO03 off or shrink `m05.repos` |
+| M05 rollout step 2 | Writes `agent:improve` on all allowlisted repos | B4 | AO03 off or shrink `m05_repos` (policies/POL01.yml) |
 | M05 rollout step 3 | Auto-fix `risk:low` via P04 same run | B5 | Disable handoff job; issues only |
 | `M05_READ_TOKEN` | Cross-repo Actions read, Issues write | B4 | Remove secret; M05 noops |
 | `P04_ASSIGN_TOKEN` | Cross-repo Issues assign | B5 | Remove secret; assign skipped |
@@ -117,6 +123,7 @@ Manual first: `workflow_dispatch` and slash commands. Each automatic `on:` event
 - [ ] Blocks line matches PR 0 block plan
 ## Technical design
 - Components and files: `workflows/*.md` per trigger; `aw.yml` allowlists; [AO03](../agent-ops/AO03-kill-switch.md) repo variables; gh-aw `command:` handlers for slash; [P14](../multi-repo/P14-board-pick-up.md) scheduled poll; POL10 check scripts in B2.
+- Module boundary: the event table is the interface; each workflow PBI owns its trigger
 - Interfaces: GitHub webhooks (`workflow_run`, `check_suite`, `issues`, `pull_request`, `pull_request_review`, `push`, `repository_dispatch`, `schedule`); slash `/plan`, `/grill`, `/fix`, `/pr-review`, `/benchmark`, `/retro`, `/stop`; labels `plan`, `grill`, `agent-ok`; M05 to P04 in-run assign for `risk:low`.
 - Sequence:
 

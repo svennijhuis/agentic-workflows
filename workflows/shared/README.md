@@ -1,19 +1,26 @@
 # Shared fragments
 
-Files here are **not** installed as standalone Actions. They have no `on:` field. Catalog workflows and consuming repos import them:
+Not installed alone. No `on:` field. Catalog workflows and consumers import them:
 
 ```yaml
 imports:
-  - shared/org-defaults.md                                          # local, from a file in workflows/
-  - svennijhuis/agentic-workflows/workflows/shared/org-defaults.md@v1  # remote, from another repo
+  - shared/defaults.md
+  - svennijhuis/agentic-workflows/workflows/shared/defaults.md@v1.0.0
 ```
 
-| Fragment | Use |
-| --- | --- |
-| [org-defaults.md](org-defaults.md) | Baseline GitHub toolsets |
-| [security.md](security.md) | Network / safety notes for org workflows |
-| [squad.md](squad.md) | `skills:` + `plugins:` from agentPacks (no copied SKILL.md) |
-| [mcp/](mcp/) | MCP server snippets (point at mcp-services; do not vendor binaries) |
-| [prompts/](prompts/) | Prompt snippets unique to **Actions** (not copies of plugin SKILL.md) |
+gh-aw v0.93.4 requires shared files under `workflows/shared/` (imports outside `workflows/` fail compile).
 
-Relative imports resolve from `workflows/`, so this folder must stay at `workflows/shared/`.
+## Fragments
+
+| File | Use |
+| --- | --- |
+| [defaults.md](defaults.md) | Baseline engine, admission, shared tool defaults |
+| [security.md](security.md) | Network and safety baseline |
+| [reporting.md](reporting.md) | Fixed issue/PR report shape ([POL16](../../policies/POL16.yml)) |
+| [agentpacks.md](agentpacks.md) | Pinned agentPacks skills/commands (not copied SKILL.md) |
+| [mcp/](mcp/) | MCP snippets (point at mcp-services; see [mcp/README.md](mcp/README.md)) |
+| [prompts/](prompts/) | Actions-only prompt snippets ([prompts/README.md](prompts/README.md)) |
+
+Configure consumers with `import-schema` `with:` only; unknown keys fail compile ([C05](../../docs/pbi/done/C05-imports-import-schema.md)).
+
+Caps are **not** importable; set them in each workflow frontmatter ([POL02](../../policies/POL02.yml)).

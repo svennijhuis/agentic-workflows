@@ -1,6 +1,8 @@
 # PBI template (copy for every new PBI)
 
-Every PBI file uses this layout. `## Technical design` is **required**: all ten fields must be filled. Builder does not start a PBI while any field is empty, and an empty field is a **Reviewer FAIL** on the PBI PR. `scripts/verify.sh` (C01) and the PR 0 gate check that the section exists and has no empty field on Block 1 PBIs and on every new PBI.
+Every PBI file uses this layout. `## Technical design` is **required**: all eleven fields must be filled. Builder does not start a PBI while any field is empty, and an empty field is a **Reviewer FAIL** on the PBI PR. `scripts/verify.sh` (C01) and the PR 0 gate check that the section exists and has no empty field on Block 1 PBIs and on every new PBI.
+
+**Shared fields (TPL01, PA8, same 5 as agentPacks):** `triage`, `feedback`, `harness`, `review-input`, `kind: skill|script`, plus `Source: D<n>` (or `PA<n>`) and the URL. `feedback:` is the feedback loop: the exact test, check or type check that tells the agent it is done (ARC08). `Module boundary:` names the small interface and the deep part behind it (ARC08). `scripts/check-pbi-template.sh` fails a new or changed PBI that misses one or leaves it empty; existing PBIs get them in [TPL02](docs/TPL02-template-backfill.md).
 
 Mermaid goes only in fenced `mermaid` code blocks, never as inline sequence text. One-way PBIs add the `one-way gate` line with Sven's yes and a rollback note (gist A1).
 
@@ -15,6 +17,12 @@ Mermaid goes only in fenced `mermaid` code blocks, never as inline sequence text
 - proof: <one command or link that shows it works>
 - door: two-way | one-way
 - one-way gate: Sven's exact yes required (named ask in its block). Rollback: <exact revert step>
+- triage: build | spec | ask | park | duplicate (<one-line reason>)
+- feedback: <the exact test, check or type check that tells the agent it is done>
+- harness: <where it runs: none (script), gh-aw engine, Cursor CLI>
+- review-input: diff + this PBI + DoD (+ linked spec) + PR description, never builder session logs
+- kind: skill | script
+- Source: D<n> <url>
 ## Goal
 ## Context
 ## Steps
@@ -22,6 +30,7 @@ Mermaid goes only in fenced `mermaid` code blocks, never as inline sequence text
 - [ ] ...
 ## Technical design
 - Components and files: <paths created or changed>
+- Module boundary: <the small interface this PBI exposes and the deep part behind it>
 - Interfaces: <frontmatter keys, inputs (import-schema), outputs (safe-outputs, exit codes)>
 - Sequence:
 

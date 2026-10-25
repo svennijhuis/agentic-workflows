@@ -1,0 +1,17 @@
+# Agent card (HX02, POL24). What runs where for squad-review. Secret NAMES only, never a value.
+# The card is checked against the frontmatter (engine, tools) and the lock manifest (mcp, secrets).
+workflow: squad-review
+interface: GitHub Actions workflow_dispatch with input pr (manual, from the Actions tab or gh aw run)
+harness: gh-aw agent job (sandbox, firewall, MCP gateway, safe-outputs job)
+engine: copilot
+engine_secret: COPILOT_GITHUB_TOKEN
+model: default (engine pin in .github/aw.json, set in shared/defaults.md)
+instructions: [shared/defaults.md, shared/security.md, shared/reporting.md, shared/agentpacks.md, agentPacks squad-review command]
+tools: [bash, github]
+mcp:
+  - name: github
+    transport: stdio
+    secret: GH_AW_GITHUB_MCP_SERVER_TOKEN
+  - name: safeoutputs
+    transport: stdio
+    secret: none

@@ -1,0 +1,7 @@
+{
+  "gh-aw": "v0.93.4",
+  "engines": {
+    "copilot": "1.0.101"
+  },
+  "note": "Toolchain pins (C06). POL17 checks every lock against these. Bump procedure: docs/reference/pins.md"
+}

@@ -7,6 +7,13 @@
 - Depends on: none
 - proof: ./scripts/verify.sh
 - door: two-way
+- triage: build (index edit in PR #4)
+- feedback: ./scripts/verify.sh (A1 and LINK rules on this file)
+- harness: none (docs page)
+- review-input: diff + this PBI + DoD (+ linked spec) + PR description, never builder session logs (PA6)
+- kind: skill
+- Source: PA8 (pre-link PBI edited in PR #4, origin in its Sources) https://github.com/svennijhuis/agentic-workflows/pull/4
+- Module boundary: the fit table is the interface; each F PBI holds the detail
 ## Goal
 Publish a single index that places all 62 `githubnext/agentics` workflows, 18 gh-aw gallery pages, and the 348 agent-factory-status rows next to value, cost tier, now/later, and target PBI id so Sven can prioritize without re-reading three spreadsheets.
 ## Context
@@ -112,7 +119,7 @@ Full table with Decision column (not ours, PICK, F71 analytics bucket) lives in 
 | F73 | Group related issues before work | Medium: one fix per root cause | M | 5 | [F73](F73-issue-grouping.md) |
 | F74 | Findings buffer on one pinned issue | High: cheap gardening, pattern visibility | S | 3 | [F74](F74-findings-buffer.md) |
 | F75 | Weekly merged PR sample (3 picks) | High: sample review, feeds new guards | S | 5 | [F75](F75-weekly-merged-pr-sample.md) |
-| X06 | Verification skill + script for this repo | High: one shared proof path for Tester | n/a | 1 | [X06](../testing/X06-verification-skill.md) |
+| X06 | Verification skill + script for this repo | High: one shared proof path for Tester | n/a | 1 | [X06](../done/X06-verification-skill.md) |
 ## Steps
 1. Keep this index aligned when adding or retiring F PBIs.
 2. On each new PICK, add a row here and open the matching F PBI file.

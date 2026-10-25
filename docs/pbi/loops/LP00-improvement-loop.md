@@ -7,6 +7,12 @@
 - Depends on: M05, M01, P04, F01, F16, F72, X07, AO01, AO03, POL12, Y02, O04, O05, C03
 - proof: every LP00 mermaid block renders (mmdc, PR 0 gate section 10) and on GitHub; all links resolve
 - door: two-way
+- triage: build (map doc)
+- feedback: mmdc render of every LP00 mermaid plus LINK rule
+- harness: none (map doc)
+- review-input: diff + this PBI + DoD (+ linked spec) + PR description, never builder session logs (PA6)
+- kind: skill
+- Source: PA8 (pre-link PBI edited in PR #4, origin in its Sources) https://github.com/svennijhuis/agentic-workflows/pull/4
 ## Goal
 Document the improvement loop from log signals through deduped `agent:improve` issues to optional fix PRs, review, and human merge, including cross-repo M05 v2 behavior.
 ## Context
@@ -27,7 +33,7 @@ Block 0 map doc: steps ship in B3, B4, and B5 as named in the table. Each step l
 
 **M05 cross-repo log watcher** (B4 with multi-repo/, depends P01, POL12, AO03)
 
-- Runs once, centrally in agentic-workflows. Reads Actions runs and failed job logs from every repo in `aw.yml` key `m05.repos` (allowlist, personal svennijhuis only; POL12 check fails on any other owner).
+- Runs once, centrally in agentic-workflows. Reads Actions runs and failed job logs from every repo in `policies/POL01.yml` key `m05_repos` (allowlist, personal svennijhuis only; POL12 check fails on any other owner).
 - Pre-step (deterministic, 0 AIC): `gh run list --status failure` per repo since last run (cursor in repo-memory Y02). Nothing new means noop. Fingerprint = repo + workflow + step + error hash; a known fingerprint only bumps a counter.
 - Agent step: small cheap model (C03 alias `small`), max-turns low. Writes one issue per new fingerprint in the repo where it failed (`target-repo` from the allowlist), labeled `agent:improve` + `risk:low|high`, body = log excerpt, repro command, first seen, count.
 - **Risk class is set by rules, not the model.** A table in `shared/risk-classes.md` maps failing step + touched paths to a class. Low: lint, markdown/docs, flaky test (passed on rerun), dependency patch bump, CI config typo. High: anything matching auth, payment, secret, infra/bicep/terraform, Azure, `.github/workflows/`, `workflows/*.md`, or no rule matched. The model may move low to high, never high to low.
@@ -99,7 +105,8 @@ flowchart LR
 - [ ] Header `proof:` grep count matches three diagram blocks (cross-repo, sequence, Flow)
 - [ ] GitHub markdown preview renders diagrams
 ## Technical design
-- Components and files: [M05](../monitoring/M05-github-log-watcher.md) workflow in agentic-workflows; `aw.yml` `m05.repos`; `shared/risk-classes.md`; [P04](../multi-repo/P04-research-plan-assign-copilot.md) assign job in same run; Y02 repo-memory cursor; F01, F16, X07 on PR path; secrets `M05_READ_TOKEN`, `P04_ASSIGN_TOKEN`.
+- Components and files: [M05](../monitoring/M05-github-log-watcher.md) workflow in agentic-workflows; `policies/POL01.yml` `m05_repos`; `shared/risk-classes.md`; [P04](../multi-repo/P04-research-plan-assign-copilot.md) assign job in same run; Y02 repo-memory cursor; F01, F16, X07 on PR path; secrets `M05_READ_TOKEN`, `P04_ASSIGN_TOKEN`.
+- Module boundary: the step table is the interface; each step links its own PBI
 - Interfaces: `gh run list --status failure` pre-step; issue labels `agent:improve`, `risk:low`, `risk:high`, human `agent-ok`; in-run P04 assign API to Copilot cloud agent; LP02 exception for bot-started assign on `risk:low`.
 - Sequence:
 
@@ -136,7 +143,7 @@ sequenceDiagram
 - Security: split read and assign tokens; log text untrusted (OWASP LLM01); no cross-repo contents or PR write PAT; threat detection on agent steps per Bar H.
 - Observability: B01 run id on every issue; fingerprint and count in issue body; AO01 retro on merged loop PRs.
 - Cost: Map doc 0 AIC; M05 pre-step 0 AIC when noop; small model capped via C03; P04 assign deterministic low AIC; PR path F01 and Copilot per measure in Evidence.
-- Rollback: Disable M05 workflow; AO03 global off; revoke tokens; shrink `m05.repos` allowlist.
+- Rollback: Disable M05 workflow; AO03 global off; revoke tokens; shrink the `m05_repos` allowlist in `policies/POL01.yml`.
 - Proof: header `proof:` command plus GitHub render
 - Door: two-way (Block 0 map; child PBIs and tokens are one-way)
 ## Evidence

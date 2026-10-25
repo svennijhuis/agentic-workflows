@@ -8,6 +8,13 @@
 - proof: gh aw compile --dir workflows --strict workflows/pr-review.md; gh aw audit <run-id> (Block exit runs)
 - door: one-way
 - one-way gate: Sven's exact yes required (named ask in its block). Rollback: disable pr-review workflow in catalog and trial repo
+- triage: build (Block 2 workflow)
+- feedback: gh aw compile --dir workflows --strict, POL22, staged run on X01
+- harness: gh-aw, engine copilot via shared/defaults.md (when built)
+- review-input: diff + this PBI + DoD (+ linked spec) + PR description, never builder session logs (PA6)
+- kind: skill
+- Source: PA8 (pre-link PBI edited in PR #4, origin in its Sources) https://github.com/svennijhuis/agentic-workflows/pull/4
+- Module boundary: the agentPacks review command import is the interface; the review contract stays in agentPacks
 ## Goal
 Ship `pr-review.md` as Copilot report-only PR review with C12 v1.1 agentPacks pins (tag on generated commit, not main SHA), replacing temporary `squad-review.md` after this workflow passes Bar H.
 ## Context
@@ -64,5 +71,5 @@ M tier, ~30-50 AIC per review (unverified)
 ## Sources
 - https://github.github.com/gh-aw/gallery/automated-pr-review/
 - https://github.com/svennijhuis/agentic-workflows/pull/2
-- docs/pbi/core/C12-agentpacks-import-contract.md
+- docs/pbi/done/C12-agentpacks-import-contract.md
 - docs/pbi/workflow-ratings.md

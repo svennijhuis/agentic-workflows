@@ -1,0 +1,14 @@
+# Agent card fixture (gate-minimal, every check passes).
+workflow: gate-minimal
+interface: GitHub Actions workflow_dispatch (manual)
+harness: gh-aw agent job
+engine: copilot
+engine_secret: COPILOT_GITHUB_TOKEN
+tools: [bash, github]
+mcp:
+  - name: github
+    transport: stdio
+    secret: GH_AW_GITHUB_MCP_SERVER_TOKEN
+  - name: safeoutputs
+    transport: stdio
+    secret: none

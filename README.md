@@ -1,82 +1,81 @@
 # Agentic workflows catalog
 
-Org source of truth for [GitHub Agentic Workflows](https://github.github.com/gh-aw/). Other repositories **install** templates from here; they do not copy-paste Markdown by hand.
+Org source of truth for [GitHub Agentic Workflows](https://github.github.com/gh-aw/). Consumer repos install templates with `gh aw add`; they do not copy-paste Markdown.
 
-This repo is the CI/Actions catalog. Interactive IDE behaviour lives in [`agentPacks`](https://github.com/svennijhuis/agentPacks). MCP servers live in [`mcp-services`](https://github.com/svennijhuis/mcp-services). See [How it works](docs/HOW-IT-WORKS.md) and [Using agentPacks](docs/AGENTPACKS.md).
+IDE plugins: [`agentPacks`](https://github.com/svennijhuis/agentPacks). MCP: [`mcp-services`](https://github.com/svennijhuis/mcp-services). Overview: [docs/explanation/how-it-works.md](docs/explanation/how-it-works.md).
 
-Replace `svennijhuis` with the company org slug when this catalog moves.
+Replace `svennijhuis` with the target org owner only at org switch ([docs/pbi/done/ARC06-org-switch.md](docs/pbi/done/ARC06-org-switch.md)).
 
 ## Install into another repository
 
-Prerequisites in the **consuming** repo:
+Prerequisites in the **consumer** repo:
 
 ```bash
 gh extension install github/gh-aw
 gh aw init
 ```
 
-Then add a catalog workflow (pin a tag in production):
+Add a catalog workflow (pin a tag in production):
 
 ```bash
-gh aw add svennijhuis/agentic-workflows/squad-review@v1
+gh aw add svennijhuis/agentic-workflows/squad-review@v1.0.0
 ```
 
-That copies the Markdown into `.github/workflows/`, compiles a `.lock.yml`, and records `source:` so later `gh aw update` can merge upstream changes.
+Commit `.md` and `.lock.yml`. Full guide: [docs/how-to/consume.md](docs/how-to/consume.md).
 
-Commit both the `.md` and the generated `.lock.yml`. Enable GitHub Actions in the consuming repo.
-
-Full consumer guide: [docs/CONSUMING.md](docs/CONSUMING.md).
-
-## Import shared fragments without installing a whole workflow
-
-In a local workflow’s frontmatter:
+## Import shared fragments
 
 ```yaml
 imports:
-  - svennijhuis/agentic-workflows/workflows/shared/org-defaults.md@v1
-  - svennijhuis/agentic-workflows/workflows/shared/security.md@v1
-  - svennijhuis/agentic-workflows/workflows/shared/squad.md@v1
+  - svennijhuis/agentic-workflows/workflows/shared/defaults.md@v1.0.0
+  - svennijhuis/agentic-workflows/workflows/shared/security.md@v1.0.0
+  - svennijhuis/agentic-workflows/workflows/shared/agentpacks.md@v1.0.0
 ```
 
 ## Layout
 
 | Path | Role |
 | --- | --- |
-| [`aw.yml`](aw.yml) | Package manifest `gh aw add` reads |
-| [`workflows/*.md`](workflows/) | Installable templates (have `on:`) |
+| [`aw.yml`](aw.yml) | Package manifest for `gh aw add` |
+| [`workflows/*.md`](workflows/) | Installable templates (`on:` required) |
 | [`workflows/shared/`](workflows/shared/) | Importable fragments (no `on:`) |
-| [`.github/workflows/`](.github/workflows/) | Control-plane jobs that run **in this repo only** |
-| [`docs/`](docs/) | How consumption, packing, and governance work |
-| [`governance/`](governance/) | Example org `GH_AW_DEFAULT_*` variables |
-| [`.github/workflows/validate-catalog.yml`](.github/workflows/validate-catalog.yml) | CI: `gh aw compile --dir workflows --no-emit` |
+| [`policies/`](policies/) | POL rules and check scripts |
+| [`scripts/verify.sh`](scripts/verify.sh) | Local gate (see below) |
+| [`.github/workflows/`](.github/workflows/) | Control-plane jobs in **this** repo only |
+| [`docs/`](docs/) | Diataxis docs |
+| [`governance/`](governance/) | Rollout ladder, proposed rulesets |
+| [`.github/aw.json`](.github/aw.json) | gh-aw and engine pins |
+
+Details: [docs/reference/layout.md](docs/reference/layout.md).
+
+## Verify (contributors)
+
+```bash
+./scripts/verify.sh
+```
+
+Must end with `0 failures`. Q0: Actions billing blocked; attach this log on the PR commit SHA. [docs/how-to/verify-workflow.md](docs/how-to/verify-workflow.md).
 
 ## Versioning
 
 | Ref | When to use |
 | --- | --- |
-| `@v1.2.0` | Production pin |
-| `@v1` | Follow the current major |
-| `@main` | Catalog development only |
+| `@v1.0.0` (exact tag) | Production pin |
+| `@v1` | Moving major after Block 2 tag policy |
 | SHA | Audit / incident freeze |
+| `@main` | Never in production; [POL01](policies/POL01.yml) rejects it |
 
-Keep this repository **private or internal** so only org members can install. Use `private: true` only on workflows that must **not** be `gh aw add`-able (control-plane jobs in `.github/workflows/`). Catalog templates under `workflows/` stay installable.
-
-## Related repos
-
-| Repo | Use it for |
-| --- | --- |
-| [svennijhuis/agentPacks](https://github.com/svennijhuis/agentPacks) | Cursor / Copilot CLI / Claude / Codex plugins (`squad`, `git`, language packs) |
-| [svennijhuis/mcp-services](https://github.com/svennijhuis/mcp-services) | MCP servers (filesystem, roslyn, index, …) |
-| [githubnext/agentics](https://github.com/githubnext/agentics) | Public starter workflows to remix into this catalog |
+Keep the catalog **private or internal**. Catalog templates under `workflows/` stay installable (`private: true` blocks `gh aw add`).
 
 ## Docs
 
-- [How it works](docs/HOW-IT-WORKS.md)
-- [Use this catalog from other repos](docs/CONSUMING.md)
-- [Reuse agentPacks and mcp-services](docs/AGENTPACKS.md)
-- [Squad review on Actions](docs/SQUAD-REVIEW.md)
-- [Governance and org defaults](docs/GOVERNANCE.md)
-- [Control plane (later)](docs/CONTROL-PLANE.md)
+- [docs/README.md](docs/README.md) (index)
+- [AGENTS.md](AGENTS.md)
+- [Consume](docs/how-to/consume.md)
+- [agentPacks contract](docs/reference/agentpacks-contract.md)
+- [squad-review](docs/reference/squad-review.md)
+- [Governance](docs/explanation/governance.md)
 - [Contributing](CONTRIBUTING.md)
+- PBI backlog: [docs/pbi/README.md](docs/pbi/README.md)
 
-Official references: [Using at Scale](https://github.github.com/gh-aw/guides/using-at-scale/), [Sharing Workflows](https://github.github.com/gh-aw/practices/sharing-workflows/).
+Official: [Using at Scale](https://github.github.com/gh-aw/guides/using-at-scale/), [Sharing Workflows](https://github.github.com/gh-aw/practices/sharing-workflows/).
