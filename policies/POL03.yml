@@ -1,6 +1,6 @@
 id: POL03
 title: 'Staged and dispatch first'
-rule: 'Every workflow has on.workflow_dispatch. Any other trigger, and any write output without safe-outputs.staged: true, needs the workflow listed in governance/rollout.yml promoted (Sven''s exact yes). .github/workflows/*.yml are workflow_dispatch only on the same terms.'
+rule: 'Every workflow has on.workflow_dispatch. Any other trigger, and any write output without safe-outputs.staged: true, needs the workflow listed in governance/rollout.yml promoted (Sven''s exact yes). .github/workflows/*.yml are workflow_dispatch only on the same terms. on: is read by scripts/lib/on-triggers.sh as a string, list or map; a parse error fails closed.'
 why: 'No scheduled or token-spending automation goes live without Sven''s explicit yes; staged runs come first.'
 check: policies/checks/POL03.sh
 bad_fixture: test/fixtures/bad/POL03.md

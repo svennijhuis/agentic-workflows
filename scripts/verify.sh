@@ -36,7 +36,7 @@ for y in .github/workflows/*.yml; do
 done
 
 echo "# shellcheck"
-count < <(shellcheck -f gcc -x -P SCRIPTDIR scripts/*.sh policies/checks/*.sh 2>&1 | sed -E 's#^([^:]+):([0-9]+):[0-9]+: (.*)#\1:\2 SHELLCHECK \3#')
+count < <(shellcheck -f gcc -x -P SCRIPTDIR scripts/*.sh scripts/lib/*.sh policies/checks/*.sh 2>&1 | sed -E 's#^([^:]+):([0-9]+):[0-9]+: (.*)#\1:\2 SHELLCHECK \3#')
 
 echo "# import-schema fixtures (C05)"
 for kind in good bad; do
