@@ -1,0 +1,16 @@
+id: POL26
+title: 'Run logs gitignored and scanned'
+rule: 'Every run log path below is ignored by .gitignore, no run log is tracked, and gitleaks scans every log path that exists on disk.'
+why: 'Run logs and traces hold prompts, tool calls and tokens. They stay local, redacted, never committed (PA2, PA3).'
+check: policies/checks/POL26.sh
+bad_fixture: test/fixtures/bad/POL26/
+good_fixture: test/fixtures/good/POL26/
+pbi: docs/pbi/done/POL26-run-logs-gitignored.md
+# Folders where run logs land. .github/aw/logs is the default output of gh aw logs and gh aw audit (gh-aw v0.93.4).
+log_dirs:
+  - .github/aw/logs
+# Sample files that must be ignored (one per kind of log we keep).
+samples:
+  - .github/aw/logs/run-1/agent-stdio.log
+  - .github/aw/logs/run-1/safe_output.jsonl
+  - scratch/run.log

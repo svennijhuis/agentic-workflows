@@ -7,6 +7,13 @@
 - Depends on: none
 - proof: ./scripts/verify.sh
 - door: two-way
+- triage: build (index edit in PR #4)
+- feedback: ./scripts/verify.sh (A1 and LINK rules on this file)
+- harness: none (docs page)
+- review-input: diff + this PBI + DoD (+ linked spec) + PR description, never builder session logs (PA6)
+- kind: skill
+- Source: PA8 (pre-link PBI edited in PR #4, origin in its Sources) https://github.com/svennijhuis/agentic-workflows/pull/4
+- Module boundary: the fit table is the interface; each F PBI holds the detail
 ## Goal
 Publish a single index that places all 62 `githubnext/agentics` workflows, 18 gh-aw gallery pages, and the 348 agent-factory-status rows next to value, cost tier, now/later, and target PBI id so Sven can prioritize without re-reading three spreadsheets.
 ## Context

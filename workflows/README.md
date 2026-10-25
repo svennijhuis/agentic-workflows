@@ -8,7 +8,7 @@ gh aw add svennijhuis/agentic-workflows/<file-stem>@v1.0.0
 
 Each file **must** have an `on:` trigger. Kebab-case stem becomes the `gh aw add` id.
 
-Block 1: catalog workflows are **`workflow_dispatch` only** until Sven enables more. Each workflow sets its own cost caps in frontmatter ([POL02](../policies/POL02.yml)). Commit `.lock.yml` next to each `.md` ([POL17](../policies/POL17.yml)).
+Block 1: catalog workflows are **`workflow_dispatch` only** until Sven enables more. Each workflow sets its own cost caps in frontmatter ([POL02](../policies/POL02.yml)). Commit `.lock.yml` next to each `.md` ([POL17](../policies/POL17.yml)). Agentic workflows stay `workflow_dispatch` only, lock included ([POL25](../policies/POL25.yml)). Each workflow has an agent card `<name>.card.yml` next to it: interface, harness, engine, tools, MCP transport and secret NAMES ([POL24](../policies/POL24.yml), [harness model](../docs/explanation/harness-model.md)).
 
 | Workflow | Purpose |
 | --- | --- |

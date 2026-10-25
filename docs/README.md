@@ -20,6 +20,7 @@ Diataxis layout for the catalog. PBI backlog: [pbi/README.md](pbi/README.md).
 
 - [How it works](explanation/how-it-works.md)
 - [Governance](explanation/governance.md)
+- [Harness model (ARC07)](explanation/harness-model.md)
 - [Control plane (later)](explanation/control-plane.md)
 
 ## Tutorials

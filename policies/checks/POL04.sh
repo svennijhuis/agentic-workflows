@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # POL04 no secrets in files: gitleaks (default rules) plus a GitHub token pattern grep.
-# Repo mode scans the tree with .gitleaks.toml, which allowlists only the POL04/POL20 bad fixtures.
+# Repo mode scans the tree with .gitleaks.toml, which allowlists only the POL04/POL20/POL26 bad fixtures.
 # shellcheck source=lib.sh
 . "$(dirname "$0")/lib.sh"
 command -v gitleaks >/dev/null 2>&1 || { echo "policies/checks/POL04.sh:1 VERIFY missing: gitleaks"; exit 1; }
@@ -26,7 +26,7 @@ grep_pat() { # FILE
 if repo_mode "$@"; then
   scan "$POL_ROOT" --config "$POL_ROOT/.gitleaks.toml"
   while IFS= read -r f; do
-    case "$f" in test/fixtures/bad/POL04.md|test/fixtures/bad/POL20.md) continue ;; esac
+    case "$f" in test/fixtures/bad/POL04.md|test/fixtures/bad/POL20.md|test/fixtures/bad/POL26/*) continue ;; esac
     [ -f "$POL_ROOT/$f" ] && grep_pat "$POL_ROOT/$f"
   done < <(git -C "$POL_ROOT" ls-files)
 else

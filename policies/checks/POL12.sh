@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # POL12 explicit repos: a custom github-token (cross-repo signal) needs target-repo or allowed-repos;
-# every target-repo / allowed-repos / aw.yml m05.repos entry is owned by the owner in policies/POL12.yml.
+# every target-repo / allowed-repos / policies/POL01.yml m05_repos entry is owned by the owner in policies/POL12.yml.
 # shellcheck source=lib.sh
 . "$(dirname "$0")/lib.sh"
 OWNER=$(polcfg POL12 '.owner')
@@ -32,9 +32,10 @@ check_yaml() { # FILE (frontmatter via q)
 }
 
 for f in $(targets "$@"); do check_yaml "$f"; done
-if repo_mode "$@" && [ -f "$POL_ROOT/aw.yml" ]; then
+if repo_mode "$@"; then
+  # M05 allowlist lives in the one allowlist file, policies/POL01.yml (aw.yml rejects unknown keys).
   while IFS= read -r t; do
-    [ -n "$t" ] && own aw.yml "$(fline "$POL_ROOT/aw.yml" "$t")" "m05.repos" "$t"
-  done < <(yq '.m05.repos[]?' "$POL_ROOT/aw.yml")
+    [ -n "$t" ] && own policies/POL01.yml "$(fline "$POL_ROOT/policies/POL01.yml" "$t")" "m05_repos" "$t"
+  done < <(yq '.m05_repos[]?' "$POL_ROOT/policies/POL01.yml")
 fi
 pol_done

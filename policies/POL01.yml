@@ -19,3 +19,5 @@ agentpacks_allowlist:
   - 'plugins/squad/commands/squad-review.md'
   - 'plugins/squad/skills/squad'
   - 'plugins/squad'
+# M05 repo allowlist (one allowlist file). POL12 holds every entry to owner svennijhuis. Empty until M05 B3.
+m05_repos: []

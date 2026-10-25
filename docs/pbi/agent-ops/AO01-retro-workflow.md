@@ -8,6 +8,12 @@
 - proof: gh aw compile --dir workflows --strict workflows/ao01-retro.md; weekly retro issue link after three audited runs
 - door: one-way
 - one-way gate: Sven's exact yes required (named ask in its block). Rollback: disable workflow via workflow_dispatch off or remove schedule trigger
+- triage: spec (one-way, spend)
+- feedback: gh aw compile --strict plus the weekly retro fixture
+- harness: gh-aw, engine copilot via shared/defaults.md (when built)
+- review-input: diff + this PBI + DoD (+ linked spec) + PR description, never builder session logs (PA6)
+- kind: skill
+- Source: PA8 (pre-link PBI edited in PR #4, origin in its Sources) https://github.com/svennijhuis/agentic-workflows/pull/4
 ## Goal
 Weekly and report-only retro: read runs, FAILs, reverts, AIC, and X07 scores; write one retro issue (went well, went wrong, repeated mistakes). Each repeated mistake becomes a POL PBI in the next nF (A5).
 ## Context
@@ -33,6 +39,7 @@ Uses [X07](../testing/X07-workflow-benchmark.md) scores in the narrative. Before
 - [ ] Repeated mistake opens POL PBI draft for next nF
 ## Technical design
 - Components and files: `workflows/ao01-retro.md`, B01 run export, AO02 scorecard script output, X07 baseline files under `docs/benchmarks/`.
+- Module boundary: retro report format is the interface; scoring detail sits in BH03
 - Interfaces: read-only GitHub API for runs; safe-output `create-issue` for retro body; link to POL template.
 - Sequence:
 

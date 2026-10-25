@@ -19,7 +19,7 @@ Policy text: `target-repo: '*'` requires documented runtime choice and read guar
 
 Bad fixture `test/fixtures/bad/POL12.md`: Cross-repo output without target-repo.
 
-M05 allowlist (plan v3.9): every entry in `aw.yml` key `m05.repos` must have owner `svennijhuis`. Any other owner (any org) fails the check. See [M05](../monitoring/M05-github-log-watcher.md).
+M05 allowlist (plan v3.9): every entry in `policies/POL01.yml` key `m05_repos` must have owner `svennijhuis`. Any other owner (any org) fails the check. See [M05](../monitoring/M05-github-log-watcher.md).
 ## Steps
 1. Write `policies/POL12.yml` with machine-readable rules.
 2. Implement `policies/checks/POL12.sh` (bash, exit codes, clear stderr).
@@ -30,11 +30,11 @@ M05 allowlist (plan v3.9): every entry in `aw.yml` key `m05.repos` must have own
 - [ ] Policy YAML, check script, and bad fixture exist for POL12
 - [ ] `policies/checks/POL12.sh` fails on bad fixture and passes on good catalog
 - [ ] Policy text included in this PBI and in `shared/policies/` or `policies/` doc
-- [ ] Fails on an `aw.yml` `m05.repos` entry whose owner is not svennijhuis
+- [ ] Fails on an `policies/POL01.yml` `m05_repos` entry whose owner is not svennijhuis
 - [ ] Gate log on SHA shows POL12 executed
 ## Technical design
 - Components and files: `policies/POL12.yml` (rule + why), `policies/checks/POL12.sh`, `test/fixtures/bad/POL12.md` (shared POL design, see [00-overview.md](../policies/00-overview.md#shared-technical-design-pol01-pol23))
-- Interfaces: Check gets the repo root, prints `file:line POL12 message`, exit 1 on hit; verify.sh loops all checks. This check: `target-repo`/`allowed-repos` explicit for cross-repo; every `aw.yml` `m05.repos` entry has owner svennijhuis
+- Interfaces: Check gets the repo root, prints `file:line POL12 message`, exit 1 on hit; verify.sh loops all checks. This check: `target-repo`/`allowed-repos` explicit for cross-repo; every `policies/POL01.yml` `m05_repos` entry has owner svennijhuis
 - Sequence:
 
 ```mermaid

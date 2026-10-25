@@ -27,6 +27,9 @@
 - [POL21: POL21-copilot-requests-none](../done/POL21-copilot-requests-none.md)
 - [POL22: POL22-pr-review-comment-only](../done/POL22-pr-review-comment-only.md)
 - [POL23: POL23-no-tautological-checks](../done/POL23-no-tautological-checks.md)
+- [POL24: agent card (PBI HX02)](../done/HX02-agent-card.md)
+- [POL25: POL25-agentic-dispatch-only](../done/POL25-agentic-dispatch-only.md)
+- [POL26: POL26-run-logs-gitignored](../done/POL26-run-logs-gitignored.md)
 
 ## Shared technical design (POL01-POL23)
 
@@ -69,7 +72,7 @@ sequenceDiagram
 | [POL09](../done/POL09-rate-limits-concurrency-cooldown.md) rate | concurrency group + schedule not below 1h | `test/fixtures/bad/POL09.md`: `*/5` cron |
 | [POL10](../done/POL10-who-can-trigger.md) who triggers | `on.roles` set, skip-bots on | `test/fixtures/bad/POL10.md`: no roles |
 | [POL11](../done/POL11-least-permissions-read-only-agent.md) permissions | agent job read-only | `test/fixtures/bad/POL11.md`: `contents: write` |
-| [POL12](../done/POL12-explicit-allowed-repos-target-repo.md) repo target | `target-repo`/`allowed-repos` explicit for cross-repo; every `aw.yml` `m05.repos` entry has owner svennijhuis | `test/fixtures/bad/POL12.md`: cross-repo with none; m05.repos entry with another owner |
+| [POL12](../done/POL12-explicit-allowed-repos-target-repo.md) repo target | `target-repo`/`allowed-repos` explicit for cross-repo; every `policies/POL01.yml` `m05_repos` entry has owner svennijhuis | `test/fixtures/bad/POL12.md`: cross-repo with none; m05.repos entry with another owner |
 | [POL13](../done/POL13-threat-detection-never-off.md) threat detection | not `false` | `test/fixtures/bad/POL13.md`: `threat-detection: false` |
 | [POL14](../done/POL14-no-merge-pull-request-unsafe-pr-target.md) no merge | no merge-pull-request, no `pull_request_target` with checkout of head | `test/fixtures/bad/POL14.md`: merge output |
 | [POL15](../done/POL15-timeouts-required.md) timeouts | `timeout-minutes` set | `test/fixtures/bad/POL15.md`: missing |
@@ -80,7 +83,10 @@ sequenceDiagram
 | [POL20](../done/POL20-no-tokens-in-markdown.md) no tokens in md | secret-pattern scan on `**/*.md` | `test/fixtures/bad/POL20.md`: token in doc |
 | [POL21](../done/POL21-copilot-requests-none.md) copilot-requests | `copilot-requests: none` | `test/fixtures/bad/POL21.md`: key missing |
 | [POL22](../done/POL22-pr-review-comment-only.md) review COMMENT only | submit-pull-request-review event is COMMENT | `test/fixtures/bad/POL22.md`: APPROVE |
-| [POL23](../done/POL23-no-tautological-checks.md) no tautology | every POL check exits 1 on its bad fixture | `test/fixtures/bad/POL23.md`: check that always passes |
+| [POL23](../done/POL23-no-tautological-checks.md) no tautology | every POL check exits 1 on its bad fixture (folder: each case alone), extra `POLnn-*` cases too | `test/fixtures/bad/POL23.md`: check that always passes |
+| [POL24](../done/HX02-agent-card.md) agent card | sibling `<name>.card.yml` matches frontmatter and lock manifest, secret NAMES only | `test/fixtures/bad/POL24/`: missing card, mismatch, secret value, lock mismatch |
+| [POL25](../done/POL25-agentic-dispatch-only.md) dispatch only | agentic `.md` and `.lock.yml` only `workflow_dispatch`; deterministic CI on `pull_request` passes | `test/fixtures/bad/POL25.md`: schedule; `bad/POL25-lock.lock.yml`: pull_request |
+| [POL26](../done/POL26-run-logs-gitignored.md) run logs | log paths ignored, none tracked, gitleaks over log dirs | `test/fixtures/bad/POL26/`: no ignore rule, fake token in a log |
 
 ## Dependency sketch
 

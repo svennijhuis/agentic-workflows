@@ -8,6 +8,12 @@
 - proof: ./scripts/benchmark-workflows.sh --dry-run && test -f docs/benchmarks/README.md && ./scripts/verify.sh
 - door: one-way
 - one-way gate: Sven's exact yes required per benchmark run (named ask Q11). Rollback: revert the docs/benchmarks/<wf>.md row and the harness commit; runs stop because each run needs a fresh yes
+- triage: spec (spend)
+- feedback: ./scripts/benchmark-workflows.sh --dry-run
+- harness: none (script), runs each workflow through gh-aw per case
+- review-input: diff + this PBI + DoD (+ linked spec) + PR description, never builder session logs (PA6)
+- kind: script
+- Source: PA8 (pre-link PBI edited in PR #4, origin in its Sources) https://github.com/svennijhuis/agentic-workflows/pull/4
 ## Goal
 Ship the only benchmark PBI: a harness that scores NOW workflows on fixed cases in the [X01](X01-test-repo-trialops.md) test repo with known ground truth. This is not a cost-compare workflow; it measures found, false alarms, misses, turns, time, and AIC per run and stores results beside a baseline row in `docs/benchmarks/<workflow>.md`.
 ## Context
@@ -28,6 +34,7 @@ Plan v3.7 makes X07 the regression gate for [L01](../release/L01-v1-moving-v1-ch
 - [ ] Mermaid flow present
 ## Technical design
 - Components and files: `scripts/benchmark-workflows.sh`, `docs/benchmarks/<workflow>.md` per NOW workflow, `workflows/benchmark.md` (dispatch and slash), X01 seeded fixtures under `test/fixtures/benchmark/`
+- Module boundary: fixed cases per workflow are the interface; the runner is behind it
 - Interfaces: workflow frontmatter caps per C03; import `shared/defaults.md`; inputs for workflow id and case subset; safe-output report rows to benchmark markdown; exit 1 when score below baseline
 - Sequence:
 

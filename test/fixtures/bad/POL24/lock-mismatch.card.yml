@@ -1,0 +1,11 @@
+# Agent card fixture (bad: card lists github, lock manifest lists github and safeoutputs).
+workflow: lock-mismatch
+interface: GitHub Actions workflow_dispatch (manual)
+harness: gh-aw agent job
+engine: copilot
+engine_secret: COPILOT_GITHUB_TOKEN
+tools: [bash, github]
+mcp:
+  - name: github
+    transport: stdio
+    secret: GH_AW_GITHUB_MCP_SERVER_TOKEN

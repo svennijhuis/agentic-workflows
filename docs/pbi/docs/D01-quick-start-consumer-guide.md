@@ -7,6 +7,13 @@
 - Depends on: D00, C04, L01, X01, G00a
 - proof: test -f docs/pbi/docs/D01-quick-start-consumer-guide.md && grep -q '## Definition of Done' docs/pbi/docs/D01-quick-start-consumer-guide.md
 - door: two-way
+- triage: build
+- feedback: the grep proof above plus LINK rule
+- harness: none (docs page)
+- review-input: diff + this PBI + DoD (+ linked spec) + PR description, never builder session logs (PA6)
+- kind: skill
+- Source: PA8 (pre-link PBI edited in PR #4, origin in its Sources) https://github.com/svennijhuis/agentic-workflows/pull/4
+- Module boundary: the quick start page is the interface; docs/how-to holds the steps
 ## Goal
 A newcomer installs `gh aw`, adds a pinned workflow, compiles, and runs dispatch safely without mentor help.
 ## Context

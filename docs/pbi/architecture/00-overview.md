@@ -2,6 +2,8 @@
 
 **Purpose:** G00 org-ready architecture: six linked pages (ARC01-ARC06) that describe containers, repo topology, identity, safe outputs, release, and the org switch. They are the expanded G00 anchor for consumers, C04 auth, and LP02 guards. Facts on gh-aw security layers come from the [GitHub security architecture blog](https://github.blog/ai-and-ml/generative-ai/under-the-hood-security-architecture-of-github-agentic-workflows/) and [safe outputs reference](https://github.github.com/gh-aw/reference/safe-outputs/) (read 2026-10-25).
 
+ARC07 harness model (glossary and layers): [../../explanation/harness-model.md](../../explanation/harness-model.md), PBI [ARC07](../done/ARC07-harness-model.md). ARC08 template field: [ARC08](../done/ARC08-module-boundary-feedback-loop.md).
+
 ## PBIs
 
 - [ARC01: Context and containers](../done/ARC01-context.md)

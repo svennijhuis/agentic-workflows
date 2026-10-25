@@ -47,7 +47,7 @@ for kind in good bad; do
   [ "$kind" = bad ] && [ $rc -eq 0 ] && fail "$d/consumer.md:1 C05 unknown import-schema input was not rejected"
 done
 
-echo "# policies (POL01-POL22, repo mode)"
+echo "# policies (every POLnn except POL23, repo mode)"
 for c in policies/checks/POL[0-9][0-9].sh; do
   [ "$(basename "$c")" = POL23.sh ] && continue
   count < <(bash "$c")
@@ -58,6 +58,18 @@ count < <(bash policies/checks/POL23.sh)
 
 echo "# PBI docs (gist A1 proof/door fields, links, dashes)"
 count < <(bash scripts/check-pbi-docs.sh)
+
+echo "# PBI template (TPL01 + ARC08, new or changed PBIs only)"
+T=test/fixtures/template
+bash scripts/check-pbi-template.sh "$T/good.md" >/dev/null || fail "$T/good.md:1 TPL01 good template fixture fails"
+for b in "$T"/bad-*.md; do bash scripts/check-pbi-template.sh "$b" >/dev/null && fail "$b:1 TPL01 bad template fixture passes (tautological)"; done
+count < <(bash scripts/check-pbi-template.sh)
+
+echo "# PR template (G02a owner, architecture summary, questions for owner)"
+P=test/fixtures/pr-body
+count < <(bash scripts/check-pr-body.sh --template .github/pull_request_template.md)
+bash scripts/check-pr-body.sh "$P/good.md" >/dev/null || fail "$P/good.md:1 G02a good PR body fixture fails"
+for b in "$P"/bad-*.md; do bash scripts/check-pr-body.sh "$b" >/dev/null && fail "$b:1 G02a bad PR body fixture passes (tautological)"; done
 
 echo "$N failures"
 [ "$N" -eq 0 ]
