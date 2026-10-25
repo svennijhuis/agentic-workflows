@@ -5,13 +5,15 @@
 - Block: 3, 4, 5
 - Lane: Builder
 - Depends on: B01, Y02, AO03, POL12, C03, O05, P04
+- Relates: P01 (not a blocker)
+- Step 2 blockers: O05 (cross-repo outputs), POL12, AO03, Y02 (repo memory holding the last-run marker); all land before M05 step 2 in B4
 - proof: gh aw compile --dir workflows --strict workflows/m05-github-log-watcher.md && ./scripts/verify.sh
 - door: one-way
 - one-way gate: each rollout step needs 3 audited runs + measured AIC + Sven's exact yes. Rollback: set the AO03 kill var for M05 and remove repos from aw.yml m05.repos
 ## Goal
 Fold **F76 log insights** into one central workflow in agentic-workflows that reads failed Actions runs across an allowlisted set of personal repos, opens deduped `agent:improve` issues with risk class, and for `risk:low` hands off to [P04](../multi-repo/P04-research-plan-assign-copilot.md) in the same run without `agent-ok` (rule-gated bot path per [LP02](../loops/LP02-event-map.md)).
 ## Context
-[LP00 v2](../loops/LP00-improvement-loop.md) cross-repo self-fix. Rollout: Block 3 report-only on one repo; Block 4 writes issues on all `aw.yml` `m05.repos` entries; Block 5 enables auto-fix for `risk:low`. [POL12](../policies/POL12-explicit-allowed-repos-target-repo.md) fails if any owner is not svennijhuis. [AO03](../agent-ops/AO03-kill-switch.md) pre-step noops the workflow. Log text is untrusted input (OWASP LLM01) and reaches the agent as data only. Merge rule: Sven merges fix PRs; an agent never merges.
+[LP00 v2](../loops/LP00-improvement-loop.md) cross-repo self-fix. Step 2 blockers: [O05](../safe-outputs/O05-cross-repo.md) cross-repo outputs, [POL12](../policies/POL12-explicit-allowed-repos-target-repo.md), [AO03](../agent-ops/AO03-kill-switch.md) and [Y02](../memory/Y02-repo-memory-ledger-compaction-replay.md) (repo memory holding the last-run marker) all land before step 2 in B4. [P01](../multi-repo/P01-central-repo-ops-hub.md) only relates (B5), it does not block. Rollout: Block 3 report-only on one repo; Block 4 writes issues on all `aw.yml` `m05.repos` entries; Block 5 enables auto-fix for `risk:low`. [POL12](../policies/POL12-explicit-allowed-repos-target-repo.md) fails if any owner is not svennijhuis. [AO03](../agent-ops/AO03-kill-switch.md) pre-step noops the workflow. Log text is untrusted input (OWASP LLM01) and reaches the agent as data only. Merge rule: Sven merges fix PRs; an agent never merges.
 ## Steps
 1. Add `workflows/m05-github-log-watcher.md`; import `shared/defaults.md`, `shared/risk-classes.md`, and [C03](../core/C03-shared-defaults.md) alias `small` with low `max-turns`.
 2. Pre-step (0 AIC): `gh run list --status failure` per allowlisted repo since last cursor in [Y02](../memory/Y02-repo-memory-ledger-compaction-replay.md); noop when nothing new.

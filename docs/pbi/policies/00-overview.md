@@ -32,7 +32,7 @@
 
 All 23 policies share one design. Each POL file repeats it in its own `## Technical design` section with its own row below.
 
-- Components and files: per POL `policies/POLnn.yml` (rule + why), `policies/checks/POLnn.sh`, `test/fixtures/bad/POLnn.md`, good coverage in `test/fixtures/good/`.
+- Components and files: per POL `policies/POLnn.yml` (rule + why), `policies/checks/POLnn.sh`, `test/fixtures/bad/POLnn.md` (exception: POL17 uses folder `test/fixtures/bad/POL17/` with a workflow file plus a stale lock), good coverage in `test/fixtures/good/`.
 - Interfaces: a check gets the repo root, prints `file:line POLnn message`, exits 1 on a hit. `scripts/verify.sh` loops all checks.
 - Sequence:
 
@@ -74,7 +74,7 @@ sequenceDiagram
 | [POL14](POL14-no-merge-pull-request-unsafe-pr-target.md) no merge | no merge-pull-request, no `pull_request_target` with checkout of head | `test/fixtures/bad/POL14.md`: merge output |
 | [POL15](POL15-timeouts-required.md) timeouts | `timeout-minutes` set | `test/fixtures/bad/POL15.md`: missing |
 | [POL16](POL16-house-style-no-em-dash-fixed-report.md) house style | no em dash, report uses shared/reporting.md | `test/fixtures/bad/POL16.md`: em dash |
-| [POL17](POL17-lock-file-committed-fresh.md) lock fresh | lock committed, compile gives no diff | `test/fixtures/bad/POL17.md`: stale lock |
+| [POL17](POL17-lock-file-committed-fresh.md) lock fresh | lock committed, compile gives no diff | `test/fixtures/bad/POL17/`: `workflow.md` plus stale `workflow.lock.yml` |
 | [POL18](POL18-gh-aw-env-runtime-policy-vars.md) runtime vars | required `gh aw env` vars documented in workflow | `test/fixtures/bad/POL18.md`: undocumented var |
 | [POL19](POL19-no-force-push.md) no force push | ruleset export has non_fast_forward; scripts have no `push -f`/`--force` | `test/fixtures/bad/POL19.md`: `git push --force` |
 | [POL20](POL20-no-tokens-in-markdown.md) no tokens in md | secret-pattern scan on `**/*.md` | `test/fixtures/bad/POL20.md`: token in doc |

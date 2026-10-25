@@ -14,12 +14,13 @@ Poll every 30 minutes (`schedule`) because GitHub Actions has no Projects v2 eve
 [LP01](../loops/LP01-delivery-loop.md) pick-up step. The board pick-up is a 30 min poll with a deterministic noop pre-step (0 AIC when Ready is empty). It is a scheduled workflow, so it stays OFF until Sven's exact yes (one-way door, B5), and its Actions minutes (48 runs a day) count toward the measured cost.
 ## Steps
 1. Add `workflows/p14-board-pick-up.md` with `schedule: '*/30 * * * *'` disabled until B5 gate.
-2. Pre-step GraphQL: Ready column items without linked PR; noop when empty.
+2. Pre-step GraphQL with `BOARD_TOKEN` (deterministic step only, never the agent job): Ready column items without linked PR; noop when empty.
 3. For each eligible item (max 1 per day): call P04 assign path with issue number from linked issue.
 4. Enforce WIP 1 open auto-fix PR per repo shared with P04 and M05.
 ## Definition of Done
 - [ ] Schedule 30 min poll documented; workflow off until Sven B5 yes
 - [ ] GraphQL pre-step noop when no Ready items (0 AIC)
+- [ ] Only the pre-step reads `BOARD_TOKEN`; the agent job has no board token
 - [ ] Only Ready cards placed by Sven; max 1 pick-up per day
 - [ ] Hands off to P04; draft PR links to Project item
 - [ ] `imports:` shared/defaults.md; caps; AO03 pre-step
@@ -48,7 +49,7 @@ sequenceDiagram
 ```
 
 - Failure modes: GraphQL auth failure fails job; daily cap skips with log
-- Security: Projects read scope on PAT; no card moves by agent
+- Security: `BOARD_TOKEN` (shared with P05, Projects read and write on the user board only) is used only by the deterministic GraphQL pre-step, never by the agent job; no card moves by agent
 - Observability: pick-up log line with item id and issue number
 - Cost: 48 scheduled runs per day mostly noop; agent cost only on pick-up
 - Rollback: turn off schedule; AO03 kill var
@@ -66,7 +67,7 @@ flowchart LR
   P04 --> PR[draft PR links card]
 ```
 ## Named asks for Sven
-Exact yes before enabling schedule trigger (one-way); Projects-capable token scope on PAT used by GraphQL step
+Exact yes before enabling schedule trigger (one-way). Board token: the same `BOARD_TOKEN` as P05 (README named ask, first asked in B3), no separate token
 ## Cost
 48 Actions runs per day at mostly 0 AIC; plus P04 chain when pick-up fires
 ## Sources

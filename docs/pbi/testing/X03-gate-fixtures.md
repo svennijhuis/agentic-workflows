@@ -12,7 +12,7 @@ Document test/fixtures good and bad layout: one bad fixture per policy exercised
 ## Context
 C01 local verify replaces CI until Q0 fixed. Fixtures prove policies fail closed. [POL23](../policies/POL23-no-tautological-checks.md) requires every check to fail on bad and pass on good fixtures under `test/fixtures/{good,bad}/`.
 ## Steps
-1. Map each POL id to `test/fixtures/bad/<id>.md` and paired `test/fixtures/good/` path.
+1. Map each POL id to `test/fixtures/bad/<id>.md` and paired `test/fixtures/good/` path. Exception: POL17 uses folder `test/fixtures/bad/POL17/` (workflow file plus stale lock).
 2. Document good fixture minimal valid workflow snippet.
 3. Wire scripts/verify.sh to run policy checks, POL23 meta-check, and compile strict.
 ## Definition of Done
@@ -21,7 +21,7 @@ C01 local verify replaces CI until Q0 fixed. Fixtures prove policies fail closed
 - [ ] scripts/verify.sh on clean SHA passes; bad fixtures fail in tests.
 - [ ] Evidence records verify log on exact SHA.
 ## Technical design
-- Components and files: `test/fixtures/good/`, `test/fixtures/bad/POLnn.md` (one per POL)
+- Components and files: `test/fixtures/good/`, `test/fixtures/bad/POLnn.md` (one per POL; POL17 is folder `test/fixtures/bad/POL17/`)
 - Interfaces: verify.sh `--fixtures` mode
 - Sequence:
 

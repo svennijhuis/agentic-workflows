@@ -17,7 +17,7 @@ This file is a Block 0 map. Workflows ship in the blocks named in the step table
 ## Steps
 | Step | PBI | Block | Door | Cap |
 |---|---|---|---|---|
-| Board | [P05](../multi-repo/P05-project-board-monitoring.md): GitHub Project (user-owned, personal account) with columns Backlog, Grilling, Ready, In progress, Review, Done. A script syncs `docs/pbi/*.md` to issues (one per PBI, by id in the title), and status flows back into the index Status column | B3 | two-way (script, no tokens) | none |
+| Board | [P05](../multi-repo/P05-project-board-monitoring.md): GitHub Project (user-owned, personal account) with columns Backlog, Grilling, Ready, In progress, Review, Done. A script syncs `docs/pbi/*.md` to issues (one per PBI, by id in the title), and status flows back into the index Status column | B3 | two-way (script, 0 AIC; `BOARD_TOKEN` secret set by Sven is one-way) | none |
 | Plan | [P12](../multi-repo/P12-planning-workflow.md): label `plan` on an issue, and the workflow writes a PBI from the template (goal, DoD, `proof:`, `door:`, technical design, mermaid) as an issue comment. The human copies or approves it | B3 | one-way (tokens) | 3 runs per day |
 | Grill | [P13](../multi-repo/P13-grilling-workflow.md) (gist 27): label `grill`, and the agent posts one round of max 5 questions on goal, DoD and edge cases. It waits for Sven's reply and only then asks the next round. It never moves a card to Ready | B3 | one-way (tokens) | 1 round per issue per run |
 | Pick up | [P14](../multi-repo/P14-board-pick-up.md): only cards Sven moved to Ready. Assigned to the Copilot cloud agent via P04, WIP 1, and the draft PR links back to the card | B5 | one-way (PR + tokens) | WIP 1, 1 per day |
@@ -64,7 +64,7 @@ sequenceDiagram
 ```
 
 - Failure modes: Ready poll runs while workflow disabled (noop only); multiple Ready cards blocked by WIP 1; grill agent moves card (forbidden by P13); Copilot assign fails (comment on issue, no PR).
-- Security: POL10 actor checks on labels; bot labels never start workflows; tokens only on one-way steps (P12, P13, P14, P04).
+- Security: POL10 actor checks on labels; bot labels never start workflows; tokens only on one-way steps (P12, P13, P14, P04); `BOARD_TOKEN` only in deterministic jobs (P05 sync, P14 poll pre-step), never in an agent job.
 - Observability: B01 run logs per workflow; AO01 retro counts delivery loop merges; board column changes visible on Project.
 - Cost: Map doc 0 AIC; P05 sync 0 AIC; P12/P13 agent steps capped per table; P14 schedule 48 workflow runs per day (mostly noop pre-step, 0 AIC when empty); implementation PRs incur Copilot and F01 AIC per Bar H measure.
 - Rollback: Map doc edits freely (two-way); disable P14 schedule until Sven re-approves; turn off P12/P13 via AO03 or workflow_dispatch off.

@@ -170,6 +170,8 @@ flowchart LR
 | M02 | Azure OIDC Reader role and login step | 4 | one-way | monitoring | W4 | todo | C04, S00 | Builder | [monitoring/M02-azure-oidc-reader.md](monitoring/M02-azure-oidc-reader.md) |
 | M03 | Hourly cron exception watcher | 4 | one-way | monitoring | W4 | todo | M01, M02, B02 | Builder | [monitoring/M03-hourly-cron-watcher.md](monitoring/M03-hourly-cron-watcher.md) |
 | M04 | Azure MCP read-only via shared azure-auth | 4 | one-way | monitoring | W4 | todo | M02, S04, POL07 | Builder | [monitoring/M04-azure-mcp-read-only.md](monitoring/M04-azure-mcp-read-only.md) |
+| O05 | Cross-repo safe outputs | 4 | two-way | safe-outputs | PR 0 | todo | O01, C04, POL12 | Cursor CLI | [safe-outputs/O05-cross-repo.md](safe-outputs/O05-cross-repo.md) |
+| Y02 | Repo-memory ledger + compaction/replay | 4 | two-way | memory | PR 0 | todo | Y01, C02 | Cursor CLI | [memory/Y02-repo-memory-ledger-compaction-replay.md](memory/Y02-repo-memory-ledger-compaction-replay.md) |
 | AO04 | Incident runbook + postmortem | 5 | two-way | agent-ops | W5 | todo | AO03, ARC04 | Builder | [agent-ops/AO04-incident-runbook-postmortem.md](agent-ops/AO04-incident-runbook-postmortem.md) |
 | AO05 | Change management | 5 | one-way | agent-ops | W5 | todo | X07, ARC05, L01 | Builder | [agent-ops/AO05-change-management.md](agent-ops/AO05-change-management.md) |
 | AO06 | Access review | 5 | two-way | agent-ops | W5 | todo | ARC03, C04 | Builder | [agent-ops/AO06-access-review.md](agent-ops/AO06-access-review.md) |
@@ -205,7 +207,6 @@ flowchart LR
 | L06 | Changeset generator | 5 | two-way | release | PR 0 | todo | L01 | Cursor CLI | [release/L06-changeset-generator.md](release/L06-changeset-generator.md) |
 | L07 | Upstream watch (blog/releases) | 5 | two-way | release | PR 0 | todo | L04 | Cursor CLI | [release/L07-upstream-watch.md](release/L07-upstream-watch.md) |
 | O04 | PR outputs + triggering CI | 5 | two-way | safe-outputs | PR 0 | todo | O01, O02, C04 | Cursor CLI | [safe-outputs/O04-pr-outputs-triggering-ci.md](safe-outputs/O04-pr-outputs-triggering-ci.md) |
-| O05 | Cross-repo safe outputs | 5 | two-way | safe-outputs | PR 0 | todo | O01, C04, POL12 | Cursor CLI | [safe-outputs/O05-cross-repo.md](safe-outputs/O05-cross-repo.md) |
 | O06 | Custom outputs + mcp-scripts | 5 | two-way | safe-outputs | PR 0 | todo | O01, S04 | Cursor CLI | [safe-outputs/O06-custom-outputs-mcp-scripts.md](safe-outputs/O06-custom-outputs-mcp-scripts.md) |
 | P01 | CentralRepoOps hub and aggregated tracking | 5 | one-way | multi-repo | W5 | todo | C02, C04, O05, G01, X01 | Builder | [multi-repo/P01-central-repo-ops-hub.md](multi-repo/P01-central-repo-ops-hub.md) |
 | P02 | Orchestrator and worker (Dependabot rollout) | 5 | one-way | multi-repo | W5 | todo | P01, C04, R01, O05 | Builder | [multi-repo/P02-orchestrator-worker-dependabot-rollout.md](multi-repo/P02-orchestrator-worker-dependabot-rollout.md) |
@@ -216,7 +217,6 @@ flowchart LR
 | T02 | Teams use cases for agentic workflows | 5 | two-way | docs | W5 | todo | T01, D02, P04 | Cursor CLI | [copilot-teams/T02-teams-use-cases.md](copilot-teams/T02-teams-use-cases.md) |
 | X02 | Staged dry-run checklist | 5 | two-way | testing | PR 0 | todo | X01, O02, G01 | Cursor CLI | [testing/X02-staged-dry-run-checklist.md](testing/X02-staged-dry-run-checklist.md) |
 | X04 | Graders/evals | 5 | two-way | testing | PR 0 | todo | B01, X01 | Cursor CLI | [testing/X04-graders-evals.md](testing/X04-graders-evals.md) |
-| Y02 | Repo-memory ledger + compaction/replay | 5 | two-way | memory | PR 0 | todo | Y01, C02 | Cursor CLI | [memory/Y02-repo-memory-ledger-compaction-replay.md](memory/Y02-repo-memory-ledger-compaction-replay.md) |
 | C07 | Engine portability matrix (Copilot primary) | 6 | two-way | core | W6 | todo | C03, C06 | Cursor CLI | [core/C07-engine-portability-matrix.md](core/C07-engine-portability-matrix.md) |
 | C08 | Runtime profiles (Docker now, microVM later) | 6 | two-way | core | W6 | todo | C03, S04 | Builder | [core/C08-runtime-profiles.md](core/C08-runtime-profiles.md) |
 | C09 | Self-hosted and ARC runners (org-ready doc) | 6 | two-way | core | W6 | todo | C08, S04 | Builder | [core/C09-self-hosted-arc-runners.md](core/C09-self-hosted-arc-runners.md) |
@@ -316,6 +316,7 @@ flowchart LR
 | M05_READ_TOKEN | Fine-grained PAT on the allowlisted svennijhuis repos: Actions read, Contents read, Issues write, nothing else. Sven sets it himself as a repo secret (one-way) | 3 |
 | P04_ASSIGN_TOKEN | Fine-grained PAT, allowlisted repos only: Issues write, Metadata read. Separate from M05_READ_TOKEN. Sven sets it himself (one-way) | 5 |
 | Copilot per repo | Open item: Copilot cloud agent enabled per target repo (Sven, one-way); the first B5 proof run decides if assign needs more scope or a second token | 5 |
+| BOARD_TOKEN | One token for the user Project board: Projects read and write on the svennijhuis user board only. Used only by deterministic jobs (P05 sync script, P14 poll pre-step), never by an agent job. Sven sets it himself (one-way). The first P05 run checks whether a fine-grained token reaches a user-owned board; if not, that run names the classic scope and Sven decides | 3 |
 | P14 poll | Exact yes to turn on the P14 30 min scheduled poll (48 runs a day count toward measured cost) | 5 |
 | PR #2 close | PO closes #2 unmerged after PR 0 with links | 3 |
 
@@ -396,7 +397,7 @@ Empty until Sven tests block 2; new PBIs get the next free id per area.
 
 **Exit criteria:** B03a value vs cost row per workflow (kill rule: 2 blocks below cost = disable). Bar H per workflow: 3 audited runs, measured AIC cost, noop pre-check proven. F01 pr-review runs manual only (`workflow_dispatch` + `/pr-review`), no push trigger; auto on push ([F01b](agent-factory/F01b-pr-review-auto-on-push.md)) waits on its 3 audited runs plus Sven's yes. Every agentPacks pin is a [C12](core/C12-agentpacks-import-contract.md) v1.1 tag (replaces `@34e1dec`). [PR #2](https://github.com/svennijhuis/agentic-workflows/pull/2) closed unmerged after PR 0, with a comment linking the replacing PBIs (C01, POL01, POL02, POL21, POL22, C12, F01, L02).
 
-**Named asks (first PBI in block that needs them):** F01b yes optional; cost cap confirmation; M05 rollout step 1 yes; M05_READ_TOKEN.
+**Named asks (first PBI in block that needs them):** F01b yes optional; cost cap confirmation; M05 rollout step 1 yes; M05_READ_TOKEN; BOARD_TOKEN (P05).
 
 ## Block 3F: findings
 
@@ -407,7 +408,7 @@ Empty until Sven tests block 3; new PBIs get the next free id per area.
 
 ## Block 4
 
-**PBIs:** M01-M04, M05 step 2 (issues on all allowlisted repos, with the multi-repo PBIs).
+**PBIs:** O05 cross-repo outputs and Y02 repo memory (both moved from B5), M01-M04, M05 step 2 (issues on all allowlisted repos, with the multi-repo PBIs). M05 step 2 blockers: O05, POL12, AO03, Y02.
 
 **What Sven can test:** Exception watcher dispatch; Azure read-only MCP.
 
@@ -424,7 +425,7 @@ Empty until Sven tests block 4; new PBIs get the next free id per area.
 
 ## Block 5
 
-**PBIs:** P01-P04, P14, O04-O06, Y02, B03-B08, L02-L07, G04-G06, D02-D07, T01, T02, X02, X04, F73, F16 (moved from B6), M05 step 3 (auto-fix risk:low via P04), AO04-AO14 (AO10 absorbs F75). First sub-block: O04, P04, F16.
+**PBIs:** P01-P04, P14, O04, O06, B03-B08, L02-L07, G04-G06, D02-D07, T01, T02, X02, X04, F73, F16 (moved from B6), M05 step 3 (auto-fix risk:low via P04), AO04-AO14 (AO10 absorbs F75). First sub-block: O04, P04, F16.
 
 **What Sven can test:** Two consumer repos on pinned tag; upgrade path; org checklist doc.
 

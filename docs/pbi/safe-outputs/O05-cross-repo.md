@@ -2,7 +2,7 @@
 - Status: todo
 - Area: safe-outputs
 - Wave: PR 0
-- Block: 5
+- Block: 4
 - Lane: Cursor CLI
 - Depends on: O01, C04, POL12
 - proof: ./scripts/verify.sh
@@ -10,6 +10,7 @@
 ## Goal
 Document target-repo, allowed-repos, and cross-repo safe-output patterns for central-run vs installed workflows.
 ## Context
+Block 4 (moved from B5): a blocker for [M05](../monitoring/M05-github-log-watcher.md) step 2 (issues on all allowlisted repos).
 Personal account uses fine-grained PAT or future GitHub App. Central exception watcher may write to target repos while workflow lives in svennijhuis/agentic-workflows (Q1).
 ## Steps
 1. Document target-repo and allowed-repos frontmatter with POL12 explicit lists.

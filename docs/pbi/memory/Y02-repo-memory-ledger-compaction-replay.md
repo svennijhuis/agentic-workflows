@@ -2,7 +2,7 @@
 - Status: todo
 - Area: memory
 - Wave: PR 0
-- Block: 5
+- Block: 4
 - Lane: Cursor CLI
 - Depends on: Y01, C02
 - proof: ./scripts/verify.sh
@@ -10,6 +10,7 @@
 ## Goal
 Document git-backed repo-memory ledger, compaction, and replay for longitudinal workflow state.
 ## Context
+Block 4 (moved from B5): holds the M05 last-run marker, so it is a blocker for [M05](../monitoring/M05-github-log-watcher.md) step 2.
 Repo memory stores structured snapshots in-repo under gh-aw conventions. Compaction and replay are experimental but inform metrics and portfolio workflows.
 ## Steps
 1. Summarize ledger specification and file layout.

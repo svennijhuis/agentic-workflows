@@ -16,7 +16,7 @@ No token of ours has `contents:write` or `pull-requests:write` in another repo. 
 2. Publish agent vs safe-output sequence diagram.
 3. Document M05 and P04 named asks for Sven (masked secrets, one-way doors).
 ## Definition of Done
-- [ ] Table lists COPILOT_GITHUB_TOKEN, GITHUB_TOKEN job, safe-output job token, GitHub App (org), Azure OIDC, M05_READ_TOKEN, P04_ASSIGN_TOKEN
+- [ ] Table lists COPILOT_GITHUB_TOKEN, GITHUB_TOKEN job, safe-output job token, GitHub App (org), Azure OIDC, M05_READ_TOKEN, P04_ASSIGN_TOKEN, BOARD_TOKEN
 - [ ] Prose states no cross-repo contents or PR write PAT
 - [ ] Mermaid sequence diagram matches gh-aw layers
 - [ ] Links to C04 auth doc when merged
@@ -76,6 +76,7 @@ sequenceDiagram
 | safe-output job token | safe-output jobs only | issues, comments, PRs within `max` | merge (POL14) | now |
 | M05_READ_TOKEN (fine-grained PAT) | repo secret in agentic-workflows, set by Sven | Actions read, Contents read, Issues write on allowlisted svennijhuis repos only | assign Copilot, contents write, PR write, repos outside allowlist | B4, one-way |
 | P04_ASSIGN_TOKEN (fine-grained PAT) | repo secret in agentic-workflows, set by Sven | Issues write, Metadata read on allowlisted repos only | Actions read, Contents read, PR create by our workflow | B5, one-way |
+| BOARD_TOKEN (fine-grained PAT; classic only if the first P05 run shows fine-grained cannot reach a user board, Sven decides) | secret set by Sven; deterministic jobs only (P05 sync script, P14 poll pre-step) | Projects read and write on the svennijhuis user board only | any repo contents, issues or PR write; use in an agent job | B3, one-way |
 | GitHub App | org later | replaces PAT, scoped per repo | anything outside install | org switch (G05) |
 | Azure OIDC federated cred | M02 | Reader on one subscription | any write | B4 |
 

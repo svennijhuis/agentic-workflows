@@ -90,7 +90,8 @@ Manual first: `workflow_dispatch` and slash commands. Each automatic `on:` event
 |---|---|---|---|
 | `agent-ok` label on improvement issue | Starts P04 issue-to-PR path (human actor) | B5 | Remove label; disable P04 trigger |
 | P04 assign (incl. M05 handoff) | Assigns Copilot cloud agent; `P04_ASSIGN_TOKEN` | B5 | Revoke or rotate token; disable workflow |
-| P14 poll enabled | 30 min `schedule` pick-up | B5 | Disable schedule trigger until Sven yes again |
+| P14 poll enabled | 30 min `schedule` pick-up; pre-step uses `BOARD_TOKEN` | B5 | Disable schedule trigger until Sven yes again |
+| `BOARD_TOKEN` secret | Projects read and write on the user board only; P05 sync and P14 pre-step, never an agent job | B3 | Revoke or rotate token |
 | F01b | `pull_request` opened/sync auto review | B3 | Remove pull_request trigger |
 | M05 rollout step 1 | Report-only issues on 1 repo | B4 | Turn off M05 workflow |
 | M05 rollout step 2 | Writes `agent:improve` on all allowlisted repos | B4 | AO03 off or shrink `m05.repos` |

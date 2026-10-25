@@ -26,7 +26,7 @@ Plan W1 starts with [X06](../testing/X06-verification-skill.md) (verification sk
 - [ ] `scripts/verify.sh` exists and runs compile strict, lock drift, actionlint, em dash scan, gitleaks, and all policy checks POL01 through POL23
 - [ ] Failure output is one line per failure: `file:line rule-id message`; on pass no failure lines; last line `N failures`; exit 0 only when N is 0
 - [ ] Verify passes on green SHA with `test/fixtures/good/` coverage
-- [ ] Verify fails on each `test/fixtures/bad/POL*.md` (one bad fixture per policy)
+- [ ] Verify fails on each `test/fixtures/bad/POL*.md` (one bad fixture per policy; POL17 is folder `test/fixtures/bad/POL17/`)
 - [ ] CI workflow calls the same script as local (when Q0 unblocks Actions billing)
 - [ ] Evidence: verify log attached for at least one green SHA on `builder/pbi-docs`
 ## Technical design

@@ -192,7 +192,7 @@ Source: [gh-aw sitemap](https://github.github.com/gh-aw/sitemap-0.xml), 2026-10-
 | MonitorOps | [patterns/monitor-ops](https://github.github.com/gh-aw/patterns/monitor-ops/) | M01 |
 | MultiRepoOps | [patterns/multi-repo-ops](https://github.github.com/gh-aw/patterns/multi-repo-ops/) | P01 + O05 |
 | OrchestratorOps | [patterns/orchestrator-ops](https://github.github.com/gh-aw/patterns/orchestrator-ops/) | P02 |
-| ProjectOps | [patterns/project-ops](https://github.github.com/gh-aw/patterns/project-ops/) | P05 user-owned Project board (auth-projects PAT) |
+| ProjectOps | [patterns/project-ops](https://github.github.com/gh-aw/patterns/project-ops/) | P05 user-owned Project board (`BOARD_TOKEN`) |
 | ResearchPlanAssignOps | [patterns/research-plan-assign-ops](https://github.github.com/gh-aw/patterns/research-plan-assign-ops/) | P04 research-plan-assign to Copilot cloud agent |
 | SpecOps | [patterns/spec-ops](https://github.github.com/gh-aw/patterns/spec-ops/) | P10 SpecOps (later) |
 | WorkQueueOps | [patterns/workqueue-ops](https://github.github.com/gh-aw/patterns/workqueue-ops/) | P11 WorkQueueOps (later) |
