@@ -18,7 +18,7 @@ Fold the 8 open findings (1 high, 6 medium, 1 low) of the Cursor review on PR #5
 ## Context
 PR #5 merged as b3e05e1 with these 8 findings open. Product Owner waived the Cursor gate for #5 only (docs, nothing turned on), on the condition that this PBI lands first.
 
-Gate rule: no SM01 to SM07 build PR starts before SM08 is done (this PBI merged and moved to `docs/pbi/done/`). SM01, SM04, SM05 and SM07 link here. SM02, SM03 and SM06 are untouched by the findings, but they depend on SM01, SM04, SM05 or SM07, so the gate reaches them too.
+Gate rule (split check 2026-10-26): the rows of this PBI live in the build PBIs SM01, SM04a, SM05a, SM05b, SM05c and SM07a; each build PR carries its rows and cites them in its fix map. SM08 closes (moves to `docs/pbi/done/`) once SM01, SM04a, SM05a, SM05b, SM05c and SM07a have merged. SM01, SM04, SM05 and SM07 link here. SM02, SM03 and SM06 are untouched by the findings, but they depend on SM01, SM04, SM05 or SM07, so the gate reaches them too.
 
 Each finding was checked against the repo at b3e05e1. All 8 hold. Finding 4 is narrowed (see its row): the evidence is `policies/checks/POL25.sh:31` and `:40` (`yes_for ... && continue` skips every trigger test) and `policies/POL25.yml:13` (`sven_yes: []`, the documented PA1 yes path for agentic schedules). Dropping `sven_yes` fully would remove that PA1 path, which is out of scope for a smoke PBI. So `sven_yes` keeps lifting only the agentic `workflow_dispatch`-only rule, and the `deployment_status` fail, the `workflow_call` allowlist and the agentic `workflow_call` fail run before it. `sven_yes` never lifts `workflow_call` on an agentic file.
 
