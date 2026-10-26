@@ -8,8 +8,14 @@
 - proof: gh aw compile --dir workflows --strict workflows/p14-board-pick-up.md && ./scripts/verify.sh
 - door: one-way
 - one-way gate: Sven's exact yes required before schedule trigger stays on (B5). Rollback: disable schedule workflow; AO03 kill var for P14
+- triage: park (schedule off until B5 Sven yes)
+- feedback: gh aw compile --dir workflows --strict workflows/p14-board-pick-up.md && ./scripts/verify.sh
+- harness: gh-aw engine
+- review-input: diff + this PBI + DoD (+ linked spec) + PR description, never builder session logs
+- kind: script
+- Source: PA8 (pre-link PBI from the PR #3 backlog, origin in its Sources) https://github.com/svennijhuis/agentic-workflows/pull/3
 ## Goal
-Poll every 30 minutes (`schedule`) because GitHub Actions has no Projects v2 event trigger. Deterministic pre-step: `gh api graphql` lists Ready items without a linked PR (0 AIC when Ready is empty). Only cards Sven moved to Ready; hand issue to [P04](P04-research-plan-assign-copilot.md), WIP 1, max 1 pick-up per day. Draft PR links back to the card. Revisit webhook at org switch ([G05](../governance/G05-org-only-appendix.md)).
+Poll every 30 minutes (`schedule`) because GitHub Actions has no Projects v2 event trigger. Deterministic pre-step: `gh api graphql` lists Ready items without a linked PR (0 AIC when Ready is empty). Only cards Sven moved to Ready; hand issue to [P04](P04-research-plan-assign-copilot.md), WIP 1, max 1 pick-up per day. Draft PR links back to the card. Revisit webhook at org switch ([G05](../done/G05-org-only-appendix.md)).
 ## Context
 [LP01](../loops/LP01-delivery-loop.md) pick-up step. The board pick-up is a 30 min poll with a deterministic noop pre-step (0 AIC when Ready is empty). It is a scheduled workflow, so it stays OFF until Sven's exact yes (one-way door, B5), and its Actions minutes (48 runs a day) count toward the measured cost.
 ## Steps
@@ -29,6 +35,7 @@ Poll every 30 minutes (`schedule`) because GitHub Actions has no Projects v2 eve
 - [ ] X07 benchmark score at or above baseline (5+ cases)
 ## Technical design
 - Components and files: `workflows/p14-board-pick-up.md`, Project id from masked var, shared WIP counter with P04
+- Module boundary: the GraphQL Ready pre-step is the interface; P04 assign is the deep handoff behind it
 - Interfaces: `schedule` cron; deterministic `gh api graphql`; dispatch or reusable workflow call to P04 assign job
 - Sequence:
 

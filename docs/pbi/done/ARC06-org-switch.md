@@ -8,10 +8,16 @@
 - Depends on: G00
 - proof: Open this file on GitHub; mermaid and table render; links to G05 and G00 resolve
 - door: two-way
+- triage: spec (architecture page; G05 link refresh)
+- feedback: open on GitHub; mermaid and table render; links to G05, G00, and ORG-ONLY resolve
+- harness: none (docs)
+- review-input: diff + this PBI + DoD (+ linked spec) + PR description, never builder session logs
+- kind: skill
+- Source: PA8 (pre-link PBI from the PR #3 backlog, moved to done in PR #4, origin in its Sources) https://github.com/svennijhuis/agentic-workflows/pull/3
 ## Goal
 List what changes when moving from personal `svennijhuis` to the target org (G05): only the boxes in the table and diagram, not workflow files, policies, or pins.
 ## Context
-Only these boxes change at the org switch (G05). Workflow files, policies, and pins stay the same, which is the point of G00. Detail checklist: [G05-org-only-appendix](../governance/G05-org-only-appendix.md). Target structure: [G00-org-target-structure](G00-org-target-structure.md).
+Only these boxes change at the org switch (G05). Workflow files, policies, and pins stay the same, which is the point of G00. Detail checklist: [G05-org-only-appendix](G05-org-only-appendix.md). Target structure: [G00-org-target-structure](G00-org-target-structure.md).
 ## Steps
 1. Publish personal vs org comparison table.
 2. Publish migration mermaid (PAT to App, rulesets, secrets, board, teams).
@@ -22,7 +28,8 @@ Only these boxes change at the org switch (G05). Workflow files, policies, and p
 - [ ] Links to G05 and G00 governance pages
 - [ ] Diagram renders on GitHub
 ## Technical design
-- Components and files: `docs/pbi/architecture/ARC06-org-switch.md`; [G05](../governance/G05-org-only-appendix.md) runbook; GitHub App install (later).
+- Components and files: `docs/pbi/done/ARC06-org-switch.md`; [G05](G05-org-only-appendix.md) runbook; [governance/ORG-ONLY.md](../../../governance/ORG-ONLY.md); GitHub App install (later).
+- Module boundary: the personal-vs-org table is the interface; org cutover steps live in G05 and ORG-ONLY only
 - Interfaces: org secrets, org rulesets, org Projects, team `@org/aw-maintainers`.
 - Sequence:
 
@@ -76,7 +83,8 @@ Q2 org name; execute G05 steps in order when ready.
 ## Cost
 0 AIC
 ## Sources
-- [G05-org-only-appendix](../governance/G05-org-only-appendix.md)
+- [G05-org-only-appendix](G05-org-only-appendix.md)
+- [governance/ORG-ONLY.md](../../../governance/ORG-ONLY.md)
 - [G00-org-target-structure](G00-org-target-structure.md)
 - Strategy pr0-adds/architecture.md ARC06 (2026-10-25)
 - Plan v3.8 G00 (agentic-workflows-pbi-plan.md)
