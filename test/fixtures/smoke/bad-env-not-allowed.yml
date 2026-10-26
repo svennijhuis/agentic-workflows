@@ -1,0 +1,8 @@
+scenarios:
+  - id: orders-list
+    env: dev
+    method: GET
+    path: /api/orders
+    auth: none
+    expect:
+      status: 200

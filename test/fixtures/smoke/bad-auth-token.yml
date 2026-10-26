@@ -1,0 +1,10 @@
+scenarios:
+  - id: orders-list
+    env: tst
+    method: GET
+    path: /api/orders
+    auth: none
+    headers:
+      X-Request-Id: FAKE0000000000.FAKE0000000000.FAKE0000000000
+    expect:
+      status: 200

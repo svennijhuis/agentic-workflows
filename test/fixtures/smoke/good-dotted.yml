@@ -1,0 +1,9 @@
+# SM01 good fixture: dots in a path with short segments are not a token shape.
+scenarios:
+  - id: version
+    env: acc
+    method: GET
+    path: /v1.2.3
+    auth: none
+    expect:
+      status: 200
