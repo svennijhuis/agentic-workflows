@@ -86,14 +86,17 @@ run_lines() {
 
 # errexit_hits FILE ID: hit when a step or job sets continue-on-error (any value), or a step shell:,
 #   job defaults.run.shell or workflow defaults.run.shell is set and not bash or sh (both run with -e
-#   on GitHub) and names no -e flag or errexit, or names a +e flag (Cursor 5655973880 medium 3).
+#   on GitHub) and names no -e flag or errexit, or names a +e flag (Cursor 5655973880 medium 3). An env:
+#   (workflow, job or step) that sets PATH, BASH_ENV, ENV, SHELLOPTS or BASHOPTS is a hit too: it can
+#   swap sha256sum or turn errexit off before the first line runs.
 errexit_hits() {
   local f=$1 id=$2 r l k v; r=$(rel "$f")
   while read -r l k v; do
     [ -n "$l" ] || continue
+    case "$k" in PATH | BASH_ENV | ENV | SHELLOPTS | BASHOPTS) hit "$r" "$l" "$id" "env: sets $k, so the step may not run the commands or errexit it shows"; continue ;; esac
     if [ "$k" = continue-on-error ]; then hit "$r" "$l" "$id" "continue-on-error is set ($v), so a failed check does not fail the job"; continue; fi
     case "$v" in bash | sh) continue ;; esac
     if grep -qE -- '(^|[[:space:]])(-[A-Za-z]*e[A-Za-z]*|-o[[:space:]]+errexit)([[:space:]]|$)' <<<"$v" && ! grep -qE -- '(^|[[:space:]])\+[A-Za-z]*e' <<<"$v"; then continue; fi
     hit "$r" "$l" "$id" "shell: $v runs without -e, so a failed command does not stop the step"
-  done < <(yq '[.. | select((path | join(".")) | test("^(defaults\\.run\\.shell|jobs\\.[^.]+\\.(continue-on-error|defaults\\.run\\.shell|steps\\.[0-9]+\\.(continue-on-error|shell)))$"))] | .[] | (line | tostring) + " " + (key | tostring) + " " + (. | tostring)' "$f" 2>/dev/null)
+  done < <(yq '[.. | select((path | join(".")) | test("^((env|jobs\\.[^.]+\\.env|jobs\\.[^.]+\\.steps\\.[0-9]+\\.env)\\.(PATH|BASH_ENV|ENV|SHELLOPTS|BASHOPTS)|defaults\\.run\\.shell|jobs\\.[^.]+\\.(continue-on-error|defaults\\.run\\.shell|steps\\.[0-9]+\\.(continue-on-error|shell)))$"))] | .[] | (line | tostring) + " " + (key | tostring) + " " + (. | tostring)' "$f" 2>/dev/null)
 }

@@ -46,7 +46,7 @@ check_aw() { # FILE: 0 when it parses (later checks may read it)
 # `echo "<pinned sha256>  FILE" | sha256sum -c -` (Cursor 5655973880 high 2). A set +e or set +o errexit
 # (quoted or not) earlier in that block is a hit (Tester 2 6421487873 item 2, Cursor 5655973880 medium 3).
 check_verify() { # VERIFY_YML AW_JSON
-  local f=$1 aw=$2 r t u s o pin rows j st l top txt want found urls="" k jj ss ll tt xx; r=$(rel "$f")
+  local f=$1 aw=$2 r t u s o pin rows j st l top txt want found urls="" files="" k jj ss ll tt xx a b c e ok; r=$(rel "$f")
   if ! yq -e 'tag == "!!map"' "$f" >/dev/null 2>&1; then hit "$r" 1 POL27 "parse error: not a YAML map"; return; fi
   errexit_hits "$f" POL27
   rows=$(run_lines "$f")
@@ -73,13 +73,24 @@ check_verify() { # VERIFY_YML AW_JSON
       if [ "$k" != 1 ]; then found="check line $ll sits inside if, a loop, a heredoc or a continuation, so it may never run"; continue; fi
       xx=$(while IFS=$'\037' read -r a b c _ e; do [ "$a" = "$j" ] && [ "$b" = "$st" ] && [ "$c" -lt "$ll" ] && grep -qE -- "$SET_E" <<<"$e" && echo "$c"; done <<<"$rows" | head -1)
       if [ -n "$xx" ]; then found="check line $ll runs after set +e (line $xx), so a failed sha256sum -c does not stop the step"; continue; fi
-      found=ok; break
+      found=ok; files="$files $j:$st:$ll:$o"; break
     done <<<"$rows"
     case "$found" in
       ok) urls="$urls $u" ;;
       "") hit "$r" "$l" POL27 "$t download has no top-level line in the same run: block after it that is exactly: $want (C14)" ;;
       *) hit "$r" "$l" POL27 "$t download $found (C14)" ;;
     esac
+  done <<<"$rows"
+  # tar and chmod +x only touch a file that a checked download wrote earlier in the same block, so a file
+  # from the repo or an unchecked step never becomes a tool on PATH.
+  while IFS=$'\037' read -r j st l top txt; do
+    case "$txt" in "tar "* | "chmod +x "*) ;; *) continue ;; esac
+    o=$(awk '{print $3}' <<<"$txt"); ok=0
+    for e in $files; do
+      IFS=: read -r a b c xx <<<"$e"
+      if [ "$a" = "$j" ] && [ "$b" = "$st" ] && [ "$c" -lt "$l" ] && [ "$xx" = "$o" ]; then ok=1; break; fi
+    done
+    [ "$ok" = 1 ] || hit "$r" "$l" POL27 "${txt%% *} $o: not a file a checked curl -o wrote earlier in this run: block (C14)"
   done <<<"$rows"
   for t in $TOOLS; do
     u=$(jq -r --arg t "$t" '.tools[$t].url // "" | strings' "$aw" 2>/dev/null)

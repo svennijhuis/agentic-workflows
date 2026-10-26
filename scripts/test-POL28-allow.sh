@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # VF02d1 proof for POL28 run_allow, run in temp copies of the tree (offline, no writes here).
-# Fail closed: a missing, empty, non-list or broken run_allow makes POL28 exit 1. Mutation: run_allow
+# Fail closed: a missing, empty, non-list or broken run_allow or setup_allow makes POL28 exit 1. Mutation: run_allow
 # [".*"] makes POL23 report the allowlist-only POL28 bad cases as passing (the allowlist is load bearing).
 # Prints `file:line POL28T message` per failed case and `N failures`; exit 0 only when N is 0.
 set -uo pipefail
@@ -29,10 +29,12 @@ case_ allow-string "$P" 1 "yq -i '.run_allow = \".*\"' $C" 'POL28 run_allow miss
 case_ allow-null "$P" 1 "yq -i '.run_allow = null' $C" 'POL28 run_allow missing or not a list (fail closed)'
 case_ allow-blank-entry "$P" 1 "yq -i '.run_allow = [\"\"]' $C" 'POL28 run_allow entry is not a non-empty regex string (fail closed)'
 case_ allow-bad-regex "$P" 1 "yq -i '.run_allow = [\"(\"]' $C" 'POL28 run_allow entry is not a valid regex'
+case_ setup-deleted "$P" 1 "yq -i 'del(.setup_allow)' $C" 'POL28 setup_allow missing or not a list (fail closed)'
+case_ setup-empty "$P" 1 "yq -i '.setup_allow = []' $C" 'POL28 setup_allow empty (fail closed)'
 case_ config-broken "$P" 1 "printf 'run_allow: [\n' >> $C" 'POL28 run_allow unreadable (yq error)'
 M=()
 for b in ci-unknown-run.yml ci-bash-c-actionlint.yml ci-if-actionlint.yml ci-go-run-actionlint.yml ci-npx-shellcheck.yml \
-  ci-sudo-u-root-actionlint.yml ci-env-u-path-actionlint.yml ci-xargs-i-actionlint.yml ci-yaml-actionlint.yaml; do
+  ci-sudo-u-root-actionlint.yml ci-env-u-path-actionlint.yml ci-xargs-i-actionlint.yml ci-yaml-actionlint.yaml ci-place-binary.yml; do
   M+=("POL23 POL28 passes bad case $b (tautological)")
 done
 case_ mutation-allow-all policies/checks/POL23.sh 1 "yq -i '.run_allow = [\".*\"]' $C" "${M[@]}"
