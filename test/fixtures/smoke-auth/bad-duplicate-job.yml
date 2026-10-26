@@ -1,0 +1,26 @@
+# Bad: job key smoke twice; the first has id-token: write and environment prd, yq keeps only the last (Reviewer #17 r1 case 2)
+name: smoke-auth fixture
+on:
+  workflow_call:
+    inputs:
+      env:
+        type: string
+        required: true
+  workflow_dispatch:
+    inputs:
+      env:
+        type: choice
+        options: [tst, acc]
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    environment: prd
+    steps:
+      - run: echo "smoke"
+  smoke:
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - run: echo "smoke"
