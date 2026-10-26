@@ -157,6 +157,7 @@ flowchart LR
 | VF01 | One verify entry point: scripts/verify.sh for CI, local gate and every agent | 2 | two-way | verify | W2 | done | C01, POL02, POL17, POL23, X06, C14 | Builder | [done/VF01.md](done/VF01.md) |
 | VF02 | Verify workflow template for consumer repos (API and frontend) | 2 | one-way | verify | W2 | todo | VF01, POL01, POL03, C12, G00a, X06b | Builder | [verify/VF02.md](verify/VF02.md) |
 | VF02a | VF02 part: POL01 yml whole-file walk, parse error, yml roots | 2 | two-way | verify | W2 | done | none | Builder | [done/VF02a-pol01-extension.md](done/VF02a-pol01-extension.md) |
+| VF02d1 | VF02 part: gate job run allowlist (POL27 and POL28) | 2 | two-way | verify | W2 | done | VF01 | Builder | [done/VF02d1.md](done/VF02d1.md) |
 | AO01 | Retro workflow | 3 | one-way | agent-ops | W3 | todo | B01, AO02, X07 | Builder | [agent-ops/AO01-retro-workflow.md](agent-ops/AO01-retro-workflow.md) |
 | AO02 | Agent scorecards | 3 | two-way | agent-ops | W3 | todo | B01, AO10 | Builder | [agent-ops/AO02-agent-scorecards.md](agent-ops/AO02-agent-scorecards.md) |
 | B01 | Logs + audit + session runbook | 3 | one-way | observability | PR 0 | todo | C01 | Cursor CLI | [observability/B01-logs-audit-session-runbook.md](observability/B01-logs-audit-session-runbook.md) |
@@ -196,6 +197,7 @@ flowchart LR
 | SM03 | Post-deploy smoke runner for tst and acc (no AI) | 3 | one-way | smoke | W3 | todo | SM01, SM04, SM05, SM07 | Builder | [smoke/SM03.md](smoke/SM03.md) |
 | SM04 | Smoke token: GitHub OIDC to Entra to APIM validate-jwt to backend | 3 | one-way | smoke | W3 | todo | SM07 | Builder | [smoke/SM04.md](smoke/SM04.md) |
 | SM05 | POL03 + POL25 allow workflow_call for the smoke runner only | 3 | two-way | smoke | W3 | todo | POL25, POL03, POL23, scripts/lib/on-triggers.sh | Builder | [smoke/SM05.md](smoke/SM05.md) |
+| SM05a | SM05 part: deterministic_triggers lib, POL03 workflow_call allowlist, case folders | 3 | two-way | smoke | W3 | done | VF01 | Builder | [done/SM05a-det-triggers-pol03.md](done/SM05a-det-triggers-pol03.md) |
 | SM06 | Smoke reporting on PR or release, ping on fail | 3 | two-way | smoke | W3 | todo | SM03 | Builder | [smoke/SM06.md](smoke/SM06.md) |
 | SM07 | Setup steps only Sven does | 3 | one-way | smoke | W3 | todo | none | Builder | [smoke/SM07.md](smoke/SM07.md) |
 | SM07a | SM07 part: smoke/SETUP.md checklist and check-smoke-setup.sh | 3 | two-way | smoke | W3 | done | VF01 | Builder | [done/SM07a-setup-check.md](done/SM07a-setup-check.md) |
@@ -377,7 +379,7 @@ Related: [agentPacks PR #80](https://github.com/svennijhuis/agentPacks/pull/80) 
 - [_template.md](_template.md) PBI template (technical design required)
 - [decisions/](decisions/) ADRs
 - [done/](done/) completed PBI moves (Block 1 from PR #4)
-- [verify/](verify/README.md): VF01-VF02 one verify entry point and the consumer verify template (Block 2; VF01 done in #10 with POL27-POL29, VF02 todo, VF02a POL01 part done in #9). New rule POL30 with VF02.
+- [verify/](verify/README.md): VF01-VF02 one verify entry point and the consumer verify template (Block 2; VF01 done in #10 with POL27-POL29, VF02 todo, VF02a POL01 part done in #9, VF02d1 POL27 and POL28 run allowlist done in #13). New rule POL30 with VF02.
 
 
 ## Block 0
