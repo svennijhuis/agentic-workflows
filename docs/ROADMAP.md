@@ -149,6 +149,7 @@ Next: TPL02, lane 3, after #15 merges.
 - Goal: every policy and the verify loops find workflow files the same way (`*.yml`, `*.yaml`, `*.lock.yml`).
 - Why: the same bug hit 3 times (#14 POL03 loop, verify.sh fixture loops, check-smoke), each time because a script had its own `*.yml` glob.
 - Steps in order: shared lib plus unit test, switch every loop to it, POL23 case for local globs, delete the dead globs.
+- Also in WF01 scope: a shared `is_dec_int` helper in `scripts/lib` (hex where an int is expected, seen in SM01a `status: 0x12C` and #16 `steps: 0x2`). Its note is in WF01.md.
 
 | PBI | Status | File |
 |---|---|---|
@@ -160,11 +161,13 @@ Next: lane 1, after SM05c and before VF02b.
 
 | Item | Where it is written | Lane, after |
 |---|---|---|
-| WF01 shared lister | `docs/pbi/verify/WF01.md` (in #18) | lane 1, after SM05c |
-| SM01b check-smoke carry (Cursor 5657706637) | `docs/pbi/smoke/SM01b.md` (in #18) | lane 2, after SM01a |
+| WF01 shared lister, plus `is_dec_int` | `docs/pbi/verify/WF01.md` (in #18) | lane 1, after SM05c |
+| SM01b check-smoke carry (Cursor 5657706637). Also next session: #15 Cursor medium status cases `bad-status-plus.yml` (`status: +200`) and `bad-status-underscore.yml` (`2_00`), each must exit 1 (raw text vs `^[1-5][0-9]{2}$`), plus the SM01a row 1 pipe fix | `docs/pbi/smoke/SM01b.md` (in #18) | lane 2, after SM01a |
 | SM01a row 1 `\|` fix | parked, to apply to `docs/pbi/smoke/SM01a.md` after #15 merges | lane 3 |
 | SM04b token hygiene | [docs/pbi/smoke/SM04.md](pbi/smoke/SM04.md) | lane 2, after SM04a (#17) |
+| SM04 todo: #17 Reviewer lows. (1) Duplicate key false hit on two inline maps on one line, like `steps: [{run: a}, {run: b}]`. (2) `id-token: Write` with a capital W exits 0 | not in a repo file yet; add to [docs/pbi/smoke/SM04.md](pbi/smoke/SM04.md) | lane 2, with SM04b |
 | SM05b, SM05c | [docs/pbi/smoke/SM05.md](pbi/smoke/SM05.md) | lane 1, after SM05a (#14) |
+| Duplicate PBI files: G00, G05 and TPL01 also sit in `docs/pbi/core/` next to their `done/` copies | `docs/pbi/core/G00-org-target-structure.md`, `docs/pbi/core/G05-org-only-appendix.md`, `docs/pbi/core/TPL01-one-pbi-template.md` | lane 3, remove only after Sven's yes; this page links the `done/` copies |
 | VF02d carries, 25 items | VF02d section of [docs/pbi/verify/VF02.md](pbi/verify/VF02.md) (older rows); the new rows land with #18 round 1, not pushed at 11700aa | lane 1, VF02d |
 
 VF02d carries 21 to 25 come from the #13 waivers: a second job running verify without checkout (21), `timeout-minutes: 0` passes (22), curl short options let POL27 accept any curl line (23, Cursor high), tar flags and archive not pinned (24), `setup_allow` not in the mutation proof (25).
@@ -194,8 +197,8 @@ VF02d carries 21 to 25 come from the #13 waivers: a second job running verify wi
 | Issue | Seen in | Shared fix |
 |---|---|---|
 | Workflow files listed as `*.yml` only, so `*.yaml` and lock files are missed | #14, verify.sh loops, check-smoke | WF01 `scripts/lib/wf-files.sh` |
-| Hex where an int is expected (`0x12C`, `0x2`) | SM01a, #16 | shared `is_dec_int` helper in `scripts/lib` (candidate, no PBI id yet) |
-| YAML anchors, aliases and duplicate keys slip past checks | #13, #16, #17 | shared `yaml_strict` precheck in `scripts/lib` (candidate, no PBI id yet) |
+| Hex where an int is expected (`0x12C`, `0x2`) | SM01a, #16 | shared `is_dec_int` helper in `scripts/lib`, part of WF01 |
+| YAML anchors, aliases and duplicate keys slip past checks | #13, #16, #17 | shared `yaml_strict` precheck in `scripts/lib` (candidate, no PBI id yet; next session assigns one) |
 | Denylists keep getting bypassed | #10, #13 | allowlists (VF02d1 run allowlist) |
 
 ## 7. Rules of the road
@@ -208,9 +211,12 @@ VF02d carries 21 to 25 come from the #13 waivers: a second job running verify wi
 
 ## 8. Next session start list
 
+Other open PR, no decision yet: [#7](https://github.com/svennijhuis/agentic-workflows/pull/7) "Bump gh-aw compiler pin to v0.93.5". State from gh at 20:48 (Amsterdam, UTC+1): open, draft, head `6242cf2`, branch `aw-upstream/2026-10-26`, no checks reported, mergeable unknown, last updated 08:37 (Amsterdam, UTC+1).
+
+
 1. Check #14, #15, #16, #17, #18 for gate state on their current heads. Whichever of #14 and #18 merges second renumbers SM05 steps 6 to 9.
 2. Apply the SM01a row 1 `|` fix after #15 merges.
 3. Lane 1: SM05b. Lane 2: SM04b (after #17) or SM01a.
 4. Lane 3: G05a and TPL02 when free.
-5. Open the shared `is_dec_int` and `yaml_strict` question with PO: own PBI ids or fold into WF01.
+5. Give `yaml_strict` a PBI id with PO (`is_dec_int` is already in WF01).
 6. Sven only, any time: SM07b.
