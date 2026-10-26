@@ -1,0 +1,10 @@
+name: Bad POL01 fixture, verify template that does not parse
+on:
+  workflow_call:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@0000000000000000000000000000000000000000
+        with: [persist-credentials: false
+      - run: ./scripts/verify.sh
