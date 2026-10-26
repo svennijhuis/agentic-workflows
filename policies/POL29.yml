@@ -1,0 +1,9 @@
+id: POL29
+title: 'Gate self-test: compile, actionlint and lock drift turn red'
+rule: 'Each bad case is itself the violation the gate must catch: a compile error (compile-error/), an actionlint error (actionlint-error/), a non-empty lock diff after compile (lock-drift/) or a PBI with no - proof: line (pbi-docs-finding/). POL29 copies each case to a temp dir, runs git init, git add -A and git commit, runs the gate steps of scripts/lib/gate-steps.sh and scripts/check-pbi-docs.sh (at the temp repo root) there, prints each finding as file:line POL29 and exits 1. The good fixture prints nothing and exits 0. POL29 exits 2 only when git or the compiler cannot run in the temp repo.'
+why: 'A check you have never seen fail proves nothing; the gate steps need a bad input that must turn red.'
+check: policies/checks/POL29.sh
+bad_fixture: test/fixtures/bad/POL29/
+good_fixture: test/fixtures/good/POL29/
+pbi: docs/pbi/done/VF01.md
+pins: .github/aw.json

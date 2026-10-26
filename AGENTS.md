@@ -24,7 +24,7 @@ Shared imports must stay under `workflows/shared/` because gh-aw v0.93.4 rejects
 ./scripts/verify.sh
 ```
 
-Must end with `0 failures`. How-to: [docs/how-to/verify-workflow.md](docs/how-to/verify-workflow.md). Skill: [.github/skills/verify-aw/SKILL.md](.github/skills/verify-aw/SKILL.md).
+Must end with `0 failures` (exit 0). Exit 1 is a finding to fix; exit 2 is needs-human (a missing or wrong tool, see `.github/aw.json`). How-to: [docs/how-to/verify-workflow.md](docs/how-to/verify-workflow.md). Skill: [.github/skills/verify-aw/SKILL.md](.github/skills/verify-aw/SKILL.md).
 
 Q0: GitHub Actions billing is blocked. Attach the verify log on the exact commit SHA to the PR.
 
@@ -49,5 +49,5 @@ Link [policies/POLnn.yml](policies/) for rules. Do not restate policy text in pr
 
 ## Policies and backlog
 
-- Policies: `policies/POL01.yml` through `policies/POL23.yml`
+- Policies: `policies/POL01.yml` through `policies/POL29.yml`
 - PBI index: [docs/pbi/README.md](docs/pbi/README.md)

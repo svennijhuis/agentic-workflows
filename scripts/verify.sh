@@ -1,42 +1,74 @@
 #!/usr/bin/env bash
-# The one gate (C01). Local and CI run the same script. No args, run from anywhere in the repo.
+# The one gate (C01, VF01). Local, CI and every agent run the same script. No args, run from anywhere in the repo.
 # Output contract (gist A3): one line per failure `file:line RULE message`, section headers start with `# `,
-# last line is always `N failures`. Exit 0 only when N is 0. A missing tool is a failure, never a skip.
+# last line is always `N failures`.
+# Exit codes (PA5): 0 ok, 1 failed (a real finding), 2 needs-human (a tool missing or at the wrong version, or a
+# producer that could not run). An exit 2 line reads `file:line VERIFY needs-human <reason>`. Nothing is skipped.
 set -uo pipefail
-cd "$(git rev-parse --show-toplevel)" || exit 2
-N=0; OUT=$(mktemp); trap 'rm -f "$OUT"' EXIT
+ROOT=$(git rev-parse --show-toplevel 2>/dev/null) || { echo "scripts/verify.sh:1 VERIFY needs-human not inside a git repo"; echo "1 failures"; exit 2; }
+cd "$ROOT" || exit 2
+# shellcheck source=lib/gate-steps.sh
+. scripts/lib/gate-steps.sh
+N=0; OUT=$(mktemp); WT=$(mktemp -d); trap 'rm -rf "$OUT" "$WT"' EXIT
 fail() { echo "$1"; N=$((N + 1)); }
-count() { local l; while IFS= read -r l; do [ -n "$l" ] && fail "$l"; done; }
+stop2() { echo "$N failures"; exit 2; }
+human() { fail "$1"; stop2; }
+in_wt() { (cd "$WT" && "$@"); }
 
-echo "# tools"
-PIN_AW=$(jq -r '.["gh-aw"]' .github/aw.json 2>/dev/null || echo unknown)
-for t in git gh jq yq actionlint gitleaks shellcheck; do command -v "$t" >/dev/null 2>&1 || fail "scripts/verify.sh:1 VERIFY missing: $t"; done
+# produce NAME CMD...: run one producer into a temp file and keep its own exit code (VF01 gap row 16).
+#   (a) a `VERIFY needs-human` line, or status 2: print it and exit 2 at once, even with other lines
+#   (b) non-zero with no output line: exit 2 at once
+#   (c) otherwise every line is a finding and is counted
+produce() {
+  local name=$1 rc l; shift
+  "$@" >"$OUT"; rc=$?
+  if grep -q 'VERIFY needs-human' "$OUT"; then
+    while IFS= read -r l; do fail "$l"; done < <(grep 'VERIFY needs-human' "$OUT"); stop2
+  fi
+  grep -q . "$OUT" || [ "$rc" -eq 0 ] || human "scripts/verify.sh:1 VERIFY needs-human $name exited $rc with no finding"
+  [ "$rc" -ne 2 ] || human "scripts/verify.sh:1 VERIFY needs-human $name exited 2: $(grep -m1 . "$OUT")"
+  while IFS= read -r l; do [ -n "$l" ] && fail "$l"; done <"$OUT"
+}
+
+# version_of TOOL: X.Y.Z the installed TOOL reports, empty when it cannot say
+version_of() {
+  case "$1" in
+    actionlint) actionlint -version ;;
+    gitleaks) gitleaks version ;;
+    *) "$1" --version ;;
+  esac 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1
+}
+
+echo "# tools (pins in .github/aw.json; git, gh and jq are runner-provided)"
+for t in git gh jq; do command -v "$t" >/dev/null 2>&1 || fail "scripts/verify.sh:1 VERIFY needs-human missing: $t"; done
+[ "$N" -eq 0 ] || stop2
+jq -e '(.["gh-aw"] | type == "string") and (.tools | type == "object")' .github/aw.json >/dev/null 2>&1 \
+  || human ".github/aw.json:1 VERIFY needs-human cannot read the gh-aw pin and tools: map"
+for t in $(jq -r '.tools | keys[]' .github/aw.json); do
+  pin=$(jq -r --arg t "$t" '.tools[$t].version' .github/aw.json); line=$(grep -nF -m1 "\"$t\"" .github/aw.json | cut -d: -f1)
+  if ! command -v "$t" >/dev/null 2>&1; then fail "scripts/verify.sh:1 VERIFY needs-human missing: $t"; continue; fi
+  have=$(version_of "$t")
+  [ "$have" = "$pin" ] || fail ".github/aw.json:${line:-1} VERIFY needs-human $t is ${have:-unknown}, pin is $pin (install tools.$t.url)"
+done
+PIN_AW=$(jq -r '.["gh-aw"]' .github/aw.json)
 have_aw=$(gh aw version 2>/dev/null | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' | head -1)
-[ "$have_aw" = "$PIN_AW" ] || fail ".github/aw.json:1 C06 gh-aw is ${have_aw:-missing}, pin is $PIN_AW (gh extension install github/gh-aw --pin $PIN_AW)"
-[ "$N" -eq 0 ] || { echo "$N failures"; exit 1; }
+[ "$have_aw" = "$PIN_AW" ] || fail ".github/aw.json:2 VERIFY needs-human gh-aw is ${have_aw:-missing}, pin is $PIN_AW (gh extension install github/gh-aw --pin $PIN_AW)"
+[ "$N" -eq 0 ] || stop2
+
+echo "# working copy (compile, actionlint on locks and lock drift run in a temp copy; the real tree is never written)"
+gate_snapshot "$ROOT" "$WT" || human "scripts/verify.sh:1 VERIFY needs-human cannot copy the working tree into a temp repo"
 
 echo "# compile (gh aw compile --dir workflows --strict --actionlint)"
-gh aw compile --dir workflows --strict --actionlint >"$OUT" 2>&1; rc=$?
-before=$N
-count < <(grep -oE 'workflows/[^ :]+\.(md|lock\.yml):[0-9]+(:[0-9]+)?: (error|warning).*' "$OUT" | sed -E 's#^(workflows/[^:]+):([0-9]+)(:[0-9]+)?: #\1:\2 COMPILE #')
-count < <(grep -oE 'workflows/[^ :]+\.md: warning: .*' "$OUT" | sed -E 's#^(workflows/[^:]+): warning: #\1:1 COMPILE warning: #')
-if grep -q 'Actionlint Summary' "$OUT" && ! grep -q 'No issues found' "$OUT"; then
-  count < <(grep -oE '[^ ]+\.lock\.yml:[0-9]+:[0-9]+: .*' "$OUT" | sed -E 's#^([^:]+):([0-9]+):[0-9]+: #\1:\2 ACTIONLINT #')
-  [ "$N" -gt "$before" ] || fail "workflows:1 ACTIONLINT issues reported by gh aw compile --actionlint"
-fi
-[ "$rc" -eq 0 ] || [ "$N" -gt "$before" ] || fail "workflows:1 COMPILE gh aw compile exited $rc: $(grep -m1 -iE 'error|failed' "$OUT")"
+produce compile in_wt gate_compile
 
 echo "# lock drift (POL17)"
-count < <({ git diff --name-only -- workflows; git ls-files --others --exclude-standard -- workflows; } | sed -E 's#$#:1 POL17 compile changed this file (run gh aw compile and commit the result)#')
+produce "lock drift" in_wt gate_drift
 
 echo "# actionlint .github/workflows"
-for y in .github/workflows/*.yml; do
-  [ -e "$y" ] || continue; case "$y" in *.lock.yml) continue ;; esac
-  count < <(actionlint -no-color -oneline "$y" | sed -E 's#^([^:]+):([0-9]+):[0-9]+: #\1:\2 ACTIONLINT #')
-done
+produce actionlint gate_actionlint
 
 echo "# shellcheck"
-count < <(shellcheck -f gcc -x -P SCRIPTDIR scripts/*.sh scripts/lib/*.sh policies/checks/*.sh 2>&1 | sed -E 's#^([^:]+):([0-9]+):[0-9]+: (.*)#\1:\2 SHELLCHECK \3#')
+produce shellcheck gate_shellcheck
 
 echo "# import-schema fixtures (C05)"
 for kind in good bad; do
@@ -50,24 +82,24 @@ done
 echo "# policies (every POLnn except POL23, repo mode)"
 for c in policies/checks/POL[0-9][0-9].sh; do
   [ "$(basename "$c")" = POL23.sh ] && continue
-  count < <(bash "$c")
+  produce "$(basename "$c" .sh)" bash "$c"
 done
 
 echo "# POL23 no tautological checks (every check vs its bad and good fixture)"
-count < <(bash policies/checks/POL23.sh)
+produce POL23 bash policies/checks/POL23.sh
 
 echo "# PBI docs (gist A1 proof/door fields, links, dashes)"
-count < <(bash scripts/check-pbi-docs.sh)
+produce check-pbi-docs.sh bash scripts/check-pbi-docs.sh
 
 echo "# PBI template (TPL01 + ARC08, new or changed PBIs only)"
 T=test/fixtures/template
 bash scripts/check-pbi-template.sh "$T/good.md" >/dev/null || fail "$T/good.md:1 TPL01 good template fixture fails"
 for b in "$T"/bad-*.md; do bash scripts/check-pbi-template.sh "$b" >/dev/null && fail "$b:1 TPL01 bad template fixture passes (tautological)"; done
-count < <(bash scripts/check-pbi-template.sh)
+produce check-pbi-template.sh bash scripts/check-pbi-template.sh
 
 echo "# PR template (G02a owner, architecture summary, questions for owner)"
 P=test/fixtures/pr-body
-count < <(bash scripts/check-pr-body.sh --template .github/pull_request_template.md)
+produce check-pr-body.sh bash scripts/check-pr-body.sh --template .github/pull_request_template.md
 bash scripts/check-pr-body.sh "$P/good.md" >/dev/null || fail "$P/good.md:1 G02a good PR body fixture fails"
 for b in "$P"/bad-*.md; do bash scripts/check-pr-body.sh "$b" >/dev/null && fail "$b:1 G02a bad PR body fixture passes (tautological)"; done
 

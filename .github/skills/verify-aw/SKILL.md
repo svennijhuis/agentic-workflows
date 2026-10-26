@@ -36,6 +36,12 @@ Format: `file:line RULE message`
 
 Fix the file at that path. Re-run `./scripts/verify.sh` until the last line is `0 failures`.
 
+## Exit codes
+
+- `0`: green, last line `0 failures`.
+- `1`: failed. Each finding is a `file:line RULE message` line. Fix it and re-run.
+- `2`: needs-human. The gate could not run, so the result is inconclusive, never a pass. The line reads `file:line VERIFY needs-human <reason>`: a tool from `.github/aw.json` is missing or at the wrong version, or a producer crashed with no finding. Do not work around it. Stop and ask a human to install the pinned tool (`.github/aw.json` `tools:` has the version, url and sha256) or to look at the crashed producer, then re-run.
+
 ## One policy check on one file
 
 ```bash
