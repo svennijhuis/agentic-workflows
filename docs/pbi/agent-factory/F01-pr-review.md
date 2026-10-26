@@ -25,7 +25,7 @@ Engine: `copilot` with `COPILOT_GITHUB_TOKEN` (personal fine-grained PAT). `copi
 2. Set caps per C03 (suggested 50 / 200 daily, unverified) in workflow frontmatter (POL02).
 3. Staged/report-only outputs first (POL03); deterministic pre-check noop when empty diff.
 4. Triggers: `workflow_dispatch` and slash `/pr-review` only until F01b approved.
-5. Run `scripts/verify.sh` on PR SHA; compile with pinned gh-aw extension v0.93.4.
+5. Run `scripts/verify.sh` on PR SHA; compile with pinned gh-aw extension v0.93.5.
 6. Block 2: X01 staged smoke run, no PR state change.
 7. Block 3: three audited manual runs; measured AIC in Evidence; then enable as default manual review path.
 8. On merge: remove `squad-review.md` and list every removed file in PR description (settled decision).
