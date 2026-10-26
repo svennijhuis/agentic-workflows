@@ -1,6 +1,6 @@
 # G05: Org switch checklist (org-only features)
 - Status: done
-- PR: #11
+- PR: #12
 - Area: governance
 - Wave: W5
 - Block: 5

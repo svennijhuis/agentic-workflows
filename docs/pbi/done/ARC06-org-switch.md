@@ -13,7 +13,7 @@
 - harness: none (docs)
 - review-input: diff + this PBI + DoD (+ linked spec) + PR description, never builder session logs
 - kind: skill
-- Source: PA8 (pre-link PBI, G05 link refresh in PR #11, origin in its Sources) https://github.com/svennijhuis/agentic-workflows/pull/11
+- Source: PA8 (pre-link PBI, G05 link refresh in PR #12, origin in its Sources) https://github.com/svennijhuis/agentic-workflows/pull/12
 ## Goal
 List what changes when moving from personal `svennijhuis` to the target org (G05): only the boxes in the table and diagram, not workflow files, policies, or pins.
 ## Context

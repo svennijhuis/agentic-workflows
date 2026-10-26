@@ -13,7 +13,7 @@
 - harness: gh-aw engine
 - review-input: diff + this PBI + DoD (+ linked spec) + PR description, never builder session logs
 - kind: skill
-- Source: PA8 (pre-link PBI, G05 link refresh in PR #11, origin in its Sources) https://github.com/svennijhuis/agentic-workflows/pull/11
+- Source: PA8 (pre-link PBI, G05 link refresh in PR #12, origin in its Sources) https://github.com/svennijhuis/agentic-workflows/pull/12
 ## Goal
 Poll every 30 minutes (`schedule`) because GitHub Actions has no Projects v2 event trigger. Deterministic pre-step: `gh api graphql` lists Ready items without a linked PR (0 AIC when Ready is empty). Only cards Sven moved to Ready; hand issue to [P04](P04-research-plan-assign-copilot.md), WIP 1, max 1 pick-up per day. Draft PR links back to the card. Revisit webhook at org switch ([G05](../done/G05-org-only-appendix.md)).
 ## Context
