@@ -5,7 +5,7 @@
 - Block: 3
 - Lane: Builder
 - Depends on: SM01a
-- proof: each of the 6 bad fixtures in Context makes `scripts/check-smoke.sh` exit 1 with one hit and `good-query-enc-limit.yml` exits 0; the SM01a check (before this PBI) gives exactly 6 failures on that bad set; `./scripts/verify.sh` ends with `0 failures` twice; both PBI checks print nothing; gitleaks clean (FAKE values allowlisted by path); POL23 untouched
+- proof: each of the 6 bad fixtures in Context makes `scripts/check-smoke.sh` exit 1 with one hit and `good-query-enc-limit.yml` exits 0; on the SM01a check (before this PBI) each of those 6 bad fixtures exits 0, so the mutation run records 6 missed hits; `bad-query-double-encoded.yml` (SM01a, `?%256cimit=1`) still exits 1; `./scripts/verify.sh` ends with `0 failures` twice; both PBI checks print nothing; gitleaks clean (FAKE values allowlisted by path); POL23 untouched
 - door: two-way
 - triage: build (lane 2 after SM01a, same file `scripts/check-smoke.sh`)
 - feedback: `scripts/check-smoke.sh` exits 1 on each bad case and 0 on each good case in the DoD; `./scripts/verify.sh` ends with `0 failures` (proof)
@@ -29,7 +29,7 @@ Fix map:
 | 3 | f3 medium | `/%2F/evil.example/a` and `/%5C/evil.example/a` decode to a leading `//` or `/\` (host switch); `?api_key%3D` plus a FAKE value decodes to a secret key; a broken `%` escape | decode the path and the query once, then rerun the path rule (a leading `//` or any `\` is a hit) and the query key allowlist; a `%` that is not followed by two hex digits is a hit (fail closed) |
 | 4 | f6 low | none: SM01a row 3 already covers `exists: "true"` | no fix here; DoD only checks `bad-exists-string.yml` still exits 1 |
 
-Bad cases (FAKE only, zeros), each exits 1 after SM01a and before SM01b gives 0:
+Bad cases (FAKE only, zeros). After SM01a each of the six exits 0; after SM01b each exits 1 with one hit; the mutation run on the pre-SM01b script records six missed hits:
 1. FAKE token-shaped value after `#` on the value line (`bad-comment-tail.yml`)
 2. a PEM private key header line only, no body (`bad-pem-header.yml`)
 3. path `/%2F/evil.example/a` (`bad-path-enc-slash.yml`)
@@ -38,17 +38,20 @@ Bad cases (FAKE only, zeros), each exits 1 after SM01a and before SM01b gives 0:
 6. path with a broken escape `/a%zz` (`bad-path-bad-escape.yml`)
 
 Good case: query `?limit%3D1` (`good-query-enc-limit.yml`) exits 0, because one decode gives the allowed key `limit` (SM01a row 6 and 13), so it must not become a false hit.
+
+Decode once in total (Reviewer FAIL 6425915794 item 8): the query is percent-decoded exactly once. The row 3 decode replaces SM01a's key decode (SM01a row 13) and does not add to it, so `bad-query-double-encoded.yml` (`?%256cimit=1`, one decode gives `%6cimit`, which still holds `%`) still exits 1.
 ## Steps
 1. Extend `scripts/check-smoke.sh` per the fix map (rows 1 to 3; row 4 has no code change).
 2. Add the 6 bad and 1 good fixtures; the existing verify loop picks them up.
-3. Run `./scripts/verify.sh` twice; mutation run: the SM01a check-smoke (before SM01b) gives exactly 6 failures on the new bad set, one per case.
+3. Run `./scripts/verify.sh` twice; mutation run: on the SM01a check-smoke (before SM01b) each of the 6 new bad fixtures exits 0, so the run records 6 missed hits, one per case.
 ## Definition of Done
 - [ ] Row 1: `bad-comment-tail.yml` exits 1 with one hit
 - [ ] Row 2: `bad-pem-header.yml` exits 1 with one hit
 - [ ] Row 3: `bad-path-enc-slash.yml`, `bad-path-enc-backslash.yml`, `bad-query-enc-eq.yml` and `bad-path-bad-escape.yml` each exit 1 with one hit; `good-query-enc-limit.yml` exits 0
 - [ ] Row 4: SM01a `bad-exists-string.yml` still exits 1 (no second fix)
 - [ ] All SM01a fixtures keep their exit code
-- [ ] Mutation proof counts only the 6 cases that still exit 0 after SM01a: the pre-SM01b check gives 6 failures
+- [ ] Mutation proof counts only the 6 cases that still exit 0 after SM01a: on the pre-SM01b check each exits 0 (6 missed hits), after SM01b each exits 1 with one hit
+- [ ] The query is decoded exactly once in total (row 3 replaces the SM01a key decode): `good-query-enc-limit.yml` exits 0 and SM01a `bad-query-double-encoded.yml` (`?%256cimit=1`) still exits 1
 - [ ] `./scripts/verify.sh` ends with `0 failures` twice; both PBI checks print nothing; gitleaks clean (FAKE values allowlisted by path); POL23 untouched
 - [ ] Two fix rounds max; anything open after goes to the list
 ## Technical design
@@ -76,7 +79,7 @@ sequenceDiagram
 - Proof: same as proof: above
 - Door: two-way (script and fixtures)
 ## Evidence
-Gate log comment, per-case exit table, mutation run (SM01a check-smoke gives 6 failures on the new bad set)
+Gate log comment, per-case exit table, mutation run (on the SM01a check-smoke each of the 6 new bad fixtures exits 0, 6 missed hits)
 ## Flow
 ```mermaid
 flowchart LR
@@ -91,3 +94,4 @@ flowchart LR
 - Cursor 5657706637 on [PR #11](https://github.com/svennijhuis/agentic-workflows/pull/11) at 4781aac
 - Product Owner GO 6425192168
 - [PR #18 Cursor review 5657888041, findings 2 and 3](https://github.com/svennijhuis/agentic-workflows/pull/18)
+- [PR #18 Cursor review 5658106584, finding 4; Reviewer FAIL 6425915794 item 8](https://github.com/svennijhuis/agentic-workflows/pull/18#issuecomment-6425915794)
