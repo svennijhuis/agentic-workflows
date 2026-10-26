@@ -5,7 +5,7 @@
 - Block: 3
 - Lane: Builder
 - Depends on: SM01a
-- proof: each listed bad fixture makes `scripts/check-smoke.sh` exit 1 with one hit; each listed good fixture exits 0; `./scripts/verify.sh` ends with `0 failures` twice; both PBI checks print nothing; gitleaks clean (FAKE values allowlisted by path); POL23 untouched
+- proof: each of the 6 bad fixtures in Context makes `scripts/check-smoke.sh` exit 1 with one hit and `good-query-enc-limit.yml` exits 0; the SM01a check (before this PBI) gives exactly 6 failures on that bad set; `./scripts/verify.sh` ends with `0 failures` twice; both PBI checks print nothing; gitleaks clean (FAKE values allowlisted by path); POL23 untouched
 - door: two-way
 - triage: build (lane 2 after SM01a, same file `scripts/check-smoke.sh`)
 - feedback: `scripts/check-smoke.sh` exits 1 on each bad case and 0 on each good case in the DoD; `./scripts/verify.sh` ends with `0 failures` (proof)
@@ -14,48 +14,41 @@
 - kind: script (deterministic)
 - Source: PA8 (no D row; Cursor 5657706637 on PR #11 at 4781aac, Product Owner GO 6425192168) https://github.com/svennijhuis/agentic-workflows/pull/11
 ## Goal
-`check-smoke` fails closed on every value shape and every encoded path, with no false duplicate hits.
+`check-smoke` fails closed on comment tails, PEM headers and every encoded path, with no false hit on an encoded allowed key.
 ## Context
 Lane 2 after SM01a (same file `scripts/check-smoke.sh`). Filed in the next lane 3 docs PR with [WF01](../verify/WF01.md). SM01a (in PR #15) stays frozen; this is its follow-up so PR #15 keeps its SHA.
 
-Already in SM01a, not repeated here: f2 (hex status), f8 (stale README).
+Already in SM01a (PR #15 head 368f837), not repeated here (Cursor 5657888041 f3 on PR #18): f2 (hex status, row 1), f8 (stale README, row 4), f1 multi-line and leading-space values (row 2), f6 `exists: "true"` (row 3, `bad-exists-string.yml`), f5 GitHub refresh token and OpenAI style key prefixes (row 14), f4 two maps on one line (row 16, `good-json-oneline.yml`), f7 exact id match (row 17). SM01b keeps only what SM01a does not name.
 
 Fix map:
 
-| # | Cursor | Gap (exits 0 today, or wrong 1) | Fix |
+| # | Cursor 5657706637 | Gap after SM01a (exits 0) | Fix |
 |---|---|---|---|
-| 1 | f1 high | secret on line 2+ of a multi-line value; leading-space value; value after `#` comment | scan each value line after trim, and the raw line incl. comment tail |
-| 2 | f5 med | a FAKE GitHub refresh token prefix (g h r underscore), a FAKE OpenAI style key prefix (s k dash), a PEM private key header line | add to prefix list; PEM header anywhere is a hit |
-| 3 | f3 med | `%2F`, `%5C` in path, `%3D` in query | decode once, then rerun path and query checks; `//`, `\` in decoded path are hits |
-| 4 | f4 med | two maps on one line reuse a key, flagged as dup | dup key check per map node (yq), not per line |
-| 5 | f6 low | `exists: "true"` accepted | bool only (overlaps SM01a f3: verify, no double fix) |
-| 6 | f7 low | dup id matches substring (`list` vs `orders list`) | exact match on full id |
+| 1 | f1 high (rest) | a FAKE token-shaped value after a YAML `#` comment on the value line | scan the raw line including the comment tail, not only the parsed scalar |
+| 2 | f5 medium (rest) | a PEM private key header line, no body | a PEM private key header anywhere in the file is a hit |
+| 3 | f3 medium | `/%2F/evil.example/a` and `/%5C/evil.example/a` decode to a leading `//` or `/\` (host switch); `?api_key%3D` plus a FAKE value decodes to a secret key; a broken `%` escape | decode the path and the query once, then rerun the path rule (a leading `//` or any `\` is a hit) and the query key allowlist; a `%` that is not followed by two hex digits is a hit (fail closed) |
+| 4 | f6 low | none: SM01a row 3 already covers `exists: "true"` | no fix here; DoD only checks `bad-exists-string.yml` still exits 1 |
 
-Bad cases (FAKE only, zeros):
-1. multi-line `equals` with a FAKE GitHub personal access token prefix (g h p underscore) on line 2
-2. value with leading space before a FAKE GitHub personal access token prefix (g h p underscore)
-3. FAKE token-shaped value after `#` on the value line
-4. a FAKE GitHub refresh token prefix (g h r underscore)
-5. a FAKE OpenAI style key prefix (s k dash)
-6. a PEM private key header line only, no body
-7. path `/a%2F%2Fb`
-8. path `/a%5Cb`
-9. query `?limit%3D1`
-10. `exists: "true"`
+Bad cases (FAKE only, zeros), each exits 1 after SM01a and before SM01b gives 0:
+1. FAKE token-shaped value after `#` on the value line (`bad-comment-tail.yml`)
+2. a PEM private key header line only, no body (`bad-pem-header.yml`)
+3. path `/%2F/evil.example/a` (`bad-path-enc-slash.yml`)
+4. path `/%5C/evil.example/a` (`bad-path-enc-backslash.yml`)
+5. query `?api_key%3D` plus a FAKE value (`bad-query-enc-eq.yml`)
+6. path with a broken escape `/a%zz` (`bad-path-bad-escape.yml`)
 
-Good cases: 2 maps on one line with same key (exit 0), ids `list` and `orders list` (exit 0).
+Good case: query `?limit%3D1` (`good-query-enc-limit.yml`) exits 0, because one decode gives the allowed key `limit` (SM01a row 6 and 13), so it must not become a false hit.
 ## Steps
-1. Extend `scripts/check-smoke.sh` per the fix map (f1, f5, f3, f4, f6, f7).
-2. Add bad and good fixtures for every row in Context; wire the verify loop.
-3. Run `./scripts/verify.sh` twice; mutation run (old check-smoke gives at least 10 failures on the new bad set).
+1. Extend `scripts/check-smoke.sh` per the fix map (rows 1 to 3; row 4 has no code change).
+2. Add the 6 bad and 1 good fixtures; the existing verify loop picks them up.
+3. Run `./scripts/verify.sh` twice; mutation run: the SM01a check-smoke (before SM01b) gives exactly 6 failures on the new bad set, one per case.
 ## Definition of Done
-- [ ] f1: multi-line value, leading-space value and comment-tail value each exit 1 with one hit
-- [ ] f5: refresh prefix, OpenAI style prefix and PEM header line each exit 1 with one hit
-- [ ] f3: encoded path and query cases exit 1; decoded `//` and `\` in path exit 1
-- [ ] f4: duplicate key per map node (yq), not per line; two maps on one line with same key exits 0
-- [ ] f6: `exists: "true"` exits 1; bool `true` still passes where SM01a already allows it
-- [ ] f7: ids `list` and `orders list` together exit 0; substring dup id match removed
-- [ ] Each bad fixture exits 1 with exactly one hit; each good fixture exits 0
+- [ ] Row 1: `bad-comment-tail.yml` exits 1 with one hit
+- [ ] Row 2: `bad-pem-header.yml` exits 1 with one hit
+- [ ] Row 3: `bad-path-enc-slash.yml`, `bad-path-enc-backslash.yml`, `bad-query-enc-eq.yml` and `bad-path-bad-escape.yml` each exit 1 with one hit; `good-query-enc-limit.yml` exits 0
+- [ ] Row 4: SM01a `bad-exists-string.yml` still exits 1 (no second fix)
+- [ ] All SM01a fixtures keep their exit code
+- [ ] Mutation proof counts only the 6 cases that still exit 0 after SM01a: the pre-SM01b check gives 6 failures
 - [ ] `./scripts/verify.sh` ends with `0 failures` twice; both PBI checks print nothing; gitleaks clean (FAKE values allowlisted by path); POL23 untouched
 - [ ] Two fix rounds max; anything open after goes to the list
 ## Technical design
@@ -75,7 +68,7 @@ sequenceDiagram
   C-->>V: exit 0 or 1
 ```
 
-- Failure modes: a gap that exits 0 today becomes a named hit; overlapping SM01a f3 (`exists` bool) is not fixed twice
+- Failure modes: a gap that exits 0 after SM01a becomes a named hit; a broken `%` escape fails closed; rows SM01a already names are not fixed twice
 - Security: FAKE-only fixtures; no literal secret prefixes in markdown (POL20); prefix list matches SM01 families where they overlap
 - Observability: one `file:line SMOKE` line per hit in verify log
 - Cost: 0
@@ -83,7 +76,7 @@ sequenceDiagram
 - Proof: same as proof: above
 - Door: two-way (script and fixtures)
 ## Evidence
-Gate log comment, per-case exit table, mutation run (old check-smoke gives at least 10 failures on the new bad set)
+Gate log comment, per-case exit table, mutation run (SM01a check-smoke gives 6 failures on the new bad set)
 ## Flow
 ```mermaid
 flowchart LR
@@ -97,3 +90,4 @@ flowchart LR
 ## Sources
 - Cursor 5657706637 on [PR #11](https://github.com/svennijhuis/agentic-workflows/pull/11) at 4781aac
 - Product Owner GO 6425192168
+- [PR #18 Cursor review 5657888041, findings 2 and 3](https://github.com/svennijhuis/agentic-workflows/pull/18)
