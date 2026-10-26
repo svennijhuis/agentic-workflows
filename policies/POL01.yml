@@ -1,6 +1,6 @@
 id: POL01
 title: 'Pinned versions only'
-rule: 'Remote imports and skills pin a 40-hex SHA or a vX.Y.Z tag. plugins: pin a vX.Y.Z tag only (C12 v1.1). agentPacks paths must be on the aw.yml agentpacks.allowlist. Actions pin a full SHA; a docker:// image pins @sha256:<64-hex>; a ./ local action is fine. A .md file is read by its frontmatter; a .yml or .yaml file is walked whole, and one that does not parse is a hit (parse error). Repo mode always walks .github/workflows/*.yml and *.yaml, plus every yml_roots glob (each *.yml glob also matches *.yaml). A missing, empty, non-list or unreadable yml_roots key, or an entry that does not end in .yml or .yaml, is a hit; a glob with no match is not.'
+rule: 'Remote imports and skills pin a 40-hex SHA or a vX.Y.Z tag. plugins: pin a vX.Y.Z tag only (C12 v1.1). agentPacks paths must be on the aw.yml agentpacks.allowlist. Actions pin a full SHA; a docker:// image pins @sha256:<64-hex>; a ./ local action is fine. A .md file is read by its frontmatter; a .yml or .yaml file is walked whole, and one that does not parse is a hit (parse error). Repo mode always walks .github/workflows/*.yml and *.yaml, plus every yml_roots glob (each glob matches both .yml and .yaml, lock files included). A missing, empty, non-list or unreadable yml_roots key, or an entry that does not end in .yml or .yaml, is a hit; a glob with no match is not.'
 why: 'A branch ref changes under you. A plugins: pin at a main SHA loads zero agents (C12 correction).'
 check: policies/checks/POL01.sh
 bad_fixture: test/fixtures/bad/POL01.md
@@ -19,7 +19,7 @@ agentpacks_allowlist:
   - 'plugins/squad/commands/squad-review.md'
   - 'plugins/squad/skills/squad'
   - 'plugins/squad'
-# Repo-mode yml roots added to the always-on .github/workflows/*.yml (VF02a). *.lock.yml is skipped.
+# Repo-mode yml roots added to the always-on .github/workflows/*.yml (VF02a). Lock files are walked too.
 yml_roots:
   - '.github/workflows/*.yml'
   - 'workflows/shared/verify/*.yml'

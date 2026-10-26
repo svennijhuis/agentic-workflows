@@ -5,14 +5,14 @@ set -uo pipefail
 cd "$(git rev-parse --show-toplevel)" || exit 2
 N=0; V=.github/workflows/verify.yml; C=policies/POL01.yml
 
-# case NAME WANT_EXIT WANT_TEXT SETUP: run POL01 repo mode in a fresh copy after SETUP
+# case NAME WANT_EXIT WANT_TEXT SETUP [WANT_HITS]: run POL01 repo mode in a fresh copy after SETUP
 case_() {
-  local name=$1 want=$2 text=$3 setup=$4 t out rc
+  local name=$1 want=$2 text=$3 setup=$4 hits=${5:-} t out rc
   t=$(mktemp -d)
   git ls-files -co --exclude-standard -z | xargs -0 cp --parents -t "$t"
   out=$(cd "$t" && eval "$setup" && bash policies/checks/POL01.sh 2>&1); rc=$?
   rm -rf "$t"
-  if [ "$rc" -ne "$want" ] || ! grep -qF -- "$text" <<<"$out"; then
+  if [ "$rc" -ne "$want" ] || ! grep -qF -- "$text" <<<"$out" || { [ -n "$hits" ] && [ "$(grep -c ' POL01 ' <<<"$out")" -ne "$hits" ]; }; then
     echo "scripts/test-POL01-roots.sh:1 POL01T $name: want exit $want with '$text', got exit $rc: ${out//$'\n'/ | }"; N=$((N + 1))
   else echo "ok $name (exit $rc)"; fi
 }
@@ -51,6 +51,14 @@ case_ docker-digest 0 '' \
   "$DK docker://alpine@sha256:$(printf '0%.0s' {1..64}) > .github/workflows/d.yml"
 case_ local-action 0 '' "$DK ./local-action > .github/workflows/d.yml"
 case_ root-not-yml 1 "$C:23 POL01 yml_roots entry does not end in .yml or .yaml" "yq -i '.yml_roots = [\"workflows/shared/verify/*\"]' $C"
+case_ lock-yml-in-github 1 '.github/workflows/evil.lock.yml:6 POL01 action not pinned to a full SHA: actions/checkout@v4' \
+  "$D > .github/workflows/evil.lock.yml"
+case_ lock-yaml-in-github 1 '.github/workflows/evil.lock.yaml:6 POL01 action not pinned to a full SHA: actions/checkout@v4' \
+  "$D > .github/workflows/evil.lock.yaml"
+case_ yaml-root-walks-yml-twin 1 'workflows/shared/verify/verify.yml:13 POL01 action not pinned to a full SHA: actions/checkout@v4' \
+  "yq -i '.yml_roots = [\"workflows/shared/verify/*.yaml\"]' $C && mkdir -p workflows/shared/verify && cp test/fixtures/bad/POL01-verify-template-tag.yml workflows/shared/verify/verify.yml"
+case_ twin-roots-walk-once 1 'workflows/shared/verify/verify.yaml:13 POL01 action not pinned to a full SHA: actions/checkout@v4' \
+  "yq -i '.yml_roots = [\"workflows/shared/verify/*.yml\", \"workflows/shared/verify/*.yaml\"]' $C && mkdir -p workflows/shared/verify && cp test/fixtures/bad/POL01-verify-template-tag.yaml workflows/shared/verify/verify.yaml" 1
 
 # File mode: a .yaml by name takes the whole-file walk (POL23 globs only bad/POLnn-*.md|yml, so it runs here).
 for x in test/fixtures/bad/POL01-*.yaml; do

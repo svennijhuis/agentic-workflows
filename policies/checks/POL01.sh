@@ -56,7 +56,7 @@ for f in $(targets "$@"); do
   while IFS= read -r u; do uses_hit "$f" "$u"; done < <(q "$f" 'del(.imports) | .. | select(tag == "!!map" and has("uses")) | .uses')
 done
 
-ROOTS=('.github/workflows/*.yml') # always on; policies/POL01.yml yml_roots can only add roots; *.yml globs also walk *.yaml
+ROOTS=('.github/workflows/*.yml') # always on; policies/POL01.yml yml_roots can only add roots; each glob walks .yml and .yaml, lock files too
 
 add_yml_roots() { # a missing, empty, non-list or unreadable yml_roots is a hit, never fewer roots
   local c="$POL_ROOT/policies/POL01.yml" l t
@@ -75,9 +75,9 @@ if repo_mode "$@"; then
   add_yml_roots
   declare -A SEEN=()
   for g in "${ROOTS[@]}"; do
-    gy=$g; case "$g" in *.yml) gy=${g%.yml}.yaml ;; esac
-    for y in "$POL_ROOT"/$g "$POL_ROOT"/$gy; do
-      [ -e "$y" ] || continue; case "$y" in *.lock.yml|*.lock.yaml) continue ;; esac
+    case "$g" in *.yml) g=${g%.yml} ;; *.yaml) g=${g%.yaml} ;; esac
+    for y in "$POL_ROOT"/$g.yml "$POL_ROOT"/$g.yaml; do
+      [ -e "$y" ] || continue
       [ -n "${SEEN[$y]:-}" ] && continue; SEEN[$y]=1
       yml_walk "$y"
     done
