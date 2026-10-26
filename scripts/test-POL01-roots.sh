@@ -42,6 +42,15 @@ case_ always-on-yaml 1 '.github/workflows/d.yaml:6 POL01 action not pinned to a 
   "yq -i 'del(.yml_roots)' $C && $D > .github/workflows/d.yaml"
 case_ verify-template-yaml 1 'workflows/shared/verify/verify.yaml:13 POL01 action not pinned to a full SHA: actions/checkout@v4' \
   'mkdir -p workflows/shared/verify && cp test/fixtures/bad/POL01-verify-template-tag.yaml workflows/shared/verify/verify.yaml'
+DK='printf "on: workflow_dispatch\njobs:\n  d:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: %s\n"'
+case_ docker-tag 1 '.github/workflows/d.yml:6 POL01 docker image not pinned to @sha256:<64-hex>: docker://alpine:3.20' \
+  "$DK docker://alpine:3.20 > .github/workflows/d.yml"
+case_ docker-no-digest 1 'POL01 docker image not pinned to @sha256:<64-hex>: docker://alpine' \
+  "$DK docker://alpine > .github/workflows/d.yml"
+case_ docker-digest 0 '' \
+  "$DK docker://alpine@sha256:$(printf '0%.0s' {1..64}) > .github/workflows/d.yml"
+case_ local-action 0 '' "$DK ./local-action > .github/workflows/d.yml"
+case_ root-not-yml 1 "$C:23 POL01 yml_roots entry does not end in .yml or .yaml" "yq -i '.yml_roots = [\"workflows/shared/verify/*\"]' $C"
 
 # File mode: a .yaml by name takes the whole-file walk (POL23 globs only bad/POLnn-*.md|yml, so it runs here).
 for x in test/fixtures/bad/POL01-*.yaml; do

@@ -29,8 +29,12 @@ check_ref() { # FILE KIND REF
   fi
 }
 
-uses_hit() { # FILE USES
-  case "$2" in ""|./*|docker://*) return 0 ;; esac
+uses_hit() { # FILE USES: ./ local is fine, docker:// needs @sha256:<64-hex>, the rest a 40-hex SHA
+  case "$2" in ""|./*) return 0 ;; esac
+  if [[ "$2" == docker://* ]]; then
+    [[ "$2" =~ @sha256:[0-9a-f]{64}$ ]] || hit "$(rel "$1")" "$(fline "$1" "$2")" POL01 "docker image not pinned to @sha256:<64-hex>: $2"
+    return 0
+  fi
   [[ "$2" =~ $SHA ]] || hit "$(rel "$1")" "$(fline "$1" "$2")" POL01 "action not pinned to a full SHA: $2"
 }
 
@@ -62,6 +66,8 @@ add_yml_roots() { # a missing, empty, non-list or unreadable yml_roots is a hit,
   [ "$(yq '.yml_roots | length' "$c")" -gt 0 ] || { hit policies/POL01.yml "$l" POL01 "yml_roots empty"; return; }
   [ "$(yq '[.yml_roots[] | select(tag != "!!str" or . == "")] | length' "$c")" -eq 0 ] \
     || { hit policies/POL01.yml "$l" POL01 "yml_roots entry is not a glob string"; return; }
+  [ "$(yq '[.yml_roots[] | select(test("\\.ya?ml$") | not)] | length' "$c")" -eq 0 ] \
+    || { hit policies/POL01.yml "$l" POL01 "yml_roots entry does not end in .yml or .yaml"; return; }
   mapfile -t -O "${#ROOTS[@]}" ROOTS < <(yq '.yml_roots[]' "$c")
 }
 
