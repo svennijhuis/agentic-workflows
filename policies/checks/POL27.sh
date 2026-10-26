@@ -31,21 +31,27 @@ check_aw() { # FILE: 0 when it parses (later checks may read it)
 }
 
 check_verify() { # VERIFY_YML AW_JSON
-  local f=$1 aw=$2 r t u s l pin; r=$(rel "$f")
+  local f=$1 aw=$2 r t u s o l pin code; r=$(rel "$f")
   if ! yq -e 'tag == "!!map"' "$f" >/dev/null 2>&1; then hit "$r" 1 POL27 "parse error: not a YAML map"; return; fi
+  # Comments do not count: a url, sha256 or check that only sits after # is not installed or checked
+  # (Cursor 5655409212 medium 1). sed keeps the line count, so line numbers still match the file.
+  code=$(sed -E 's/(^|[[:space:]])#.*$//' "$f")
   while IFS= read -r l; do
     u=$(grep -oE 'https://[^[:space:]"|]+' <<<"${l#*:}" | head -1)
     t=$(jq -r --arg u "$u" '.tools // {} | to_entries[] | select(.value.url == $u) | .key' "$aw" 2>/dev/null | head -1)
     if [ -z "$t" ]; then hit "$r" "${l%%:*}" POL27 "curl downloads ${u:-an unnamed url}, not a tools: url in .github/aw.json"; continue; fi
     s=$(jq -r --arg t "$t" '.tools[$t].sha256' "$aw")
-    grep -qE "$s .*sha256sum -c" "$f" || hit "$r" "${l%%:*}" POL27 "$t download has no sha256sum -c check for its pinned sha256 (C14)"
-  done < <(grep -nE '(^|[[:space:]])curl[[:space:]]' "$f")
+    o=$(grep -oE -- '(^|[[:space:]])-o[[:space:]]+[^[:space:]]+' <<<"${l#*:}" | head -1 | awk '{print $2}')
+    if [ -z "$o" ]; then hit "$r" "${l%%:*}" POL27 "$t curl has no -o file to check (C14)"; continue; fi
+    grep -F -- "$s" <<<"$code" | grep -F 'sha256sum -c' | grep -qF -- "$o" \
+      || hit "$r" "${l%%:*}" POL27 "$t download has no sha256sum -c line naming its pinned sha256 and $o (C14)"
+  done < <(grep -nE '(^|[[:space:]])curl[[:space:]]' <<<"$code")
   for t in $TOOLS; do
     u=$(jq -r --arg t "$t" '.tools[$t].url // "" | strings' "$aw" 2>/dev/null)
-    [ -n "$u" ] && ! grep -qF -- "$u" "$f" && hit "$r" 1 POL27 "does not install the $t pin from .github/aw.json"
+    [ -n "$u" ] && ! grep -qF -- "$u" <<<"$code" && hit "$r" 1 POL27 "does not install the $t pin from .github/aw.json"
   done
   pin=$(jq -r '.["gh-aw"] // ""' "$aw" 2>/dev/null)
-  grep -qE "gh extension install github/gh-aw --pin $pin([[:space:]]|$)" "$f" || hit "$r" "$(gline "$f" 'gh-aw')" POL27 "does not install gh-aw at the pin $pin"
+  grep -qE "gh extension install github/gh-aw --pin $pin([[:space:]]|$)" <<<"$code" || hit "$r" "$(gline "$f" 'gh-aw')" POL27 "does not install gh-aw at the pin $pin"
 }
 
 check_pair() { # AW_JSON|"" VERIFY_YML|""
