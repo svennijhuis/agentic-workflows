@@ -44,7 +44,7 @@ allowed() { # TEXT SETUP(0|1): true when TEXT matches one run_allow (or, when SE
 }
 
 check_workflow() { # FILE
-  local f=$1 r steps n i line run u l txt setup=0 has_gate=0; r=$(rel "$f")
+  local f=$1 r steps n i line run l txt setup=0 has_gate=0; r=$(rel "$f")
   [ "$(basename "$f")" = verify.yml ] && setup=1
   if ! steps=$(yq -o json -I0 '[(.jobs // {}) | .[] | (.steps // []) | .[] | select(has("run")) | {"line": (.run | line), "run": .run}]' "$f" 2>/dev/null) \
     || [ "$(yq 'tag' "$f" 2>/dev/null)" != '!!map' ]; then

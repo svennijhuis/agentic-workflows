@@ -153,9 +153,10 @@ shape_hits() {
   l=$(yq '[.. | select(anchor != "" or tag == "")] | .[0] | line' "$f" 2>/dev/null)
   if [ -n "$l" ] && [ "$l" != null ] && [ "$l" != 0 ]; then hit "$r" "$l" "$id" "YAML anchor or alias, so a value may come from a node no check reads"; fi
   local js rows
-  js=$(yq -o json -I0 'explode(.) | .__line = 1 | with(.jobs | select(tag == "!!map") | .[] | select(tag == "!!map"); .__line = line) | with(.jobs | select(tag == "!!map") | .[] | select(tag == "!!map") | .steps | select(tag == "!!seq") | .[] | select(tag == "!!map"); .__line = line)' "$f" 2>/dev/null) \
-    && [ "$(jq -r type <<<"$js" 2>/dev/null)" = object ] && rows=$(jq -r "$SHAPE_JQ" <<<"$js" 2>/dev/null) \
-    || { hit "$r" 1 "$id" "workflow shape unreadable (not a YAML map, or the shape check failed), fail closed"; return; }
+  if ! js=$(yq -o json -I0 'explode(.) | .__line = 1 | with(.jobs | select(tag == "!!map") | .[] | select(tag == "!!map"); .__line = line) | with(.jobs | select(tag == "!!map") | .[] | select(tag == "!!map") | .steps | select(tag == "!!seq") | .[] | select(tag == "!!map"); .__line = line)' "$f" 2>/dev/null) \
+    || [ "$(jq -r type <<<"$js" 2>/dev/null)" != object ] || ! rows=$(jq -r "$SHAPE_JQ" <<<"$js" 2>/dev/null); then
+    hit "$r" 1 "$id" "workflow shape unreadable (not a YAML map, or the shape check failed), fail closed"; return
+  fi
   while IFS=$'\037' read -r l m; do [ -n "$l" ] && hit "$r" "$l" "$id" "$m"; done < <(
     while IFS=$'\037' read -r l m; do
       [ -n "$l" ] || continue
