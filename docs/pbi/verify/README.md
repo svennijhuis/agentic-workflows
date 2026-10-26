@@ -1,7 +1,7 @@
 # docs/pbi/verify/
 One verify entry point for this catalog and for consumer repos. Source: Sven via Fleet, 2026-10-26, the verification approach from the Matt Pocock and poteto talk (pstack verify guide, create and maintain verification skill).
 Order: VF01 -> VF02. Docs only. Nothing is enabled until Sven says yes. Actions billing is blocked today (Q0), so the local verify log on the exact SHA is the gate.
-Where things live: `scripts/verify.sh` is the only runner (C01). Each rule lives in one `policies/POLnn.yml` with its check in `policies/checks/POLnn.sh` and its proof in `test/fixtures/bad/POLnn/` and `test/fixtures/good/POLnn.md`. The consumer template lives in `workflows/shared/verify/` and agentPacks distributes it. Done PBIs move to `docs/pbi/done/`.
+Where things live: `scripts/verify.sh` is the only runner (C01). Each rule lives in one `policies/POLnn.yml` with its check in `policies/checks/POLnn.sh` and its proof in `test/fixtures/bad/POLnn/` and `test/fixtures/good/POLnn/` (a folder). The consumer template lives in `workflows/shared/verify/` and agentPacks distributes it. Done PBIs move to `docs/pbi/done/`.
 
 | ID | Title | Block | Door | Wave | Status | Depends on | New rules | File |
 |---|---|---:|---|---|---|---|---|---|
