@@ -154,6 +154,8 @@ flowchart LR
 | HX03 | Harness-neutral prompts | 2 | two-way | harness | W2 | todo | ARC07, HX02, C12 | Builder | [harness/HX03-harness-neutral-prompts.md](harness/HX03-harness-neutral-prompts.md) |
 | TPL02 | Backfill template fields on the existing PBIs | 2 | two-way | docs | W2 | todo | TPL01 | Cursor CLI | [docs/TPL02-template-backfill.md](docs/TPL02-template-backfill.md) |
 | C12a | agentPacks release tag, then re-add plugins: to squad-review | 2 | two-way | core | W2 | todo | C12, agentPacks PBI 04 (first release) | Builder | [core/C12a-agentpacks-tag-plugins-repin.md](core/C12a-agentpacks-tag-plugins-repin.md) |
+| VF01 | One verify entry point: scripts/verify.sh for CI, local gate and every agent | 2 | two-way | verify | W2 | todo | C01, POL02, POL17, POL23, X06, C14 | Builder | [verify/VF01.md](verify/VF01.md) |
+| VF02 | Verify workflow template for consumer repos (API and frontend) | 2 | one-way | verify | W2 | todo | VF01, POL01, POL03, C12, G00a, X06b | Builder | [verify/VF02.md](verify/VF02.md) |
 | AO01 | Retro workflow | 3 | one-way | agent-ops | W3 | todo | B01, AO02, X07 | Builder | [agent-ops/AO01-retro-workflow.md](agent-ops/AO01-retro-workflow.md) |
 | AO02 | Agent scorecards | 3 | two-way | agent-ops | W3 | todo | B01, AO10 | Builder | [agent-ops/AO02-agent-scorecards.md](agent-ops/AO02-agent-scorecards.md) |
 | B01 | Logs + audit + session runbook | 3 | one-way | observability | PR 0 | todo | C01 | Cursor CLI | [observability/B01-logs-audit-session-runbook.md](observability/B01-logs-audit-session-runbook.md) |
@@ -354,6 +356,7 @@ flowchart LR
 | BOARD_TOKEN | One token for the user Project board: Projects read and write on the svennijhuis user board only. Used only by deterministic jobs (P05 sync script, P14 poll pre-step), never by an agent job. Sven sets it himself (one-way). The first P05 run checks whether a fine-grained token reaches a user-owned board; if not, that run names the classic scope and Sven decides | 3 |
 | P14 poll | Exact yes to turn on the P14 30 min scheduled poll (48 runs a day count toward measured cost) | 5 |
 | PR #2 close | PO closes #2 unmerged after PR 0 with links | 3 |
+| VF02 consumer | Enable the verify template caller in a named consumer repo; any trigger other than workflow_dispatch (push, pull_request, merge_group, schedule, workflow_run and the rest), Playwright, or any AIC step needs its own yes (row in policies/POL30.yml sven_yes); pull_request_target and secrets: inherit are never allowed | 2 |
 
 Keys and tokens: masked GitHub fields only, never committed files (POL20).
 
@@ -371,6 +374,7 @@ Related: [agentPacks PR #80](https://github.com/svennijhuis/agentPacks/pull/80) 
 - [_template.md](_template.md) PBI template (technical design required)
 - [decisions/](decisions/) ADRs
 - [done/](done/) completed PBI moves (Block 1 from PR #4)
+- [verify/](verify/README.md): VF01-VF02 one verify entry point and the consumer verify template (Block 2, todo, docs only). New rules POL27-POL30.
 
 
 ## Block 0
@@ -409,7 +413,7 @@ Empty until Sven tests block 1; new PBIs get the next free id per area.
 
 ## Block 2
 
-**PBIs:** BH09, C13, HX03, TPL02, C12a (v3.12, docs only so far), S00-S06, O01-O03, R01-R03, L01, D01, G01-G03, X07 benchmark harness, AO03 kill switch (guard for `/stop`), LP02 guards (POL10 actor check, concurrency), F01 staged smoke, G00a proof run.
+**PBIs:** BH09, C13, HX03, TPL02, C12a (v3.12, docs only so far), VF01-VF02 verify (docs only so far), S00-S06, O01-O03, R01-R03, L01, D01, G01-G03, X07 benchmark harness, AO03 kill switch (guard for `/stop`), LP02 guards (POL10 actor check, concurrency), F01 staged smoke, G00a proof run.
 
 **What Sven can test:** Tag v0.1; `gh aw add` F01 into trial repo; staged run shows safe-output preview, no writes.
 
