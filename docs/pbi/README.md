@@ -348,7 +348,7 @@ flowchart LR
 | BOARD_TOKEN | One token for the user Project board: Projects read and write on the svennijhuis user board only. Used only by deterministic jobs (P05 sync script, P14 poll pre-step), never by an agent job. Sven sets it himself (one-way). The first P05 run checks whether a fine-grained token reaches a user-owned board; if not, that run names the classic scope and Sven decides | 3 |
 | P14 poll | Exact yes to turn on the P14 30 min scheduled poll (48 runs a day count toward measured cost) | 5 |
 | PR #2 close | PO closes #2 unmerged after PR 0 with links | 3 |
-| VF02 consumer | Enable the verify template caller in a named consumer repo; each push, pull_request, schedule or workflow_run trigger, Playwright, or any AIC step needs its own yes (row in policies/POL30.yml sven_yes) | 2 |
+| VF02 consumer | Enable the verify template caller in a named consumer repo; any trigger other than workflow_dispatch (push, pull_request, merge_group, schedule, workflow_run and the rest), Playwright, or any AIC step needs its own yes (row in policies/POL30.yml sven_yes); pull_request_target and secrets: inherit are never allowed | 2 |
 
 Keys and tokens: masked GitHub fields only, never committed files (POL20).
 
