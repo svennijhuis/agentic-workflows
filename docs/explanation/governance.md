@@ -32,7 +32,7 @@ gh aw env get org-defaults.yml --scope org --org YOUR_ORG
 gh aw env update org-defaults.yml --scope org --org YOUR_ORG
 ```
 
-Precedence: workflow frontmatter, then repo, org, enterprise, compiler fallback. Org-only features stay in [G05](../pbi/governance/G05-org-only-appendix.md) until switch.
+Precedence: workflow frontmatter, then repo, org, enterprise, compiler fallback. Org-only features stay in [G05](../pbi/done/G05-org-only-appendix.md) and [ORG-ONLY.md](../../governance/ORG-ONLY.md) until switch.
 
 ## Safe rollout
 

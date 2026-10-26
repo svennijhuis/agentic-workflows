@@ -10,7 +10,7 @@
 - [G02: G02-raci](G02-raci.md)
 - [G03: G03-onboarding-support](G03-onboarding-support.md)
 - [G04: G04-config-governance](G04-config-governance.md)
-- [G05: G05-org-only-appendix](G05-org-only-appendix.md)
+- [G05: G05-org-only-appendix](../done/G05-org-only-appendix.md)
 - [G06: G06-correctionops-feedback-loop](G06-correctionops-feedback-loop.md)
 
 ## Dependency sketch
