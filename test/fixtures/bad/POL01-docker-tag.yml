@@ -1,0 +1,13 @@
+name: Bad POL01 fixture, docker image pinned by tag
+on:
+  workflow_call:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: docker://alpine:3.20

@@ -156,6 +156,7 @@ flowchart LR
 | C12a | agentPacks release tag, then re-add plugins: to squad-review | 2 | two-way | core | W2 | todo | C12, agentPacks PBI 04 (first release) | Builder | [core/C12a-agentpacks-tag-plugins-repin.md](core/C12a-agentpacks-tag-plugins-repin.md) |
 | VF01 | One verify entry point: scripts/verify.sh for CI, local gate and every agent | 2 | two-way | verify | W2 | done | C01, POL02, POL17, POL23, X06, C14 | Builder | [done/VF01.md](done/VF01.md) |
 | VF02 | Verify workflow template for consumer repos (API and frontend) | 2 | one-way | verify | W2 | todo | VF01, POL01, POL03, C12, G00a, X06b | Builder | [verify/VF02.md](verify/VF02.md) |
+| VF02a | VF02 part: POL01 yml whole-file walk, parse error, yml roots | 2 | two-way | verify | W2 | done | none | Builder | [done/VF02a-pol01-extension.md](done/VF02a-pol01-extension.md) |
 | AO01 | Retro workflow | 3 | one-way | agent-ops | W3 | todo | B01, AO02, X07 | Builder | [agent-ops/AO01-retro-workflow.md](agent-ops/AO01-retro-workflow.md) |
 | AO02 | Agent scorecards | 3 | two-way | agent-ops | W3 | todo | B01, AO10 | Builder | [agent-ops/AO02-agent-scorecards.md](agent-ops/AO02-agent-scorecards.md) |
 | B01 | Logs + audit + session runbook | 3 | one-way | observability | PR 0 | todo | C01 | Cursor CLI | [observability/B01-logs-audit-session-runbook.md](observability/B01-logs-audit-session-runbook.md) |
@@ -375,7 +376,7 @@ Related: [agentPacks PR #80](https://github.com/svennijhuis/agentPacks/pull/80) 
 - [_template.md](_template.md) PBI template (technical design required)
 - [decisions/](decisions/) ADRs
 - [done/](done/) completed PBI moves (Block 1 from PR #4)
-- [verify/](verify/README.md): VF01-VF02 one verify entry point and the consumer verify template (Block 2; VF01 done in #10 with POL27-POL29, VF02 todo). New rule POL30 with VF02.
+- [verify/](verify/README.md): VF01-VF02 one verify entry point and the consumer verify template (Block 2; VF01 done in #10 with POL27-POL29, VF02 todo, VF02a POL01 part done in #9). New rule POL30 with VF02.
 
 
 ## Block 0
