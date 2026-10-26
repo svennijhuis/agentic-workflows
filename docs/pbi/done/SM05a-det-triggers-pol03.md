@@ -6,10 +6,10 @@
 - Block: 3
 - Lane: Builder
 - Depends on: VF01 (merged); part of [SM05](../smoke/SM05.md)
-- proof: `./scripts/verify.sh` ends with `0 failures`; POL23 inside it runs the 2 good smoke cases `test/fixtures/good/POL03-smoke-*/` (each exits 0), keeps `good/POL03.md` (exits 0), and runs the 22 bad smoke cases `test/fixtures/bad/POL03-smoke-*` (each exits exactly 1)
+- proof: `./scripts/verify.sh` ends with `0 failures`; POL23 inside it runs the 2 good smoke cases `test/fixtures/good/POL03-smoke-*/` (each exits 0), keeps `good/POL03.md` (exits 0), and runs the 26 bad smoke cases `test/fixtures/bad/POL03-smoke-*` (each exits exactly 1); `bash scripts/test-POL03-roots.sh` (also run inside verify.sh) ends with `0 failures`
 - door: two-way
 - triage: build (first of the three SM05 parts, Strategy split check 2026-10-26)
-- feedback: `./scripts/verify.sh`: POL23 runs every `good/POL03-smoke-*` case (exit 0) and every `bad/POL03-smoke-*` case (exit 1); each case folder is checked with its own `rollout.yml` (proof)
+- feedback: `./scripts/verify.sh`: POL23 runs every `good/POL03-smoke-*` case (exit 0) and every `bad/POL03-smoke-*` case (exit 1); each case folder is checked with its own `rollout.yml`; the repo-mode cases of `scripts/test-POL03-roots.sh` run in temp copies (proof)
 - harness: none (script)
 - review-input: diff + this PBI + DoD (+ [SM05](../smoke/SM05.md) and [SM08](../smoke/SM08-cursor-findings.md)) + PR description, never builder session logs (PA6)
 - kind: script (deterministic)
@@ -35,6 +35,17 @@ Rules POL03 applies, in this order, before `promoted && return 0`:
 - The setting keys from `policies/POL25.yml` `settings:` (`roles`, `skip-bots`, `skip-roles`) are dropped before the trigger tests.
 - Then `promoted && return 0`, then the existing rules: `workflow_dispatch` must be there, every other trigger needs `promoted:`, and a write output without `safe-outputs.staged: true` needs `promoted:`.
 - A case folder must hold exactly one workflow file beside `rollout.yml` (an `X.lock.yml` beside `X.md` counts with it).
+
+Round 2 fix map (Reviewer FAIL and Tester 2 FAIL on `13a6e82`):
+
+| Finding | Fix | Proof |
+|---|---|---|
+| Reviewer: repo mode walks only `.github/workflows/*.yml`, a `probe.yaml` on `push` exits 0 | `POL03.sh` repo loop walks `*.yml` and `*.yaml` | `scripts/test-POL03-roots.sh` case `yaml-push` (exit 1), `yaml-dispatch` (exit 0); `bad/POL03-smoke-yaml-push/` |
+| Tester 2: lock files are never checked | `check_file` checks a `*.lock.yml` argument and the `X.lock.yml` beside a checked `X.md`; the repo loop walks `.github/workflows/*.lock.yml` and orphan `workflows/**/*.lock.yml`; a lock is agentic, so `workflow_call` and `deployment_status` always fail on it | `bad/POL03-smoke-lock-call/` (orphan lock, its entry lists `workflow_call`), `bad/POL03-smoke-lock-deployment-status/` (promoted), `bad/POL03-smoke-lock-paired-call/` (`.md` dispatch only, lock adds `workflow_call`); test cases `lock-call`, `lock-deployment-status`, `orphan-lock-in-workflows`, `paired-lock-in-workflows` |
+| Reviewer low: `$POL_ROLLOUT` honored in repo mode | `POL03.sh` unsets it in repo mode (tests only) | test case `rollout-env-ignored` (exit 1) |
+| Reviewer low: `promoted()` puts the name into yq unquoted | name goes in through `strenv(N)`; exact item match with `any_c`, so `probe-extra` no longer promotes `probe` (the old `contains` matched substrings) | test cases `promoted-exact` (exit 0), `promoted-prefix-only` (exit 1) |
+
+Each test case and each new bad case exits 0 on the round 1 `POL03.sh` (except `bad/POL03-smoke-yaml-push/`, which file mode already caught), so none is tautological. `scripts/verify.sh` runs `scripts/test-POL03-roots.sh` and counts each failed case as a finding.
 ## Steps
 1. New `scripts/lib/det-triggers.sh`: rollout path, case folder files, map shape, entry check (trim), entry triggers, agentic test. Every error is a message (fail closed).
 2. `policies/checks/POL03.sh`: the rule order above, case folders, settings read from `policies/POL25.yml`.
@@ -52,12 +63,14 @@ Rules POL03 applies, in this order, before `promoted && return 0`:
 - [x] Good cases, each exits 0: `test/fixtures/good/POL03-smoke-runner/` (entry with `workflow_dispatch` and `workflow_call`, valid yes), `good/POL03-smoke-dispatch-unlisted/` (empty map, dispatch-only yml), existing `good/POL03.md`
 - [x] Bad cases from SM05 and SM08, each exits 1: `bad/POL03-smoke-missing-key/`, `-rollout-broken/`, `-not-map/`, `-extra-trigger/`, `-no-quote/`, `-deployment-status/`, `-unlisted/`, `-on-broken.yml`, `-quote-empty/`, `-quote-blank/`, `-date-empty/`, `-map-string/`, `-map-null/`, `-promoted-deployment-status/`, `-unstaged-write.md`, `-entry-extra/` (SM08 finding 5: `pull_request` only in the entry `triggers` list), `-date-blank/` (SM08 finding 8)
 - [x] Bad cases for the new fail-closed rules of this part, each exits 1: `bad/POL03-smoke-entry-not-map/`, `-triggers-string/`, `-two-workflows/`, `-no-workflow/`, `-agentic-call/` (agentic `.md` listed with `workflow_call`)
-- [x] POL23 runs all of them. Making POL03 always pass, letting an unlisted `workflow_call` through, putting `promoted && return 0` first, or dropping the trim each turns POL23 red; main's POL03 passes 19 of the 22 bad smoke cases (Cursor 5654162636 finding 6: proof states its own counts, 2 good smoke and 22 bad)
+- [x] Round 2 bad cases, each exits 1: `bad/POL03-smoke-lock-call/`, `-lock-deployment-status/`, `-lock-paired-call/`, `-yaml-push/`
+- [x] Repo mode walks `.github/workflows/*.yml`, `*.yaml` and `*.lock.yml` and orphan `workflows/**/*.lock.yml`; `$POL_ROLLOUT` is ignored in repo mode; `promoted:` matches exact items only; `bash scripts/test-POL03-roots.sh` ends with `0 failures`
+- [x] POL23 runs all of them. Making POL03 always pass, letting an unlisted `workflow_call` through, putting `promoted && return 0` first, or dropping the trim each turns POL23 red; main's POL03 passes 19 of the 22 bad smoke cases (Cursor 5654162636 finding 6: proof states its own counts, 2 good smoke and 22 bad in round 1, 26 bad after round 2)
 - [x] Diagram has the POL03 staged node before `OK` on the agentic dispatch-only path, and RT is POL03 only (SM08 findings 3 and 5)
 ## Technical design
-- Components and files: `scripts/lib/det-triggers.sh` (new), `policies/checks/POL03.sh`, `policies/POL03.yml`, `governance/rollout.yml`, `test/fixtures/good/POL03-smoke-*/`, `test/fixtures/bad/POL03-smoke-*`
+- Components and files: `scripts/lib/det-triggers.sh` (new), `scripts/test-POL03-roots.sh` (new), `scripts/verify.sh` (runs it), `policies/checks/POL03.sh`, `policies/POL03.yml`, `governance/rollout.yml`, `test/fixtures/good/POL03-smoke-*/`, `test/fixtures/bad/POL03-smoke-*`
 - Module boundary: `governance/rollout.yml` `deterministic_triggers` plus POL03 exit 0/1; rollout path resolution, map shape, entry check and agentic test sit behind `scripts/lib/det-triggers.sh`, which SM05b reuses for POL25
-- Interfaces: `rollout.yml` key `deterministic_triggers`: map of file name to `{triggers, yes: {date, quote}}`; `$POL_ROLLOUT` overrides the path; a case folder carries its own `rollout.yml`; exit 0/1, `file:line POL03 message`
+- Interfaces: `rollout.yml` key `deterministic_triggers`: map of file name to `{triggers, yes: {date, quote}}`; `$POL_ROLLOUT` overrides the path in file mode (tests only, ignored in repo mode); a case folder carries its own `rollout.yml`; exit 0/1, `file:line POL03 message`
 - Sequence:
 
 ```mermaid
@@ -105,7 +118,7 @@ flowchart LR
   S1[det-triggers.sh lib] --> S2[POL03 rule order, fail closed]
   S2 --> S3[rule text in POL03.yml]
   S3 --> S4[case folders with own rollout.yml]
-  S4 --> S5[2 good and 22 bad smoke cases, map empty]
+  S4 --> S5[2 good and 26 bad smoke cases, map empty]
   S5 --> S6[SM05b POL25, SM05c sven_yes and pair]
 ```
 ## Named asks for Sven

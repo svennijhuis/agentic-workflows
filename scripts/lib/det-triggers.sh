@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # deterministic_triggers reader for POL03 (SM05a) and POL25 (SM05b). Fail closed: every error is a message.
-# The rollout file is $POL_ROLLOUT, else <case>/rollout.yml for a case folder, else governance/rollout.yml.
+# The rollout file is $POL_ROLLOUT (tests only; POL03 unsets it in repo mode), else <case>/rollout.yml for a case folder, else governance/rollout.yml.
 #
 # det_rollout [DIR]      path of the rollout file to use (DIR: a case folder or empty)
 # det_case DIR           true when DIR is a case folder (holds a rollout.yml)

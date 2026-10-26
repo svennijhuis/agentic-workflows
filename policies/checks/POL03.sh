@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 # POL03 staged and dispatch first: every workflow has on.workflow_dispatch; triggers other than
 # workflow_dispatch and write outputs without `staged: true` need a governance/rollout.yml promotion (Sven's yes).
-# .github/workflows/*.yml (repo mode) and any .yml argument are workflow_dispatch only on the same terms.
+# .github/workflows/*.yml and *.yaml (repo mode) and any .yml or .yaml argument are workflow_dispatch only on the same terms.
+# Lock files are checked too (SM05a round 2): every *.lock.yml under .github/workflows/ and workflows/ in repo mode,
+#   a *.lock.yml argument, and the X.lock.yml beside a checked X.md. A lock is agentic, so workflow_call and
+#   deployment_status always fail on it; its promoted: name is X.
+# $POL_ROLLOUT is for tests only: repo mode ignores it and reads governance/rollout.yml.
 # on: is read through scripts/lib/on-triggers.sh: string, list and map forms alike; a parse error is a hit.
 # SM05a: deterministic_triggers (scripts/lib/det-triggers.sh). Before `promoted && return 0`:
 #   a rollout file that does not parse, or a deterministic_triggers that is not a map, fails every file;
@@ -15,8 +19,12 @@
 . "$POL_ROOT/scripts/lib/on-triggers.sh"
 # shellcheck source=../../scripts/lib/det-triggers.sh
 . "$POL_ROOT/scripts/lib/det-triggers.sh"
+repo_mode "$@" && unset POL_ROLLOUT
 ROLLOUT=$(det_rollout)
-promoted() { [ -f "$ROLLOUT" ] && [ "$(yq ".promoted // [] | contains([\"$1\"])" "$ROLLOUT" 2>/dev/null)" = "true" ]; }
+# promoted NAME: NAME is an exact item of promoted: (strenv, no substring match; a non-list is not promoted)
+promoted() { [ -f "$ROLLOUT" ] && [ "$(N=$1 yq '(.promoted // []) | select(tag == "!!seq") | any_c(. == strenv(N))' "$ROLLOUT" 2>/dev/null)" = "true" ]; }
+# wf_name FILE: promoted: name of a workflow file (X for X.md, X.lock.yml, X.yml, X.yaml)
+wf_name() { local b; b=$(basename "$1"); case "$b" in *.lock.yml) echo "${b%.lock.yml}" ;; *) echo "${b%.*}" ;; esac; }
 SETTINGS=" $(polcfg POL25 '.settings | join(" ")') "
 READ_ONLY=' noop missing-tool missing-data report-incomplete '
 
@@ -60,9 +68,10 @@ triggers_ok() { # FILE NAME: on: triggers are workflow_dispatch (plus settings) 
 check_file() { # FILE
   local f=$1 r o
   case "$f" in
-    *.yml|*.yaml) case "$f" in *.lock.yml) return ;; esac; triggers_ok "$f" "$(basename "${f%.*}")"; return ;;
+    *.yml|*.yaml) triggers_ok "$f" "$(wf_name "$f")"; return ;;
   esac
-  triggers_ok "$f" "$(basename "$f" .md)" || return
+  [ -f "${f%.md}.lock.yml" ] && triggers_ok "${f%.md}.lock.yml" "$(wf_name "$f")"
+  triggers_ok "$f" "$(wf_name "$f")" || return
   promoted "$(basename "$f" .md)" && return
   is_workflow "$f" || return
   r=$(rel "$f")
@@ -84,9 +93,12 @@ if [ $# -eq 0 ] || [ ${#args[@]} -gt 0 ]; then
   for f in $(targets "${args[@]}"); do check_file "$f"; done
 fi
 if repo_mode "$@"; then
-  for y in "$POL_ROOT"/.github/workflows/*.yml; do
-    [ -e "$y" ] || continue; case "$y" in *.lock.yml) continue ;; esac
-    triggers_ok "$y" "$(basename "$y" .yml)"
+  for y in "$POL_ROOT"/.github/workflows/*.yml "$POL_ROOT"/.github/workflows/*.yaml; do
+    [ -e "$y" ] || continue; triggers_ok "$y" "$(wf_name "$y")"
   done
+  # orphan locks under workflows/ (a lock beside an X.md was already checked with that X.md)
+  while IFS= read -r y; do
+    [ -e "${y%.lock.yml}.md" ] || triggers_ok "$y" "$(wf_name "$y")"
+  done < <(find "$POL_ROOT/workflows" -name '*.lock.yml' 2>/dev/null | sort)
 fi
 pol_done
