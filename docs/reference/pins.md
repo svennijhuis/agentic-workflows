@@ -8,7 +8,7 @@ Catalog pin file (Block 1):
 
 - gh-aw compiler **v0.93.4**
 - Copilot engine **1.0.101**
-- `tools:` map (VF01, [POL27](../../policies/POL27.yml)): actionlint, gitleaks, yq and shellcheck, each with `version`, `url` and `sha256`. `scripts/verify.sh` exits 2 (needs-human) when one is missing or at another version. `.github/workflows/verify.yml` downloads exactly those urls and checks each sha256. The top-level `gh-aw` key is the only gh-aw pin. git, gh and jq are runner-provided.
+- `tools:` map (VF01, [POL27](../../policies/POL27.yml)): actionlint, gitleaks, yq and shellcheck, each with `version`, `url` and `sha256`. `scripts/verify.sh` exits 2 (needs-human) when one is missing or at another version. `.github/workflows/verify.yml` downloads exactly those urls, each with a plain `curl ... -o FILE` line and the exact `echo "<sha256>  FILE" | sha256sum -c -` line in the same `run:` block ([VF02d1](../pbi/done/VF02d1.md)); every `run:` line there must match `run_allow:` in [POL28](../../policies/POL28.yml). The top-level `gh-aw` key is the only gh-aw pin. git, gh and jq are runner-provided.
 
 Fields follow gh-aw compiler config: action pins, `compiler_version`, and `engine_versions.copilot` (plus checksum when set). `scripts/verify.sh` runs `gh aw compile --dir workflows --strict --actionlint` against these pins.
 

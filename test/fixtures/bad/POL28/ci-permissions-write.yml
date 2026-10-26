@@ -1,0 +1,16 @@
+# FAKE bad POL28 case (VF02d1 round 2): contents: write (Cursor 5657508090 f6)
+name: Verify
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+      - name: Verify
+        run: ./scripts/verify.sh

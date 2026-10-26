@@ -42,9 +42,10 @@ for f in $(targets "$@"); do
   fi
 done
 if repo_mode "$@"; then
-  for y in "$POL_ROOT"/.github/workflows/*.yml; do
-    [ -e "$y" ] || continue; case "$y" in *.lock.yml) continue ;; esac
-    triggers_ok "$y" "$(basename "$y" .yml)"
+  # *.yaml too, the same roots as POL28 (Cursor 5657508090 f8).
+  for y in "$POL_ROOT"/.github/workflows/*.yml "$POL_ROOT"/.github/workflows/*.yaml; do
+    [ -e "$y" ] || continue; case "$y" in *.lock.yml | *.lock.yaml) continue ;; esac
+    triggers_ok "$y" "$(basename "${y%.*}")"
   done
 fi
 pol_done
