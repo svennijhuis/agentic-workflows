@@ -9,6 +9,12 @@
 - proof: ./scripts/verify.sh
 - door: one-way
 - one-way gate: Sven's exact yes required (named ask in its block). Rollback: do not apply org switch steps
+- triage: spec (org switch checklist, docs only; the switch itself waits on Sven's yes)
+- feedback: ./scripts/verify.sh (check-pbi-docs links) plus mermaid render of both governance/ORG-ONLY.md diagrams
+- harness: none (docs)
+- review-input: diff + this PBI + DoD (+ linked spec) + PR description, never builder session logs
+- kind: skill
+- Source: PA8 (pre-link PBI from the PR #3 backlog, origin in its Sources) https://github.com/svennijhuis/agentic-workflows/pull/3
 ## Goal
 Checklist only: what changes when moving from personal `svennijhuis` to a GitHub org. Org-only features are documented as ready, not used on the personal account today.
 ## Context
@@ -21,6 +27,8 @@ Nothing else changes at switch: same `workflows/`, `shared/`, `policies/`, `docs
    - **Teams**: CODEOWNERS, repo visibility (Q2).
    - **GHES**: enterprise host options and compiler enterprise controls (reference only until needed).
 2. Explicit closing line: no catalog layout, workflow behavior, or C12 pin rules change at switch.
+## Technical design
+- Module boundary: governance/ORG-ONLY.md is the interface (five checklist sections plus the closing line); the org cutover steps behind it run only on Sven's yes
 ## Definition of Done
 - [x] Checklist enumerates billing, rulesets, org secrets, teams, GHES only
 - [x] Checklist states no other repo structure or workflow behavior changes

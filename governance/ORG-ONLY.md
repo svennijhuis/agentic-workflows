@@ -19,9 +19,8 @@ flowchart TB
   Hub --> Gov["governance/ (rollout.yml, rulesets/main.json, ORG-ONLY.md)"]
   Hub --> Pbi["docs/pbi/"]
   Cons["Consumer repos"]
-  Cons -->|"gh aw add svennijhuis/agentic-workflows/#lt;wf#gt;@vX.Y.Z (tags only, never a branch, import-schema inputs only)"| Hub
-  P01["P01 central repo ops hub (later, Block 5, todo)"]
-  P01 -.->|"signals from consumer repos (Sven's yes)"| Hub
+  Cons -->|"gh aw add svennijhuis/agentic-workflows/#lt;wf#gt;@vX.Y.Z (vX.Y.Z tag or 40-hex SHA, never a branch, import-schema inputs only)"| Hub
+  Cons -.->|"P01 later work: hub pulls signals from consumer repos (Block 5, todo, Sven's yes)"| Hub
 ```
 
 ### Personal now vs org later
@@ -58,14 +57,14 @@ flowchart LR
 
 ## Central Copilot billing
 
-- [ ] Enable org billing path for `copilot-requests` on consumer and catalog repos after switch (see [gh-aw billing](https://github.github.com/gh-aw/reference/billing/)).
+- [ ] After switch, for org billing (AI Credits on the org Copilot tenant, per [gh-aw billing](https://github.github.com/gh-aw/reference/billing/)), all of these in one change: enable the org Copilot CLI billing policy (Organization, Settings, Copilot, Policies, Copilot CLI, "Allow use of Copilot CLI billed to the organization"); change `permissions.copilot-requests` from `none` to `write` in each workflow; recompile with `gh aw compile` and commit the updated `.lock.yml`; edit [POL21](../policies/POL21.yml) in the same change, because its check fails any value that is not `none`. Without all of these, workflows stay on `none` (seat or PAT billing).
 - [ ] Until switch, keep every catalog workflow on `copilot-requests: none` ([POL21](../policies/POL21.yml); personal account; org Copilot billing is not used).
 
 ## Rulesets
 
-- [ ] Apply branch protection on `main`: squash merge, required review thread resolution, no deletion ([governance/rulesets/main.json](rulesets/main.json) is proposed today, not applied on the personal account).
+- [ ] Apply [governance/rulesets/main.json](rulesets/main.json) on the default branch (proposed today, not applied on the personal account). As written it has `enforcement: active` (enforces as soon as it is created), rules `deletion` and `non_fast_forward`, and a `pull_request` rule with squash as the only merge method, `required_review_thread_resolution: true`, `dismiss_stale_reviews_on_push: true`, `required_approving_review_count: 0` (no approving review required) and `require_code_owner_review: false` (code-owner review off). Raise the review count or turn on code-owner review only with Sven's yes, once teams exist.
 - [ ] Require the `verify` check from [C01](../docs/pbi/done/C01-verify-script.md) on every PR to the catalog and AW consumer repos.
-- [ ] Enforce [POL19](../policies/POL19.yml) no force push at org ruleset level (`non_fast_forward`), not only in docs and checks.
+- [ ] [POL19](../policies/POL19.yml) no force push is the `non_fast_forward` rule already in that same file, not a second ruleset. At org level, target the same ruleset at the catalog and AW consumer repos.
 
 ## Org secrets
 
