@@ -5,14 +5,15 @@
 #   1 frontmatter slice: line 1 is `---` and a closing `---` follows (the `fm` slice of policies/checks/lib.sh)
 #   2 `yq` parses the slice (only the slice, never the markdown body), the slice is a map, no duplicate key
 #   3 `steps` is an integer
-#   4 every fence closes: open = 3+ backticks or tildes; close = same char, at least as long, nothing after
+#   4 every fence closes: open = 3+ backticks or tildes; close = same char, at least as long, nothing after;
+#     every HTML comment closes: `<!--` to `-->` outside fences; comment text is dropped before 5 to 7 and the scan
 #   5 at least one numbered step (`N. ` at column 0, outside fences)
 #   6 `steps` equals the count of numbered steps
 #   7 steps are numbered 1, 2, 3 ... in order
 # Then the scan: every step has an indented `verify: <text>` (or `- verify: <text>`) line before the next step
 # or heading, outside fences.
 set -uo pipefail
-case "${1:-}" in -h|--help) sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;; esac
+case "${1:-}" in -h|--help) sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;; esac
 command -v yq >/dev/null 2>&1 || { echo "scripts/check-smoke-setup.sh:1 VERIFY needs-human missing: yq"; exit 2; }
 N=0; fch=''; flen=0
 hit() { echo "$1:$2 SMOKESETUP $3"; N=$((N + 1)); } # FILE LINE MESSAGE
@@ -34,9 +35,32 @@ in_fence() {
   fch=${BASH_REMATCH[1]:0:1}; flen=${#BASH_REMATCH[1]}
 }
 
+# mask_comments FROM: fill M from L with HTML comment text blanked (outside fences only), so a step or verify:
+# line inside `<!-- -->` is not counted. Fence lines stay as they are. Sets cline to the line of an unclosed `<!--`.
+mask_comments() {
+  local i l out cm=0
+  M=("${L[@]}"); fch=''; flen=0; cline=0
+  for ((i = $1; i < ${#L[@]}; i++)); do
+    l=${L[i]}; out=''
+    if [ "$cm" -eq 0 ] && [ -n "$fch" ]; then in_fence "$l"; continue; fi
+    while :; do
+      if [ "$cm" -eq 1 ]; then
+        [[ $l == *'-->'* ]] || { l=''; break; }
+        l=${l#*-->}; cm=0
+      fi
+      [[ $l == *'<!--'* ]] || { out+=$l; break; }
+      out+=${l%%<!--*}; l=${l#*<!--}; cm=1; cline=$((i + 1))
+    done
+    M[i]=$out
+    [ "$cm" -eq 0 ] && in_fence "$out" >/dev/null
+  done
+  [ "$cm" -eq 1 ] || cline=0
+  fch=''; flen=0
+}
+
 check_file() {
-  local f=$1 close slice v tag want line k i l n fline=0 cur=0 cur_line=0 have=0
-  local -a L steps=()
+  local f=$1 close slice v tag want line k i l n fline=0 cur=0 cur_line=0 have=0 cline=0
+  local -a L M steps=()
   fch=''; flen=0
   [ -f "$f" ] || { hit "$f" 1 "no such file"; return; }
   mapfile -t L <"$f"
@@ -56,9 +80,11 @@ check_file() {
   # 3 steps is an integer
   [ "$(yq '.steps | tag' <<<"$slice")" = "!!int" ] || { hit "$f" 1 "frontmatter steps is missing or not an integer"; return; }
   want=$(yq '.steps' <<<"$slice")
-  # 4 every fence closes; 5 to 7 numbered steps outside fences
-  for ((i = close; i < ${#L[@]}; i++)); do
-    l=${L[i]}
+  # 4 every comment and fence closes; 5 to 7 numbered steps outside fences and comments
+  mask_comments "$close"
+  [ "$cline" -eq 0 ] || { hit "$f" "$cline" "HTML comment opened here is never closed"; return; }
+  for ((i = close; i < ${#M[@]}; i++)); do
+    l=${M[i]}
     if [ -n "$fch" ]; then in_fence "$l"; continue; fi
     in_fence "$l" && { fline=$((i + 1)); continue; }
     [[ $l =~ ^([0-9]+)\.[[:space:]] ]] && steps+=("$((i + 1)):${BASH_REMATCH[1]}")
@@ -71,10 +97,10 @@ check_file() {
     [ "$((10#${steps[i]#*:}))" -eq "$((i + 1))" ] || { hit "$f" "${steps[i]%%:*}" "step numbered ${steps[i]#*:}, expected $((i + 1))"; return; }
   done
   # verify-line scan outside fences: a step ends at the next step, a heading or end of file
-  for ((i = close; i <= ${#L[@]}; i++)); do
-    l=${L[i]:-}
-    [ "$i" -lt "${#L[@]}" ] && in_fence "$l" && continue
-    if [ "$i" -eq "${#L[@]}" ] || [[ $l =~ ^[0-9]+\.[[:space:]] ]] || [[ $l =~ ^# ]]; then
+  for ((i = close; i <= ${#M[@]}; i++)); do
+    l=${M[i]:-}
+    [ "$i" -lt "${#M[@]}" ] && in_fence "$l" && continue
+    if [ "$i" -eq "${#M[@]}" ] || [[ $l =~ ^[0-9]+\.[[:space:]] ]] || [[ $l =~ ^# ]]; then
       [ "$cur" -gt 0 ] && [ "$have" -eq 0 ] && hit "$f" "$cur_line" "step $cur has no verify: line (or it is empty)"
       cur=0
       [[ $l =~ ^([0-9]+)\.[[:space:]] ]] && { cur=$((10#${BASH_REMATCH[1]})); cur_line=$((i + 1)); have=0; }

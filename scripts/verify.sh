@@ -113,8 +113,12 @@ for b in "$P"/bad-*.md; do bash scripts/check-pr-body.sh "$b" >/dev/null && fail
 echo "# smoke setup checklist (SM07a: smoke/SETUP.md and each good exit 0, each bad exits exactly 1 with one hit)"
 U=test/fixtures/smoke-setup
 produce check-smoke-setup.sh bash scripts/check-smoke-setup.sh smoke/SETUP.md
-for g in "$U"/good*.md; do bash scripts/check-smoke-setup.sh "$g" >/dev/null || fail "$g:1 SMOKESETUP good setup fixture fails"; done
-for b in "$U"/bad-*.md; do
+shopt -s nullglob; UG=("$U"/good*.md); UB=("$U"/bad-*.md); shopt -u nullglob
+[ "${#UG[@]}" -gt 0 ] || fail "$U:1 SMOKESETUP no good setup fixtures"
+[ "${#UB[@]}" -gt 0 ] || fail "$U:1 SMOKESETUP no bad setup fixtures"
+for g in "${UG[@]}"; do bash scripts/check-smoke-setup.sh "$g" >/dev/null || fail "$g:1 SMOKESETUP good setup fixture fails"; done
+for b in "${UB[@]}"; do
+  [ -f "$b" ] || { fail "$b:1 SMOKESETUP bad setup fixture is not a file"; continue; }
   h=$(bash scripts/check-smoke-setup.sh "$b"); rc=$?
   { [ "$rc" -eq 1 ] && [ "$(grep -c . <<<"$h")" -eq 1 ]; } || fail "$b:1 SMOKESETUP bad setup fixture does not exit 1 with exactly one hit (rc $rc)"
 done

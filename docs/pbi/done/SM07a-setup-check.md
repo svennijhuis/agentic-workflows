@@ -6,7 +6,7 @@
 - Block: 3
 - Lane: Builder
 - Depends on: VF01 (done, #10). Part of [SM07](../smoke/SM07.md); SM07b (Sven runs the steps) is the other part
-- proof: `bash scripts/check-smoke-setup.sh smoke/SETUP.md`, `test/fixtures/smoke-setup/good.md` and `good-nested-fence.md` exit 0 and each of the 16 `test/fixtures/smoke-setup/bad-*.md` exits exactly 1 with one hit, in the `scripts/verify.sh` loop; `./scripts/verify.sh` ends with `0 failures`
+- proof: `bash scripts/check-smoke-setup.sh smoke/SETUP.md`, `test/fixtures/smoke-setup/good.md`, `good-nested-fence.md` and `good-comment.md` exit 0 and each of the 20 `test/fixtures/smoke-setup/bad-*.md` exits exactly 1 with one hit, in the `scripts/verify.sh` loop (an empty good or bad set fails the loop); `./scripts/verify.sh` ends with `0 failures`
 - door: two-way
 - triage: build (code part of SM07, split out by Strategy on 2026-10-26; Sven's live setup stays in SM07b)
 - feedback: the `scripts/verify.sh` smoke setup loop: `smoke/SETUP.md` and each good fixture exit 0, each bad fixture exits 1 with exactly one `file:line SMOKESETUP message` line
@@ -26,15 +26,17 @@ POL23 only runs `policies/checks/POLnn.sh`, so `check-smoke-setup.sh` gets its o
 ## Steps
 1. `smoke/SETUP.md`: frontmatter `steps: 8`, the 8 SM07 steps in order, one `verify:` line each.
 2. `scripts/check-smoke-setup.sh FILE...` (default `smoke/SETUP.md`): gate phase in a fixed order, stop at the first hit; then the verify-line scan.
-3. Fixtures in `test/fixtures/smoke-setup/`: 2 good, 16 bad, one hit each.
-4. `scripts/verify.sh` loop: `smoke/SETUP.md` through `produce`, each good exits 0, each bad exits 1 with exactly one hit line.
+3. Fixtures in `test/fixtures/smoke-setup/`: 3 good, 20 bad, one hit each.
+4. `scripts/verify.sh` loop: `smoke/SETUP.md` through `produce`, each good exits 0, each bad exits 1 with exactly one hit line; the fixture globs use `nullglob`, an empty good or bad set is a failure, and a bad path that is not a file is a failure (Cursor 5657735146 f1).
 ## Definition of Done
 - [x] `smoke/SETUP.md` lists, in this order, the 8 steps of SM07: Actions billing; one smoke app per env (no secret, no certificate, public client flows off); one federated credential per app (`environment:smoke-tst` and `smoke-acc` subjects only); role assignment through the infra repo clientconfig (read role, `party.<slug>`); API audience check; GitHub environments `smoke-tst` and `smoke-acc` with the six vars; optional Conditional Access for workload identities; not set up (no test user, no ROPC, no TOTP seed, no CA exclusions)
 - [x] Each step has a `verify:` line Sven can run (portal path or `gh variable list --env smoke-tst`); the check exits 1 when a numbered step has no `verify:` line, an empty one, or one only inside a code fence
 - [x] The check slices the frontmatter (line 1 `---`, up to the next `---`) and runs `yq` on the slice only; before the verify-line scan it exits 1 when the slice is missing or never closed, when `yq` on the slice fails, when the slice is not a map or has a duplicate key, when `steps` is missing or not an integer, when a fence is still open at end of file, when there are 0 numbered steps, when `steps` differs from the count of numbered steps, or when the steps are not numbered 1, 2, 3 in order (SM08 finding 6)
+- [x] HTML comments are tracked `<!--` to `-->` outside fences, the same way as fences: a numbered step or `verify:` line inside a comment is not counted, and a comment still open at end of file exits 1 (Cursor 5657735146 f2). Bad fixtures `bad-comment-only.md` (the only step and verify line inside a comment), `bad-step-in-comment.md` (`steps: 2`, step 2 only in a comment), `bad-verify-in-comment.md` (step 2's only verify line in a comment) and `bad-comment-unclosed.md` each exit 1 with one hit; each exits 0 on 83c9b21. Good `good-comment.md` (an inline comment on a step line, a comment holding `3.`, `<!--` inside a fence) exits 0
+- [x] `scripts/verify.sh`: with every `bad-*.md` removed the loop prints `SMOKESETUP no bad setup fixtures` and verify ends with `1 failures` (Cursor 5657735146 f1; on 83c9b21 the literal glob gave one `no such file` hit and passed)
 - [x] Fences are tracked open and close, not counted: a close is the same marker (backtick or tilde), at least as long as the open, with nothing after it; a backtick line whose info string holds a backtick is not a fence (Cursor 5654162636 finding 5)
-- [x] Bad fixtures, each exits 1 with one hit: `test/fixtures/smoke-setup/bad-broken.md` (invalid YAML inside the slice), `bad-no-frontmatter.md`, `bad-frontmatter-unclosed.md`, `bad-frontmatter-not-map.md`, `bad-dup-key.md` (`steps: 8` then `steps: 1`), `bad-steps-missing.md`, `bad-steps-not-int.md` (`steps: "1"`), `bad-unclosed-fence.md` (valid frontmatter, every step has a verify line, one unclosed fence), `bad-two-unclosed.md` (a backtick fence and a tilde line, even fence count), `bad-short-close.md` (four backticks closed by three), `bad-empty.md` (`steps: 0`, 0 numbered steps), `bad-steps-mismatch.md` (`steps: 3`, two numbered steps), `bad-step-order.md` (1 then 3), `bad-missing-verify.md`, `bad-verify-empty.md`, `bad-verify-in-fence.md`
-- [x] Good: `test/fixtures/smoke-setup/good.md`, `good-nested-fence.md` (a four-backtick fence holding a three-backtick line, a tilde line and a `2.` line) and `smoke/SETUP.md` exit 0 (their slice parses)
+- [x] Bad fixtures, each exits 1 with one hit: `test/fixtures/smoke-setup/bad-broken.md` (invalid YAML inside the slice), `bad-no-frontmatter.md`, `bad-frontmatter-unclosed.md`, `bad-frontmatter-not-map.md`, `bad-dup-key.md` (`steps: 8` then `steps: 1`), `bad-steps-missing.md`, `bad-steps-not-int.md` (`steps: "1"`), `bad-unclosed-fence.md` (valid frontmatter, every step has a verify line, one unclosed fence), `bad-two-unclosed.md` (a backtick fence and a tilde line, even fence count), `bad-short-close.md` (four backticks closed by three), `bad-empty.md` (`steps: 0`, 0 numbered steps), `bad-steps-mismatch.md` (`steps: 3`, two numbered steps), `bad-step-order.md` (1 then 3), `bad-missing-verify.md`, `bad-verify-empty.md`, `bad-verify-in-fence.md`, plus the four comment fixtures above (20)
+- [x] Good: `test/fixtures/smoke-setup/good.md`, `good-nested-fence.md` (a four-backtick fence holding a three-backtick line, a tilde line and a `2.` line), `good-comment.md` and `smoke/SETUP.md` exit 0 (their slice parses)
 - [x] `scripts/verify.sh` loop for `check-smoke-setup.sh` (SM01 style): `smoke/SETUP.md` and each good exit 0, each bad exits exactly 1 with one hit; `--help` prints usage and exits 0; yq missing exits 2 (needs-human)
 - [ ] Sven runs steps 1 to 7 and says yes in the room: SM07b, not this PR
 ## Technical design
@@ -71,10 +73,14 @@ verify log on the PR head SHA, one hit line per bad fixture; gate log comment on
 ```mermaid
 flowchart LR
   S1[SETUP.md, 8 steps] --> S2[check-smoke-setup.sh, slice and fences first]
-  S2 --> S3[2 good and 16 bad fixtures]
+  S2 --> S3[3 good and 20 bad fixtures]
   S3 --> S4[verify.sh loop]
   S4 --> S5[SM07b: Sven runs steps 1 to 7]
 ```
+## Todo (carried, not built here)
+The SM07 todo rows come in PR #18 (`docs/pbi/smoke/SM07.md`) and are not on main yet, so the low findings from PR #16 sit here; whoever merges second moves them to SM07.
+- [ ] Cursor 5657735146 f3 low (security): `smoke/SETUP.md` L23 and L33. Step 6 says the two commands list the six vars and no secrets, but `gh variable list` prints names and values, and step 8 runs `gh secret list` only for `smoke-tst`. Fix: describe step 6 as `gh variable list` for the six names and say to keep the values off chat and off the PR; run `gh secret list` for both `smoke-tst` and `smoke-acc` in step 8.
+- [x] Cursor 5657735146 f4 low (readability): `docs/pbi/smoke/README.md` L4 gate sentence said no SM01 to SM07 build PR starts before SM08 merges. Resolved by the merge of main `9680af0` (#11): the line now says the SM08 rows live in the build PBIs (SM07a among them) and SM08 closes once those have merged. No edit on this PR.
 ## Named asks for Sven
 - None for this PR. SM07b: name the API repo, run steps 1 to 7, say yes in the room.
 ## Cost
@@ -84,3 +90,4 @@ flowchart LR
 - [PR #5 Cursor review at 8936269](https://github.com/svennijhuis/agentic-workflows/pull/5#pullrequestreview-5648771343)
 - Cursor review 5654162636 on PR #8, finding 5 (two unclosed fences, mixed markers) https://github.com/svennijhuis/agentic-workflows/pull/8#pullrequestreview-5654162636
 - https://spec.commonmark.org/0.31.2/#fenced-code-blocks (an unclosed fence runs to the end of the document)
+- Cursor review 5657735146 on PR #16 at 83c9b21 (f1 and f2 medium fixed in round 1; f3 low in the Todo section; f4 low resolved by the main merge) https://github.com/svennijhuis/agentic-workflows/pull/16#pullrequestreview-5657735146
