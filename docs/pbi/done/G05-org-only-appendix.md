@@ -1,5 +1,6 @@
 # G05: Org switch checklist (org-only features)
-- Status: todo
+- Status: done
+- PR: #11
 - Area: governance
 - Wave: W5
 - Block: 5
@@ -21,11 +22,11 @@ Nothing else changes at switch: same `workflows/`, `shared/`, `policies/`, `docs
    - **GHES**: enterprise host options and compiler enterprise controls (reference only until needed).
 2. Explicit closing line: no catalog layout, workflow behavior, or C12 pin rules change at switch.
 ## Definition of Done
-- [ ] Checklist enumerates billing, rulesets, org secrets, teams, GHES only
-- [ ] Checklist states no other repo structure or workflow behavior changes
-- [ ] Q2 visibility decision recorded when Sven answers
+- [x] Checklist enumerates billing, rulesets, org secrets, teams, GHES only
+- [x] Checklist states no other repo structure or workflow behavior changes
+- [ ] Q2 visibility decision recorded when Sven answers (open: Q2 not answered yet, placeholder in ORG-ONLY.md)
 ## Evidence
-(ORG-ONLY.md link, review notes)
+[governance/ORG-ONLY.md](../../../governance/ORG-ONLY.md)
 ## Flow
 ```mermaid
 sequenceDiagram
