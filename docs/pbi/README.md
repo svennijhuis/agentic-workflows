@@ -53,7 +53,7 @@ flowchart LR
 - [loops/](loops/00-overview.md): [LP00](loops/LP00-improvement-loop.md) improvement loop (incl. LP00 v2 cross-repo self-fix), [LP01](loops/LP01-delivery-loop.md) delivery loop (P05 board, P12 planning, P13 grilling, P14 pick-up at WIP 1), [LP02](loops/LP02-event-map.md) event map (automatic events, human triggers incl. slash commands and `/stop`, guards, rollout, doors).
 - [architecture/](architecture/00-overview.md): ARC01-ARC06 (context, topology, identity, safe-output flow incl. cross-repo, release, org switch). G00 owns these pages.
 - [agent-ops/](agent-ops/00-overview.md): AO01-AO14, sourced (S1-S11). AO01 retro and AO02 scorecards in B3, AO03 kill switch in B2 (guard dependency for `/stop`), the rest in B5. AO10 absorbs F75.
-- [smoke/](smoke/README.md): SM01-SM07 post-deploy API smoke on tst and acc (Block 3, todo, docs only). Build order: SM07 (Sven, parallel), then SM01, SM05, SM04, SM03, SM06, SM02 (agentic, last). Nothing enabled until Sven's yes.
+- [smoke/](smoke/README.md): SM01-SM08 post-deploy API smoke on tst and acc (Block 3, todo, docs only). Build order: SM08 (docs, the open PR #5 Cursor findings; no SM01-SM07 build before it merges), SM07 (Sven, parallel), then SM01, SM05, SM04, SM03, SM06, SM02 (agentic, last). Nothing enabled until Sven's yes.
 - Folds: F76 log insights is in [M05](monitoring/M05-github-log-watcher.md), F77 issue to PR is in [P04](multi-repo/P04-research-plan-assign-copilot.md). The human go label is `agent-ok`. C01 is `scripts/verify.sh` only.
 
 ```mermaid
@@ -195,6 +195,7 @@ flowchart LR
 | SM05 | POL03 + POL25 allow workflow_call for the smoke runner only | 3 | two-way | smoke | W3 | todo | POL25, POL03, POL23, scripts/lib/on-triggers.sh | Builder | [smoke/SM05.md](smoke/SM05.md) |
 | SM06 | Smoke reporting on PR or release, ping on fail | 3 | two-way | smoke | W3 | todo | SM03 | Builder | [smoke/SM06.md](smoke/SM06.md) |
 | SM07 | Setup steps only Sven does | 3 | one-way | smoke | W3 | todo | none | Builder | [smoke/SM07.md](smoke/SM07.md) |
+| SM08 | Close the 8 open Cursor findings on SM01, SM04, SM05, SM07 (docs first) | 3 | two-way | smoke | W3 | todo | none | Cursor CLI | [smoke/SM08-cursor-findings.md](smoke/SM08-cursor-findings.md) |
 | M01 | Exception watcher (dispatch-only, deterministic pre-step) | 4 | one-way | monitoring | W4 | todo | C03, C04, M02, O03, S00 | Builder | [monitoring/M01-exception-watcher-dispatch.md](monitoring/M01-exception-watcher-dispatch.md) |
 | M02 | Azure OIDC Reader role and login step | 4 | one-way | monitoring | W4 | todo | C04, S00 | Builder | [monitoring/M02-azure-oidc-reader.md](monitoring/M02-azure-oidc-reader.md) |
 | M03 | Hourly cron exception watcher | 4 | one-way | monitoring | W4 | todo | M01, M02, B02 | Builder | [monitoring/M03-hourly-cron-watcher.md](monitoring/M03-hourly-cron-watcher.md) |
