@@ -30,21 +30,25 @@ check_aw() { # FILE: 0 when it parses (later checks may read it)
   done
 }
 
-# A check line holds the pinned sha256 and sha256sum -c, names the -o file as a whole token (split on
-# space and quotes, so xgitleaks.tar.gz does not count for gitleaks.tar.gz), does not mask a failed
-# check with || true or || :, and has no set +e (or set +o errexit) on any line before it (Tester 2
-# 6421487873 items 1 and 2). Prints nothing when one line passes, else why the download is unchecked.
+# Allowlist, not a denylist (Reviewer 6421748756, round 3): a download is checked only by a non-comment
+# line that is exactly `echo "<pinned sha256>  FILE" | sha256sum -c -` (two spaces, FILE the -o file,
+# nothing else on the line but surrounding blanks). Any other form (|| echo, || /bin/true, | true, a
+# leading !, if ! (...), another file name) is not a check. A set +e (or set +o errexit) on any line
+# before it still lets a failed check go on, so that is a hit too (Tester 2 6421487873 item 2).
+# Prints nothing when one line passes, else why the download is unchecked.
 check_line() { # CODE SHA256 FILE
-  local code=$1 s=$2 o=$3 c n txt why
-  why="has no sha256sum -c line naming its pinned sha256 and $o"
+  local code=$1 s=$2 o=$3 c n txt want
+  want="echo \"$s  $o\" | sha256sum -c -"
   while IFS= read -r c; do
     n=${c%%:*}; txt=${c#*:}
-    tr -s ' \t"'"'"'' '\n' <<<"$txt" | grep -qxF -- "$o" || continue
-    if grep -qE '\|\|[[:space:]]*(true|:)([[:space:];)]|$)' <<<"$txt"; then why="check line $n masks a failed sha256sum -c with || true or || :"; continue; fi
-    if head -n "$n" <<<"$code" | grep -qE '(^|[;&|({[:space:]])set[[:space:]]+(\+[A-Za-z]*e[A-Za-z]*|\+o[[:space:]]+errexit)([[:space:];]|$)'; then why="check line $n runs after set +e, so a failed sha256sum -c does not stop the step"; continue; fi
+    txt=${txt#"${txt%%[![:space:]]*}"}; txt=${txt%"${txt##*[![:space:]]}"}
+    [ "$txt" = "$want" ] || continue
+    if head -n "$n" <<<"$code" | grep -qE '(^|[;&|({[:space:]])set[[:space:]]+(\+[A-Za-z]*e[A-Za-z]*|\+o[[:space:]]+errexit)([[:space:];]|$)'; then
+      echo "check line $n runs after set +e, so a failed sha256sum -c does not stop the step"; return
+    fi
     return 0
-  done < <(grep -nF -- "$s" <<<"$code" | grep -F 'sha256sum -c')
-  echo "$why"
+  done < <(grep -nF -- "$s" <<<"$code")
+  echo "has no line that is exactly: $want"
 }
 
 check_verify() { # VERIFY_YML AW_JSON
