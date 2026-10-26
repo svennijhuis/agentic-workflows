@@ -1,0 +1,15 @@
+# SM01 smoke scenario schema (authoring copy). scripts/check-smoke.sh enforces it; smoke/README.md explains it.
+# One file per feature: smoke/<feature>/scenarios.yml. One YAML document, top level is a map.
+scenarios:            # required, non-empty list of maps
+  - id: string        # required, not empty
+    env: tst | acc    # required allowlist: anything else (empty, prd, prod, production, dev) exits 1
+    method: GET       # required word; GET and HEAD are reads, every other value is a write (POST, PURGE, post)
+    path: /relative   # required: starts with exactly one /, no scheme, no host, no backslash, no whitespace
+    auth: none | smoke-jwt   # required allowlist; a missing key exits 1
+    test_data_only: true     # required (boolean true) on every write
+    headers: {}       # optional map; never a token (any token-shaped scalar in the file exits 1)
+    expect:           # required map
+      status: 200     # required int, 100 to 599
+      json:           # optional list
+        - path: $.a   # jsonpath, starts with $
+          equals: x   # exactly one of equals or exists: true

@@ -1,0 +1,30 @@
+# SM01 good fixture: one read and one write on tst and acc. Fake ids only.
+scenarios:
+  - id: orders-list
+    env: tst
+    method: GET
+    path: /api/orders?limit=1
+    auth: smoke-jwt
+    expect:
+      status: 200
+      json:
+        - path: $.items
+          exists: true
+  - id: health
+    env: acc
+    method: HEAD
+    path: /health
+    auth: none
+    expect:
+      status: 200
+  - id: order-create
+    env: tst
+    method: POST
+    path: /api/orders
+    auth: smoke-jwt
+    test_data_only: true
+    expect:
+      status: 201
+      json:
+        - path: $.status
+          equals: created
