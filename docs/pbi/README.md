@@ -198,6 +198,7 @@ flowchart LR
 | SM05 | POL03 + POL25 allow workflow_call for the smoke runner only | 3 | two-way | smoke | W3 | todo | POL25, POL03, POL23, scripts/lib/on-triggers.sh | Builder | [smoke/SM05.md](smoke/SM05.md) |
 | SM06 | Smoke reporting on PR or release, ping on fail | 3 | two-way | smoke | W3 | todo | SM03 | Builder | [smoke/SM06.md](smoke/SM06.md) |
 | SM07 | Setup steps only Sven does | 3 | one-way | smoke | W3 | todo | none | Builder | [smoke/SM07.md](smoke/SM07.md) |
+| SM07a | SM07 part: smoke/SETUP.md checklist and check-smoke-setup.sh | 3 | two-way | smoke | W3 | done | VF01 | Builder | [done/SM07a-setup-check.md](done/SM07a-setup-check.md) |
 | SM08 | Close the 8 open Cursor findings on SM01, SM04, SM05, SM07 (docs first) | 3 | two-way | smoke | W3 | todo | none | Cursor CLI | [smoke/SM08-cursor-findings.md](smoke/SM08-cursor-findings.md) |
 | M01 | Exception watcher (dispatch-only, deterministic pre-step) | 4 | one-way | monitoring | W4 | todo | C03, C04, M02, O03, S00 | Builder | [monitoring/M01-exception-watcher-dispatch.md](monitoring/M01-exception-watcher-dispatch.md) |
 | M02 | Azure OIDC Reader role and login step | 4 | one-way | monitoring | W4 | todo | C04, S00 | Builder | [monitoring/M02-azure-oidc-reader.md](monitoring/M02-azure-oidc-reader.md) |

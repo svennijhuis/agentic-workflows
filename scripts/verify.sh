@@ -104,5 +104,14 @@ produce check-pr-body.sh bash scripts/check-pr-body.sh --template .github/pull_r
 bash scripts/check-pr-body.sh "$P/good.md" >/dev/null || fail "$P/good.md:1 G02a good PR body fixture fails"
 for b in "$P"/bad-*.md; do bash scripts/check-pr-body.sh "$b" >/dev/null && fail "$b:1 G02a bad PR body fixture passes (tautological)"; done
 
+echo "# smoke setup checklist (SM07a: smoke/SETUP.md and each good exit 0, each bad exits exactly 1 with one hit)"
+U=test/fixtures/smoke-setup
+produce check-smoke-setup.sh bash scripts/check-smoke-setup.sh smoke/SETUP.md
+for g in "$U"/good*.md; do bash scripts/check-smoke-setup.sh "$g" >/dev/null || fail "$g:1 SMOKESETUP good setup fixture fails"; done
+for b in "$U"/bad-*.md; do
+  h=$(bash scripts/check-smoke-setup.sh "$b"); rc=$?
+  { [ "$rc" -eq 1 ] && [ "$(grep -c . <<<"$h")" -eq 1 ]; } || fail "$b:1 SMOKESETUP bad setup fixture does not exit 1 with exactly one hit (rc $rc)"
+done
+
 echo "$N failures"
 [ "$N" -eq 0 ]
