@@ -7,7 +7,7 @@
 #   A plain file argument (a workflow .md) has no logs: nothing to check.
 # shellcheck source=lib.sh
 . "$(dirname "$0")/lib.sh"
-command -v gitleaks >/dev/null 2>&1 || { echo "policies/checks/POL26.sh:1 VERIFY missing: gitleaks"; exit 1; }
+command -v gitleaks >/dev/null 2>&1 || { echo "policies/checks/POL26.sh:1 VERIFY needs-human missing: gitleaks"; exit 2; }
 report=$(mktemp); tmp=$(mktemp -d); trap 'rm -rf "$report" "$tmp"' EXIT
 
 check_root() { # ROOT IGNOREFILE

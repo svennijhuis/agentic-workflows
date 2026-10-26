@@ -1,0 +1,3 @@
+# Good POL26 fixture ignore file: run logs stay local.
+/.github/aw/logs/
+*.log

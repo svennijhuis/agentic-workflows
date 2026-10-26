@@ -9,7 +9,7 @@
 #        check-pbi-template.sh FILE...    check these files (fixtures)
 set -uo pipefail
 cd "$(git rev-parse --show-toplevel)" || exit 2
-command -v python3 >/dev/null 2>&1 || { echo "scripts/check-pbi-template.sh:1 VERIFY missing: python3"; exit 1; }
+command -v python3 >/dev/null 2>&1 || { echo "scripts/check-pbi-template.sh:1 VERIFY needs-human missing: python3"; exit 2; }
 if [ $# -eq 0 ]; then
   base=${TPL_BASE:-$(git merge-base HEAD origin/main 2>/dev/null)}
   [ -n "$base" ] || { echo "scripts/check-pbi-template.sh:1 TPL01 no base (fetch origin/main or set TPL_BASE)"; exit 1; }

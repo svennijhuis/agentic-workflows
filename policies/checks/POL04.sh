@@ -3,7 +3,7 @@
 # Repo mode scans the tree with .gitleaks.toml, which allowlists only the POL04/POL20/POL26 bad fixtures.
 # shellcheck source=lib.sh
 . "$(dirname "$0")/lib.sh"
-command -v gitleaks >/dev/null 2>&1 || { echo "policies/checks/POL04.sh:1 VERIFY missing: gitleaks"; exit 1; }
+command -v gitleaks >/dev/null 2>&1 || { echo "policies/checks/POL04.sh:1 VERIFY needs-human missing: gitleaks"; exit 2; }
 PAT='gh[pousr]_[A-Za-z0-9]{36}|github_pat_[A-Za-z0-9_]{22,}'
 report=$(mktemp); trap 'rm -f "$report"' EXIT
 declare -A seen

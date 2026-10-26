@@ -4,7 +4,7 @@
 # (Full body drift is caught by scripts/verify.sh: compile, then git status on workflows/.)
 # shellcheck source=lib.sh
 . "$(dirname "$0")/lib.sh"
-if ! gh aw version >/dev/null 2>&1; then echo "policies/checks/POL17.sh:1 VERIFY missing: gh aw"; exit 1; fi
+if ! gh aw version >/dev/null 2>&1; then echo "policies/checks/POL17.sh:1 VERIFY needs-human missing: gh aw"; exit 2; fi
 PIN_AW=$(jq -r '.["gh-aw"]' "$POL_ROOT/.github/aw.json"); PIN_CP=$(jq -r '.engines.copilot' "$POL_ROOT/.github/aw.json")
 for f in $(targets "$@"); do
   is_workflow "$f" || continue

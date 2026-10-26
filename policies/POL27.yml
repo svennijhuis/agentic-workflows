@@ -1,0 +1,9 @@
+id: POL27
+title: 'Verify toolchain pinned in one place'
+rule: 'Every tool scripts/verify.sh installs (actionlint, gitleaks, yq, shellcheck) has one version, url and sha256 in .github/aw.json tools:, and .github/workflows/verify.yml downloads exactly those urls and checks each sha256 (C14): for every curl -o FILE there is a non-comment line that is exactly echo "<pinned sha256>  FILE" | sha256sum -c - (two spaces, nothing else on the line), and any other form is not a check; a set +e (or set +o errexit) on any line before it is a hit. gh-aw has one pin, the top-level gh-aw key, read by scripts/verify.sh and POL27; a second gh-aw pin is a hit. git, gh and jq are runner-provided and outside POL27, but scripts/verify.sh still exits 2 when one is missing. Repo-mode roots are .github/aw.json and .github/workflows/verify.yml; a missing root, an empty scan or a parse error prints file:line POL27 and exits 1.'
+why: 'Local, CI and agents must run the same tool versions, or a green run proves nothing about the other place.'
+check: policies/checks/POL27.sh
+bad_fixture: test/fixtures/bad/POL27/
+good_fixture: test/fixtures/good/POL27/
+pbi: docs/pbi/done/VF01.md
+pins: .github/aw.json
