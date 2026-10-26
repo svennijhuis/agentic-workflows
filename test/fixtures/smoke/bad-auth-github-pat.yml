@@ -1,0 +1,10 @@
+scenarios:
+  - id: orders-list
+    env: tst
+    method: GET
+    path: /api/orders
+    auth: none
+    headers:
+      X-Request-Id: github_pat_FAKE0000
+    expect:
+      status: 200

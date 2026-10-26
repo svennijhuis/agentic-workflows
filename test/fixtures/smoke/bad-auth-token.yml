@@ -5,6 +5,6 @@ scenarios:
     path: /api/orders
     auth: none
     headers:
-      X-Smoke-Trace: FAKE0000000000.FAKE0000000000.FAKE0000000000
+      X-Request-Id: FAKE0000000000.FAKE0000000000.FAKE0000000000
     expect:
       status: 200

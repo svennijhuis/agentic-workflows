@@ -5,6 +5,9 @@ scenarios:
     method: GET
     path: /api/orders?limit=1
     auth: smoke-jwt
+    headers:
+      Accept: application/json
+      x-request-id: smoke-orders-list
     expect:
       status: 200
       json:
@@ -23,6 +26,9 @@ scenarios:
     path: /api/orders
     auth: smoke-jwt
     test_data_only: true
+    headers:
+      Content-Type: application/json
+      If-None-Match: '"v1"'
     expect:
       status: 201
       json:
