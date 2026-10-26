@@ -104,7 +104,7 @@ Next: VF02b, after WF01 (lane 1, edits POL23).
 | SM07a | open [#16](https://github.com/svennijhuis/agentic-workflows/pull/16), head `bdab17f` | `docs/pbi/done/SM07a-setup-check.md` (in #16 at bdab17f) |
 | SM04a | open [#17](https://github.com/svennijhuis/agentic-workflows/pull/17), head `8226e99` | `docs/pbi/done/SM04a-auth-check.md` (in #17 at 8226e99) |
 | SM01a | todo, PBI file in open [#15](https://github.com/svennijhuis/agentic-workflows/pull/15), head `368f837` | `docs/pbi/smoke/SM01a.md` (in #15 at 368f837) |
-| SM01b | todo, PBI file in open [#18](https://github.com/svennijhuis/agentic-workflows/pull/18), head `905e953` | `docs/pbi/smoke/SM01b.md` (in #18 at 905e953) |
+| SM01b | todo, PBI file in open [#18](https://github.com/svennijhuis/agentic-workflows/pull/18), head `11700aa` | `docs/pbi/smoke/SM01b.md` (in #18 at 11700aa) |
 | SM05b, SM05c | todo, sections in the parent | [docs/pbi/smoke/SM05.md](pbi/smoke/SM05.md) |
 | SM04b | todo, section in the parent | [docs/pbi/smoke/SM04.md](pbi/smoke/SM04.md) |
 | SM03a, SM03b | todo | [docs/pbi/smoke/SM03.md](pbi/smoke/SM03.md) |
@@ -152,7 +152,7 @@ Next: TPL02, lane 3, after #15 merges.
 
 | PBI | Status | File |
 |---|---|---|
-| WF01 | todo, PBI file in open [#18](https://github.com/svennijhuis/agentic-workflows/pull/18), head `905e953` (round 1 in progress) | `docs/pbi/verify/WF01.md` (in #18 at 905e953) |
+| WF01 | todo, PBI file in open [#18](https://github.com/svennijhuis/agentic-workflows/pull/18), head `11700aa` (round 1 in progress) | `docs/pbi/verify/WF01.md` (in #18 at 11700aa) |
 
 Next: lane 1, after SM05c and before VF02b.
 
@@ -165,7 +165,7 @@ Next: lane 1, after SM05c and before VF02b.
 | SM01a row 1 `\|` fix | parked, to apply to `docs/pbi/smoke/SM01a.md` after #15 merges | lane 3 |
 | SM04b token hygiene | [docs/pbi/smoke/SM04.md](pbi/smoke/SM04.md) | lane 2, after SM04a (#17) |
 | SM05b, SM05c | [docs/pbi/smoke/SM05.md](pbi/smoke/SM05.md) | lane 1, after SM05a (#14) |
-| VF02d carries, 25 items | VF02d section of [docs/pbi/verify/VF02.md](pbi/verify/VF02.md) (older rows); the new rows land with #18 round 1, not pushed at 905e953 | lane 1, VF02d |
+| VF02d carries, 25 items | VF02d section of [docs/pbi/verify/VF02.md](pbi/verify/VF02.md) (older rows); the new rows land with #18 round 1, not pushed at 11700aa | lane 1, VF02d |
 
 VF02d carries 21 to 25 come from the #13 waivers: a second job running verify without checkout (21), `timeout-minutes: 0` passes (22), curl short options let POL27 accept any curl line (23, Cursor high), tar flags and archive not pinned (24), `setup_allow` not in the mutation proof (25).
 
