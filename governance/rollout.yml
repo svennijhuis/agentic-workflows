@@ -2,3 +2,7 @@
 # unstaged write outputs. Adding a name needs Sven's exact yes plus 3 audited staged runs (Bar H).
 # Empty: nothing is enabled.
 promoted: []
+# SM05a: deterministic (non-agentic) workflows that may be called with workflow_call. Map of file name to
+# {triggers, yes: {date, quote}}. Empty: no entry. The smoke-run.yml entry lands in the SM03 PR, only after
+# Sven's exact yes is quoted. deployment_status is never allowed; agentic workflows never get workflow_call.
+deterministic_triggers: {}

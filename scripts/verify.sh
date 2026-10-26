@@ -31,6 +31,9 @@ produce() {
   while IFS= read -r l; do [ -n "$l" ] && fail "$l"; done <"$OUT"
 }
 
+# pol03_roots: only the failed case lines of scripts/test-POL03-roots.sh (its ok lines and tally are not findings)
+pol03_roots() { local o rc; o=$(bash scripts/test-POL03-roots.sh 2>&1); rc=$?; grep ' POL03T ' <<<"$o"; [ "$rc" -eq 0 ] || [ "$rc" -eq 1 ] || return 2; return "$rc"; }
+
 # version_of TOOL: X.Y.Z the installed TOOL reports, empty when it cannot say
 version_of() {
   case "$1" in
@@ -88,6 +91,9 @@ done
 
 echo "# POL23 no tautological checks (every check vs its bad and good fixture)"
 produce POL23 bash policies/checks/POL23.sh
+
+echo "# POL03 repo-mode cases (scripts/test-POL03-roots.sh: *.yaml, locks, POL_ROLLOUT, promoted)"
+produce test-POL03-roots.sh pol03_roots
 
 echo "# PBI docs (gist A1 proof/door fields, links, dashes)"
 produce check-pbi-docs.sh bash scripts/check-pbi-docs.sh
