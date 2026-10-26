@@ -1,0 +1,4 @@
+scenarios:
+  - id: orders-list
+    env: [tst
+    method: GET
