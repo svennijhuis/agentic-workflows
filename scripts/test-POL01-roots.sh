@@ -4,6 +4,7 @@
 set -uo pipefail
 cd "$(git rev-parse --show-toplevel)" || exit 2
 N=0; V=.github/workflows/verify.yml; C=policies/POL01.yml
+VL=$(grep -n -m1 'uses: actions/checkout@' "$V" | cut -d: -f1)  # checkout line in $V, so a verify.yml edit does not break the expected text
 
 # case NAME WANT_EXIT WANT_TEXT SETUP [WANT_HITS]: run POL01 repo mode in a fresh copy after SETUP
 case_() {
@@ -25,9 +26,9 @@ case_ roots-map 1 'POL01 yml_roots missing or not a list' "yq -i '.yml_roots = {
 case_ roots-null 1 'POL01 yml_roots missing or not a list' "yq -i '.yml_roots = null' $C"
 case_ roots-blank-entry 1 'POL01 yml_roots entry is not a glob string' "yq -i '.yml_roots = [\"\"]' $C"
 case_ config-broken 1 "$C:1 POL01 yml_roots unreadable (yq error)" "printf 'yml_roots: [\n' >> $C"
-case_ roots-deleted-tag-still-caught 1 "$V:20 POL01 action not pinned to a full SHA: actions/checkout@v4" \
+case_ roots-deleted-tag-still-caught 1 "$V:$VL POL01 action not pinned to a full SHA: actions/checkout@v4" \
   "yq -i 'del(.yml_roots)' $C && sed -i -E 's#actions/checkout@[0-9a-f]{40}#actions/checkout@v4#' $V"
-case_ roots-without-github-still-caught 1 "$V:20 POL01 action not pinned to a full SHA: actions/checkout@v4" \
+case_ roots-without-github-still-caught 1 "$V:$VL POL01 action not pinned to a full SHA: actions/checkout@v4" \
   "yq -i '.yml_roots = [\"workflows/shared/verify/*.yml\"]' $C && sed -i -E 's#actions/checkout@[0-9a-f]{40}#actions/checkout@v4#' $V"
 case_ root-glob-no-match 0 '' "yq -i '.yml_roots = [\"nothing-here/*.yml\"]' $C"
 case_ verify-template-tag 1 'workflows/shared/verify/verify.yml:13 POL01 action not pinned to a full SHA: actions/checkout@v4' \
