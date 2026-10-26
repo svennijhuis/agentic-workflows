@@ -13,7 +13,7 @@ ARC07 harness model (glossary and layers): [../../explanation/harness-model.md](
 - [ARC05: Release flow](../done/ARC05-release-flow.md)
 - [ARC06: Org switch](../done/ARC06-org-switch.md)
 
-Related governance: [G00-org-target-structure](../done/G00-org-target-structure.md), [G05-org-only-appendix](../governance/G05-org-only-appendix.md).
+Related governance: [G00-org-target-structure](../done/G00-org-target-structure.md), [G05-org-only-appendix](../done/G05-org-only-appendix.md).
 
 ## Dependency sketch
 
