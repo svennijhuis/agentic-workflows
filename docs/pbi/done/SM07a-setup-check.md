@@ -40,7 +40,7 @@ POL23 only runs `policies/checks/POLnn.sh`, so `check-smoke-setup.sh` gets its o
 - [x] `scripts/verify.sh` loop for `check-smoke-setup.sh` (SM01 style): `smoke/SETUP.md` and each good exit 0, each bad exits exactly 1 with one hit; `--help` prints usage and exits 0; yq missing exits 2 (needs-human)
 - [ ] Sven runs steps 1 to 7 and says yes in the room: SM07b, not this PR
 ## Technical design
-- Components and files: `smoke/SETUP.md`, `scripts/check-smoke-setup.sh`, `test/fixtures/smoke-setup/` (2 good, 16 bad), `scripts/verify.sh` (loop)
+- Components and files: `smoke/SETUP.md`, `scripts/check-smoke-setup.sh`, `test/fixtures/smoke-setup/` (3 good, 20 bad), `scripts/verify.sh` (loop)
 - Module boundary: `check-smoke-setup.sh FILE...` with exit 0/1/2 and one `file:line SMOKESETUP message` per hit; the frontmatter slice, fence tracking and step rules sit behind it
 - Interfaces: input a checklist markdown file with frontmatter `steps: <n>`; exit 0 ok, 1 a hit (fail closed), 2 needs-human (yq missing); `--help`
 - Sequence:
@@ -51,7 +51,9 @@ flowchart TD
   B -->|no| X[exit 1, hit named]
   B -->|yes| C{yq on slice: parses, map, no duplicate key, steps integer}
   C -->|no| X
-  C -->|yes| D{every fence closes, marker and length}
+  C -->|yes| H{every HTML comment outside fences closes}
+  H -->|no| X
+  H -->|yes| D{every fence closes, marker and length}
   D -->|no| X
   D -->|yes| E{steps over 0, equals count, numbered 1 to n}
   E -->|no| X
@@ -60,7 +62,7 @@ flowchart TD
   F -->|yes| G[exit 0]
 ```
 
-- Failure modes: a missing or broken slice, an open fence, a wrong step count or order, or a step without a verify line fails verify with the line and rule named; yq missing exits 2 (needs-human), never 0
+- Failure modes: a missing or broken slice, an unclosed HTML comment (comment text never counts as a step or verify line), an open fence, a wrong step count or order, or a step without a verify line fails verify with the line and rule named; yq missing exits 2 (needs-human), never 0
 - Security: no secret values, client ids, tenant ids or URLs in the repo; `<api repo>` stays a placeholder; bots never sign in to Azure or edit Entra
 - Observability: verify log line per hit
 - Cost: 0
@@ -81,6 +83,11 @@ flowchart LR
 The SM07 todo rows come in PR #18 (`docs/pbi/smoke/SM07.md`) and are not on main yet, so the low findings from PR #16 sit here; whoever merges second moves them to SM07.
 - [ ] Cursor 5657735146 f3 low (security): `smoke/SETUP.md` L23 and L33. Step 6 says the two commands list the six vars and no secrets, but `gh variable list` prints names and values, and step 8 runs `gh secret list` only for `smoke-tst`. Fix: describe step 6 as `gh variable list` for the six names and say to keep the values off chat and off the PR; run `gh secret list` for both `smoke-tst` and `smoke-acc` in step 8.
 - [x] Cursor 5657735146 f4 low (readability): `docs/pbi/smoke/README.md` L4 gate sentence said no SM01 to SM07 build PR starts before SM08 merges. Resolved by the merge of main `9680af0` (#11): the line now says the SM08 rows live in the build PBIs (SM07a among them) and SM08 closes once those have merged. No edit on this PR.
+- [ ] Tester 2 6425735243 low: a step written right after `-->` on the same line is not counted (still fails through the steps mismatch).
+- [ ] Reviewer 6425777048 low 1: `` `<!--` `` in inline code reads as an unclosed comment (false hit, fails closed).
+- [ ] Reviewer 6425777048 low 2: `<!-- n --> verify: x` counts as a verify line, but CommonMark renders that line as raw HTML.
+- [ ] Cursor 5658043906 f1 low (security): same as 5657735146 f3 above (`gh variable list` prints values; `gh secret list` for both envs).
+- [x] Cursor 5658043906 f2 low: fixture count set to 3 good and 20 bad, HTML comment gate added to the diagram and Failure modes.
 ## Named asks for Sven
 - None for this PR. SM07b: name the API repo, run steps 1 to 7, say yes in the room.
 ## Cost
