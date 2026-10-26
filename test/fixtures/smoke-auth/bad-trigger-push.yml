@@ -1,0 +1,18 @@
+# Bad: push trigger, scalar on: (SM08 f1)
+name: smoke-auth fixture
+on: push
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - run: echo "env ok"
+  smoke:
+    needs: guard
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    environment: smoke-${{ inputs.env }}
+    steps:
+      - run: echo "smoke"

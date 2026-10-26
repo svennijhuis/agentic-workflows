@@ -195,6 +195,7 @@ flowchart LR
 | SM02 | Scenario generator at PR time | 3 | one-way | smoke | W3 | todo | SM01, BH08, P14 | Builder | [smoke/SM02.md](smoke/SM02.md) |
 | SM03 | Post-deploy smoke runner for tst and acc (no AI) | 3 | one-way | smoke | W3 | todo | SM01, SM04, SM05, SM07 | Builder | [smoke/SM03.md](smoke/SM03.md) |
 | SM04 | Smoke token: GitHub OIDC to Entra to APIM validate-jwt to backend | 3 | one-way | smoke | W3 | todo | SM07 | Builder | [smoke/SM04.md](smoke/SM04.md) |
+| SM04a | SM04 part: check-smoke-auth.sh parse, triggers and OIDC environment rule | 3 | two-way | smoke | W3 | done | VF01 | Builder | [done/SM04a-auth-check.md](done/SM04a-auth-check.md) |
 | SM05 | POL03 + POL25 allow workflow_call for the smoke runner only | 3 | two-way | smoke | W3 | todo | POL25, POL03, POL23, scripts/lib/on-triggers.sh | Builder | [smoke/SM05.md](smoke/SM05.md) |
 | SM06 | Smoke reporting on PR or release, ping on fail | 3 | two-way | smoke | W3 | todo | SM03 | Builder | [smoke/SM06.md](smoke/SM06.md) |
 | SM07 | Setup steps only Sven does | 3 | one-way | smoke | W3 | todo | none | Builder | [smoke/SM07.md](smoke/SM07.md) |

@@ -71,6 +71,14 @@ produce actionlint gate_actionlint
 echo "# shellcheck"
 produce shellcheck gate_shellcheck
 
+echo "# smoke auth check (SM04a: each good exits 0, each bad exits exactly 1 with one hit)"
+A=test/fixtures/smoke-auth
+for g in "$A"/good*.yml; do bash scripts/check-smoke-auth.sh "$g" >/dev/null || fail "$g:1 SMOKEAUTH good smoke auth fixture fails"; done
+for b in "$A"/bad-*.yml; do
+  h=$(bash scripts/check-smoke-auth.sh "$b"); rc=$?
+  { [ "$rc" -eq 1 ] && [ "$(grep -c . <<<"$h")" -eq 1 ]; } || fail "$b:1 SMOKEAUTH bad smoke auth fixture does not exit 1 with exactly one hit (rc $rc)"
+done
+
 echo "# import-schema fixtures (C05)"
 for kind in good bad; do
   d=test/fixtures/import-schema/$kind; tmp=$(mktemp -d); cp -r "$d" "$tmp/w"
