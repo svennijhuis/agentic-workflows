@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # POL01 pinned versions only: remote imports/skills @<40-hex> or @vX.Y.Z, plugins @vX.Y.Z only (C12 v1.1),
-# agentPacks paths on the policies/POL01.yml allowlist, actions by full SHA.
+# agentPacks paths on the policies/POL01.yml allowlist, actions by full SHA (yml roots: policies/POL01.yml yml_roots).
 # shellcheck source=lib.sh
 . "$(dirname "$0")/lib.sh"
 
@@ -29,25 +29,36 @@ check_ref() { # FILE KIND REF
   fi
 }
 
+uses_hit() { # FILE USES
+  case "$2" in ""|./*|docker://*) return 0 ;; esac
+  [[ "$2" =~ $SHA ]] || hit "$(rel "$1")" "$(fline "$1" "$2")" POL01 "action not pinned to a full SHA: $2"
+}
+
+yml_walk() { # FILE: whole-file yq walk for *.yml (md keeps q()), a parse error is a hit
+  local f=$1 out l u
+  if ! out=$(yq '.. | select(tag == "!!map" and has("uses")) | .uses' "$f" 2>/dev/null); then
+    l=$(yq '.' "$f" 2>&1 >/dev/null | grep -oE 'line [0-9]+' | head -1 | grep -oE '[0-9]+')
+    hit "$(rel "$f")" "${l:-1}" POL01 "parse error"; return
+  fi
+  while IFS= read -r u; do uses_hit "$f" "$u"; done <<<"$out"
+}
+
 for f in $(targets "$@"); do
+  case "$f" in *.yml) yml_walk "$f"; continue ;; esac
   for kind in imports skills plugins; do
     while IFS= read -r ref; do [ -n "$ref" ] && check_ref "$f" "$kind" "$ref"; done \
       < <(q "$f" ".${kind}[]? | select(tag == \"!!str\") , (.${kind}[]? | select(tag == \"!!map\") | .uses // .path)")
   done
-  while IFS= read -r u; do
-    [ -z "$u" ] && continue
-    case "$u" in ./*|docker://*) continue ;; esac
-    [[ "$u" =~ $SHA ]] || hit "$(rel "$f")" "$(fline "$f" "$u")" POL01 "action not pinned to a full SHA: $u"
-  done < <(q "$f" 'del(.imports) | .. | select(tag == "!!map" and has("uses")) | .uses')
+  while IFS= read -r u; do uses_hit "$f" "$u"; done < <(q "$f" 'del(.imports) | .. | select(tag == "!!map" and has("uses")) | .uses')
 done
 
 if repo_mode "$@"; then
-  for y in "$POL_ROOT"/.github/workflows/*.yml; do
-    [ -e "$y" ] || continue; case "$y" in *.lock.yml) continue ;; esac
-    while IFS= read -r u; do
-      [ -z "$u" ] && continue
-      [[ "$u" =~ $SHA ]] || hit "$(rel "$y")" "$(fline "$y" "$u")" POL01 "action not pinned to a full SHA: $u"
-    done < <(yq '.. | select(tag == "!!map" and has("uses")) | .uses' "$y")
+  mapfile -t ROOTS < <(polcfg POL01 '.yml_roots[]')
+  for g in "${ROOTS[@]}"; do
+    for y in "$POL_ROOT"/$g; do
+      [ -e "$y" ] || continue; case "$y" in *.lock.yml) continue ;; esac
+      yml_walk "$y"
+    done
   done
 fi
 pol_done
