@@ -233,6 +233,7 @@ flowchart LR
 | F75 | Weekly merged PR sample | 5 | one-way | agent-factory | W5 | folded into AO10 | C03, C04, O01, O03, R01, X01 | Builder | [agent-factory/F75-weekly-merged-pr-sample.md](agent-factory/F75-weekly-merged-pr-sample.md) |
 | G04 | Config governance | 5 | two-way | governance | PR 0 | todo | C03, POL18 | Cursor CLI | [governance/G04-config-governance.md](governance/G04-config-governance.md) |
 | G05 | Org switch checklist (org-only features) | 5 | one-way | governance | W5 | done | G00, C02 | Cursor CLI | [done/G05-org-only-appendix.md](done/G05-org-only-appendix.md) |
+| G05a | ORG-ONLY.md follow-ups: mermaid labels, billing box scope | 5 | two-way | governance | W5 | todo | G05 | Cursor CLI | [governance/G05a-org-only-followups.md](governance/G05a-org-only-followups.md) |
 | G06 | CorrectionOps feedback loop | 5 | two-way | governance | PR 0 | todo | G01, C01 | Cursor CLI | [governance/G06-correctionops-feedback-loop.md](governance/G06-correctionops-feedback-loop.md) |
 | L02 | Update vs upgrade, safe update | 5 | two-way | release | PR 0 | todo | L01 | Cursor CLI | [release/L02-update-vs-upgrade-safe-update.md](release/L02-update-vs-upgrade-safe-update.md) |
 | L03 | Deprecation | 5 | two-way | release | PR 0 | todo | L01, G01 | Cursor CLI | [release/L03-deprecation.md](release/L03-deprecation.md) |

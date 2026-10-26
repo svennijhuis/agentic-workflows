@@ -5,49 +5,57 @@
 - Block: 3
 - Lane: Builder
 - Depends on: SM01 ([PR #11](https://github.com/svennijhuis/agentic-workflows/pull/11), not merged yet; `scripts/check-smoke.sh` lands with it)
-- proof: each of the 11 new `test/fixtures/smoke/bad-*` cases below exits exactly 1 under `bash scripts/check-smoke.sh` (case 11 as a two-file call), `good.yml` and `good-dotted.yml` still exit 0, in the `scripts/verify.sh` loop; `./scripts/verify.sh` ends with `0 failures`
+- proof: each of the 22 new `test/fixtures/smoke/bad-*` cases below exits exactly 1 under `bash scripts/check-smoke.sh` (row 11 as a two-file call), `good.yml`, `good-dotted.yml` and the new `good-json-oneline.yml` exit 0, in the `scripts/verify.sh` loop; `./scripts/verify.sh` ends with `0 failures`
 - door: two-way
-- triage: build (the open findings Sven's 2-round cap moved off PR #11 at 68b63f2: Cursor review 5657322997 f1 to f4 and Reviewer comment 6424620155; each one exits 0 today and gets one FAKE bad fixture)
+- triage: build (the open findings Sven's 2-round cap moved off PR #11 at 68b63f2: Cursor reviews 5657322997 f1 to f4 and 5657407855 f1 to f7, Reviewer comment 6424620155 and Tester comment 6424705361; each one exits 0 today and gets one FAKE bad fixture)
 - feedback: `bash scripts/check-smoke.sh` on each new bad fixture exits 1 with one hit; the two good fixtures exit 0; `./scripts/verify.sh` gives `0 failures`
 - harness: none (script)
 - review-input: diff + this PBI + DoD (+ linked spec) + PR description, never builder session logs (PA6)
 - kind: script (deterministic)
-- Source: PA8 (no D row; Sven, Development Agentic Workflows room, 2026-10-26 19:34 "Please do not 4 round we will fix issues later and add on list") https://github.com/svennijhuis/agentic-workflows/pull/11#pullrequestreview-5657322997 and https://github.com/svennijhuis/agentic-workflows/pull/11#issuecomment-6424620155
+- Source: PA8 (no D row; Sven, Development Agentic Workflows room, 2026-10-26 19:34 "Please do not 4 round we will fix issues later and add on list") https://github.com/svennijhuis/agentic-workflows/pull/11#pullrequestreview-5657322997 and https://github.com/svennijhuis/agentic-workflows/pull/11#issuecomment-6424620155 https://github.com/svennijhuis/agentic-workflows/pull/11#issuecomment-6424705361
 ## Goal
 Close the gaps left open on #11 with typed, allowlisted values, not more patterns, so `scripts/check-smoke.sh` fails closed on every value it reads.
 ## Context
-SM01 ships `scripts/check-smoke.sh` in [PR #11](https://github.com/svennijhuis/agentic-workflows/pull/11). Under Sven's 2-round cap (2026-10-26 19:34) Reviewer passed #11 at 68b63f2 with the findings below still open. Each one was reproduced with `scripts/check-smoke.sh` from 68b63f2 on a copy of `test/fixtures/smoke/good.yml` with one value changed, and each exits 0 today (no hit). This PBI only starts after #11 merges.
+SM01 ships `scripts/check-smoke.sh` in [PR #11](https://github.com/svennijhuis/agentic-workflows/pull/11). Under Sven's 2-round cap (2026-10-26 19:34) Reviewer and Tester passed #11 at 68b63f2 with the findings below still open. Each one was reproduced with `scripts/check-smoke.sh` from 68b63f2 on a copy of `test/fixtures/smoke/good.yml` with one value changed, and each exits 0 today (no hit). This PBI only starts after #11 merges.
 
-Fix map (Strategy draft, line numbers are `scripts/check-smoke.sh` at 68b63f2):
+Fix map (Strategy draft plus the Tester PASS 6424705361 and the Cursor run on 68b63f2, review 5657407855; line numbers are `scripts/check-smoke.sh` at 68b63f2):
 
 | # | Source | Gap (exits 0 at 68b63f2) | Fix |
 |---|---|---|---|
-| 1 | Cursor 5657322997 f1 medium | `status: 0x1000` (and `0o1130`): yq tags it `!!int`, `tostring` keeps `0x1000`, `[ "$status" -gt 599 ]` at :73 prints `integer expression expected` and the `elif` never calls `hit` (fails open) | range test inside yq: `tag == "!!int"` and decimal and `. >= 100 and . <= 599`; exit 1 when yq or the compare cannot decide |
-| 2 | Cursor 5657322997 f2 medium | a token in `expect.json[].equals`: split across lines (the `@tsv` read at :40 is one physical line at a time, so the rest of the scalar is never tested), and on one line with a short middle segment (`FAKE000000.e30.FAKE000000000`, `e30` is under 10 chars) | run the token `test()` inside yq on the whole scalar, print only `line` plus a fixed code, exit 1 when that yq call fails; JWT shape is three dot segments with a short middle allowed, or an `eyJ` start; move the `env`, `path`, `auth` reads into yq too so a newline cannot drop a field |
-| 3 | Cursor 5657322997 f3 low | `exists: "true"` (`!!str`): `.exists != true` at :26 treats the string as equal | `exists` must be tag `!!bool` and value `true`, same as `test_data_only` |
-| 4 | Cursor 5657322997 f4 low | `docs/pbi/README.md` line 435 still says "SM01-SM07 smoke (docs only so far)" and line 56 says SM01 waits on SM08, while #11 marks SM01 done | update both lines to the 2026-10-26 split (SM01 build carries its SM08 rows, SM08 closes after its last target PBI) |
-| 5 | Reviewer 6424620155 item 5 | `#access_token` fragment: `path: /x#access_token=FAKE0000000000` | `path` must not contain `#` |
-| 6 | Reviewer 6424620155 item 5 | `?client_secret=` and `?password=` query keys (the key list at :61 has only token, access_token, api_key, key, secret) | query key allowlist in `smoke/_schema.yml` (empty by default); any query key not on it is a hit |
-| 7 | Reviewer 6424620155 item 5 | `glpat-` prefix: `path: /x/glpat-FAKE0000000000` (PREFIX at :11 has no GitLab family) | add `glpat-` to the prefix list |
+| 1 | Cursor 5657322997 f1 medium, 5657407855 f2 high | `status: 0x1000` (and `0o1130`): yq tags it `!!int`, `tostring` keeps `0x1000`, `[ "$status" -gt 599 ]` at :73 prints `integer expression expected` and the `elif` never calls `hit` (fails open) | range test inside yq: `tag == "!!int"` and decimal and `. >= 100 and . <= 599`; exit 1 when yq or the compare cannot decide |
+| 2 | Cursor 5657322997 f2 medium, 5657407855 f1 high | a token, `Bearer ` or `ghp_` value split by a newline (`\n` escape or a block scalar) in `expect.json[].equals` or a header (`X-Request-Id: "ok\nghp_FAKE0000000000"`); a leading space makes `@tsv` quote the value, so `Accept: "  bearer FAKE00000000"` passes; a token (the `@tsv` read at :40 is one physical line at a time, so the rest of the scalar is never tested), and on one line with a short middle segment (`FAKE000000.e30.FAKE000000000`, `e30` is under 10 chars) | run the token `test()` inside yq on the whole scalar, print only `line` plus a fixed code, exit 1 when that yq call fails; JWT shape is three dot segments with a short middle allowed, or an `eyJ` start; move the `env`, `path`, `auth` reads into yq too so a newline cannot drop a field |
+| 3 | Cursor 5657322997 f3 low, 5657407855 f5 low | `exists: "true"` (`!!str`): `.exists != true` at :26 treats the string as equal | `exists` must be tag `!!bool` and value `true`, same as `test_data_only` |
+| 4 | Cursor 5657322997 f4 low, 5657407855 f7 low, Tester 6424705361 | `docs/pbi/README.md` line 435 still says "SM01-SM07 smoke (docs only so far)" and line 56 says SM01 waits on SM08, while #11 marks SM01 done; `docs/pbi/smoke/README.md:2` (Tester: `smoke/README.md:2`) still has the old order with SM08 first | update the three lines to the 2026-10-26 split (SM01 build carries its SM08 rows, SM08 closes after its last target PBI) |
+| 5 | Reviewer 6424620155 item 5, Tester 6424705361 | `#access_token` fragment: `path: /x#access_token=FAKE0000000000` | `path` must not contain `#` |
+| 6 | Reviewer 6424620155 item 5, Tester 6424705361 | `?client_secret=` and `?password=` query keys (the key list at :61 has only token, access_token, api_key, key, secret) | query key allowlist in `smoke/_schema.yml` (empty by default); any query key not on it is a hit |
+| 7 | Reviewer 6424620155 item 5, Tester 6424705361 | `glpat-` prefix: `path: /x/glpat-FAKE0000000000` (PREFIX at :11 has no GitLab family) | add `glpat-` to the prefix list |
 | 8 | Reviewer 6424620155 item 5 | a JWT in the path: `path: /x/FAKE000000.e30.FAKE000000000` | same yq token rule as row 2, run on `path` |
 | 9 | Reviewer 6424620155 item 6 (round 1 low) | `.yaml` glob: `scripts/verify.sh` at 68b63f2 already loops `smoke/*/scenarios.yaml` (:105), but the fixture loops (:103, :104) read only `good*.yml` and `bad-*.yml`, so a `bad-*.yaml` fixture is never run | fixture loops read `*.yml` and `*.yaml` |
 | 10 | Product Owner gap list | unique ids per file | done in #11 (duplicate id fixture `bad-dup-id.yml` exits 1, Reviewer probed it) |
 | 11 | Product Owner gap list, probe | the same `id` in two different smoke files: `check-smoke.sh a.yml b.yml` exits 0 (`ids` resets per file in `check_file`) | ids unique across all files in one call; a repeat in a second file is a hit on that file |
+| 12 | Tester 6424705361 | `?sig=FAKE0000000000` and `;token=FAKE0000000000` (`;` is not a query separator in the :61 regex) | same allowlist as row 6; split query and matrix params on `?`, `&` and `;` |
+| 13 | Tester 6424705361 | URL-encoded query keys: `?%74oken=FAKE0000000000` | percent-decode the key before the allowlist; a key that still holds `%` after decode is a hit |
+| 14 | Tester 6424705361, Cursor 5657407855 f4 medium | prefixes `ghr_`, `xoxe-`, `rk_live_` and `sk-` plus 20 alphanumerics (FAKE plus zeros; the literal is not written here because POL20 would flag it) exit 0; PREFIX at :11 is `gh[opsu]_` while POL20 uses `gh[pousr]_` | use `gh[pousr]_`, add `xoxe-`, `rk_live_` (and `rk_test_`) and an `sk-` alternative matching POL20 |
+| 15 | Tester 6424705361 | `Basic`, `Token` and `Bearer` are caught only at the start of a value: `X-Request-Id: "id Bearer FAKE0000000000"` exits 0 (:42 anchors with `^`) | match the scheme word followed by a space and a token-like run anywhere in the scalar |
+| 16 | Cursor 5657407855 f3 medium | false hit: two maps on one line that reuse a key, `json: [{path: $.items, exists: true}, {path: $.n, equals: 1}]`, exits 1 with `duplicate key 'path'` (KEYS at :18 keys by map line, `uniq -d` at :35 pools every map) | find duplicate keys inside each map in the yq filter, never across maps |
+| 17 | Cursor 5657407855 f6 low | false hit: id `orders list` then id `list` exits 1 (substring test at :64) | exact match per id (associative array or `grep -Fxq`); `id` a non-empty `!!str` with no whitespace |
 
-Note for the build: the id match at :64 uses a space-joined list, so an id with a space (`"a b"`) makes a later id `b` a false duplicate. Make `id` a non-empty `!!str` with no whitespace and match whole ids.
+Rows 16 and 17 are false hits (a valid file fails), not leaks; they get good fixtures. Review 5657322997 is posted on commit 68b63f2 but its body says "Cursor review at eab0e53"; 5657407855 is the run on 68b63f2.
 ## Steps
-1. After #11 merges, move the value checks of rows 1, 2, 3, 5, 6, 7, 8 and 11 into yq (whole scalars, tags checked), keeping the `file:line SMOKE message` output and exit 0, 1, 2.
+1. After #11 merges, move the value checks of rows 1 to 3, 5 to 8 and 11 to 17 into yq (whole scalars, tags checked), keeping the `file:line SMOKE message` output and exit 0, 1, 2.
 2. Add the query key allowlist to `smoke/_schema.yml` and `smoke/README.md`.
-3. Fix the fixture loops in `scripts/verify.sh` for `.yaml` (row 9) and the two README lines (row 4).
+3. Fix the fixture loops in `scripts/verify.sh` for `.yaml` (row 9) and the three README lines (row 4).
 4. Add the bad fixtures below, FAKE plus zeros values only, each differing from `good.yml` by one value.
 5. Run `./scripts/verify.sh` twice, `bash scripts/check-pbi-docs.sh`, `bash scripts/check-pbi-template.sh`, gitleaks.
 6. Move this file to `docs/pbi/done/` with `- Status: done` and `- PR: #<n>`, update the README rows.
 ## Definition of Done
 - [ ] Row 1: `test/fixtures/smoke/bad-status-hex.yml` (`status: 0x1000`) exits 1 with one hit, no bash compare error on stderr
 - [ ] Row 2: `bad-equals-token-oneline.yml` (`equals: FAKE000000.e30.FAKE000000000`) exits 1
-- [ ] Row 2: `bad-auth-token-multiline.yml` (the FAKE token in `equals` split across two lines in a quoted scalar) exits 1
+- [ ] Row 2: `bad-auth-token-multiline.yml` (the FAKE token in `equals` split by a newline) exits 1
+- [ ] Row 2: `bad-auth-newline.yml` (`X-Request-Id: "ok\nghp_FAKE0000000000"`) exits 1
+- [ ] Row 2: `bad-auth-bearer-space.yml` (`Accept: "  bearer FAKE00000000"`) exits 1
 - [ ] Row 3: `bad-exists-string.yml` (`exists: "true"`) exits 1
-- [ ] Row 4: `docs/pbi/README.md` lines 56 and 435 match the 2026-10-26 split
+- [ ] Row 4: `docs/pbi/README.md` lines 56 and 435 and `docs/pbi/smoke/README.md:2` match the 2026-10-26 split
 - [ ] Row 5: `bad-path-fragment.yml` (`path: /x#access_token=FAKE0000000000`) exits 1
 - [ ] Row 6: `bad-query-client-secret.yml` (`?client_secret=FAKE0000000000`) exits 1
 - [ ] Row 6: `bad-query-password.yml` (`?password=FAKE0000000000`) exits 1
@@ -56,12 +64,18 @@ Note for the build: the id match at :64 uses a space-joined list, so an id with 
 - [ ] Row 9: `bad-yaml-ext.yaml` (a bad scenario saved as `.yaml`) is run by the verify fixture loop and exits 1
 - [ ] Row 10: `bad-dup-id.yml` from #11 still exits 1 (no change)
 - [ ] Row 11: `test/fixtures/smoke/bad-dup-id-cross/a.yml` plus `b.yml` (same `id` in both) exits 1 when passed together, and the verify loop runs that pair as one case
+- [ ] Row 12: `bad-query-sig.yml` (`?sig=FAKE0000000000`) and `bad-query-semicolon.yml` (`;token=FAKE0000000000`) each exit 1
+- [ ] Row 13: `bad-query-encoded.yml` (`?%74oken=FAKE0000000000`) exits 1
+- [ ] Row 14: `bad-auth-ghr.yml`, `bad-auth-xoxe.yml`, `bad-auth-rk.yml` and `bad-auth-sk-dash.yml` (FAKE plus zeros after the prefix) each exit 1
+- [ ] Row 15: `bad-auth-scheme-mid.yml` (`X-Request-Id: "id Bearer FAKE0000000000"`) exits 1
+- [ ] Row 16: new good `good-json-oneline.yml` (two `expect.json` items on one line sharing `path`) exits 0; `bad-dup-env.yml` still exits 1
+- [ ] Row 17: `good-json-oneline.yml` also holds ids `orders-list` and `list` and exits 0; `bad-id-space.yml` (an id with whitespace) exits 1
 - [ ] `good.yml` and `good-dotted.yml` (`path: /v1.2.3`) still exit 0
 - [ ] `./scripts/verify.sh` ends with `0 failures` (run twice); `bash scripts/check-pbi-docs.sh` and `bash scripts/check-pbi-template.sh` print nothing; gitleaks clean; no em or en dash; `policies/checks/POL23.sh` untouched
 - [ ] No real or JWT-prefixed token in any file (FAKE plus zeros only)
 - [ ] A fresh Cursor review on the SM01a PR head has no open medium or above
 ## Technical design
-- Components and files: `scripts/check-smoke.sh`, `smoke/_schema.yml`, `smoke/README.md`, `scripts/verify.sh` (smoke fixture loops only), `test/fixtures/smoke/bad-*.yml`, `bad-yaml-ext.yaml`, `bad-dup-id-cross/`, `docs/pbi/README.md`
+- Components and files: `scripts/check-smoke.sh`, `smoke/_schema.yml`, `smoke/README.md`, `scripts/verify.sh` (smoke fixture loops only), `test/fixtures/smoke/bad-*.yml`, `bad-yaml-ext.yaml`, `bad-dup-id-cross/`, `good-json-oneline.yml`, `docs/pbi/README.md`, `docs/pbi/smoke/README.md`
 - Module boundary: `scripts/check-smoke.sh FILE...` (exit 0, 1, 2, `file:line SMOKE message`) stays the only interface; the typed yq value rules sit behind it
 - Interfaces: input one or more `scenarios.yml` or `.yaml` files; output one line per hit; exit 0 ok, 1 a hit or a value yq cannot decide, 2 needs-human (yq missing)
 - Sequence:
@@ -85,12 +99,12 @@ sequenceDiagram
 - Proof: same as proof: above
 - Door: two-way (script and fixtures only, nothing enabled)
 ## Evidence
-Probes on 68b63f2 (`scripts/check-smoke.sh` from #11, one value changed in a copy of `good.yml`): rows 1, 2 (split and short middle), 3, 5, 6, 7, 8 and 11 exit 0. A one-line token with three 10+ char segments in `equals` or `path` already exits 1.
+Probes on 68b63f2 (`scripts/check-smoke.sh` from #11, one value changed in a copy of `good.yml`): rows 1, 2 (newline split, leading space, short middle), 3, 5 to 8 and 11 to 15 exit 0, and the valid files of rows 16 and 17 exit 1. A one-line token with three 10+ char segments in `equals` or `path` already exits 1.
 ## Flow
 ```mermaid
 flowchart LR
   A[PR 11 merged] --> B[yq typed value rules]
-  B --> C[11 FAKE bad fixtures]
+  B --> C[22 FAKE bad fixtures, 1 new good]
   C --> D[verify.sh 0 failures]
 ```
 ## Named asks for Sven
@@ -99,5 +113,7 @@ none
 0 (script)
 ## Sources
 - Cursor review 5657322997 on PR #11 at 68b63f2: https://github.com/svennijhuis/agentic-workflows/pull/11#pullrequestreview-5657322997
+- Cursor review 5657407855 on PR #11 at 68b63f2: https://github.com/svennijhuis/agentic-workflows/pull/11#pullrequestreview-5657407855
 - Reviewer PASS comment 6424620155: https://github.com/svennijhuis/agentic-workflows/pull/11#issuecomment-6424620155
+- Tester PASS comment 6424705361: https://github.com/svennijhuis/agentic-workflows/pull/11#issuecomment-6424705361
 - Sven 2026-10-26 19:34, 2-round cap, leftovers to a todo PBI
