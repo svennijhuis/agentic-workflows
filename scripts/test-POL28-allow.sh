@@ -38,5 +38,8 @@ for b in ci-unknown-run.yml ci-bash-c-actionlint.yml ci-if-actionlint.yml ci-go-
   M+=("POL23 POL28 passes bad case $b (tautological)")
 done
 case_ mutation-allow-all policies/checks/POL23.sh 1 "yq -i '.run_allow = [\".*\"]' $C" "${M[@]}"
+# Repo mode reads *.yaml roots too: POL28 shape and POL03 triggers (Cursor 5657508090 f8).
+case_ yaml-root-shape "$P" 1 'cp test/fixtures/bad/POL28/ci-container.yml .github/workflows/ci.yaml' '.github/workflows/ci.yaml:8 POL28 job verify sets container'
+case_ pol03-yaml-root policies/checks/POL03.sh 1 'cp test/fixtures/bad/POL03-push.yml .github/workflows/ci.yaml' ".github/workflows/ci.yaml:3 POL03 trigger 'push' needs a governance/rollout.yml promotion"
 echo "$N failures"
 [ "$N" -eq 0 ]

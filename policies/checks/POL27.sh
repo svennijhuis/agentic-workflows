@@ -7,8 +7,8 @@
 #   version, url (naming that version as its own token) and sha256. verify.yml (VF02d1): the only download
 #   is a plain `curl ... -o FILE <tools: url>` line at the top level of a step run: block, and that same
 #   block checks FILE with the exact sha256 line, top level, after the curl; every tools: url is
-#   downloaded that way; no step or job sets continue-on-error or a shell without -e; gh-aw is
-#   installed at the gh-aw pin.
+#   downloaded that way; the job keys pass shape_hits (lib.sh); every gh extension line is exactly
+#   the gh-aw pin install.
 # shellcheck source=lib.sh
 . "$(dirname "$0")/lib.sh"
 command -v jq >/dev/null 2>&1 || { echo "policies/checks/POL27.sh:1 VERIFY needs-human missing: jq"; exit 2; }
@@ -48,7 +48,7 @@ check_aw() { # FILE: 0 when it parses (later checks may read it)
 check_verify() { # VERIFY_YML AW_JSON
   local f=$1 aw=$2 r t u s o pin rows j st l top txt want found urls="" files="" k jj ss ll tt xx a b c e ok; r=$(rel "$f")
   if ! yq -e 'tag == "!!map"' "$f" >/dev/null 2>&1; then hit "$r" 1 POL27 "parse error: not a YAML map"; return; fi
-  errexit_hits "$f" POL27
+  shape_hits "$f" POL27
   rows=$(run_lines "$f")
   while IFS=$'\037' read -r j st l top txt; do
     [ -n "$l" ] || continue
@@ -97,6 +97,12 @@ check_verify() { # VERIFY_YML AW_JSON
     [ -n "$u" ] && [[ " $urls " != *" $u "* ]] && hit "$r" 1 POL27 "does not download and check the $t pin from .github/aw.json with plain curl -o FILE plus its sha256 line"
   done
   pin=$(jq -r '.["gh-aw"] // ""' "$aw" 2>/dev/null)
+  # Every gh extension line is the exact pin line, so a later install cannot replace it (Cursor 5657508090 f7).
+  while IFS=$'\037' read -r _ _ l _ txt; do
+    [ -n "$l" ] || continue
+    grep -qE '(^|[^A-Za-z0-9_-])gh[[:space:]]+extension([[:space:]]|$)' <<<"$txt" || continue
+    [ "$txt" = "gh extension install github/gh-aw --pin $pin" ] || hit "$r" "$l" POL27 "gh extension line is not exactly gh extension install github/gh-aw --pin $pin: $txt"
+  done <<<"$rows"
   cut -d $'\037' -f5 <<<"$rows" | grep -qxF "gh extension install github/gh-aw --pin $pin" || hit "$r" "$(gline "$f" 'gh-aw')" POL27 "does not install gh-aw at the pin $pin"
 }
 

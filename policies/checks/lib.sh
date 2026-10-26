@@ -84,19 +84,85 @@ run_lines() {
           cont = (t ~ /\\$/) ? 1 : 0 }'
 }
 
-# errexit_hits FILE ID: hit when a step or job sets continue-on-error (any value), or a step shell:,
-#   job defaults.run.shell or workflow defaults.run.shell is set and not bash or sh (both run with -e
-#   on GitHub) and names no -e flag or errexit, or names a +e flag (Cursor 5655973880 medium 3). An env:
-#   (workflow, job or step) that sets PATH, BASH_ENV, ENV, SHELLOPTS or BASHOPTS is a hit too: it can
-#   swap sha256sum or turn errexit off before the first line runs.
-errexit_hits() {
-  local f=$1 id=$2 r l k v; r=$(rel "$f")
-  while read -r l k v; do
-    [ -n "$l" ] || continue
-    case "$k" in PATH | BASH_ENV | ENV | SHELLOPTS | BASHOPTS) hit "$r" "$l" "$id" "env: sets $k, so the step may not run the commands or errexit it shows"; continue ;; esac
-    if [ "$k" = continue-on-error ]; then hit "$r" "$l" "$id" "continue-on-error is set ($v), so a failed check does not fail the job"; continue; fi
-    case "$v" in bash | sh) continue ;; esac
-    if grep -qE -- '(^|[[:space:]])(-[A-Za-z]*e[A-Za-z]*|-o[[:space:]]+errexit)([[:space:]]|$)' <<<"$v" && ! grep -qE -- '(^|[[:space:]])\+[A-Za-z]*e' <<<"$v"; then continue; fi
-    hit "$r" "$l" "$id" "shell: $v runs without -e, so a failed command does not stop the step"
-  done < <(yq '[.. | select((path | join(".")) | test("^((env|jobs\\.[^.]+\\.env|jobs\\.[^.]+\\.steps\\.[0-9]+\\.env)\\.(PATH|BASH_ENV|ENV|SHELLOPTS|BASHOPTS)|defaults\\.run\\.shell|jobs\\.[^.]+\\.(continue-on-error|defaults\\.run\\.shell|steps\\.[0-9]+\\.(continue-on-error|shell)))$"))] | .[] | (line | tostring) + " " + (key | tostring) + " " + (. | tostring)' "$f" 2>/dev/null)
+# shape_hits FILE ID (VF02d1 round 2): the gate job is a key allowlist, not a denylist (Tester 6424839165,
+#   Cursor 5657508090 f1 to f6). A YAML anchor or alias anywhere is one hit. Then, on the exploded map:
+#   top-level keys only name, run-name, on, permissions, concurrency, jobs, env, defaults; permissions exactly
+#   contents: read (workflow, and job when set); job keys only name, runs-on (ubuntu-latest), timeout-minutes,
+#   permissions, steps, defaults, env (so no if, container, services, uses, outputs, strategy); step keys only
+#   name, id, uses, with, run, env, shell, timeout-minutes (so no if or working-directory); continue-on-error
+#   anywhere is a hit; shell: (step, job or workflow defaults.run) only bash, sh or bash --noprofile --norc
+#   -eo pipefail {0}; defaults only run.shell; every env: is a plain map whose only entry is
+#   GH_TOKEN: ${{ github.token }} (no LD_*, BASH_FUNC_*, PATH, fromJSON); uses: only actions/checkout@<40 hex>,
+#   one such step per workflow, with: only persist-credentials: false and fetch-depth. Hits on one step or
+#   job are joined into one line.
+read -r -d '' SHAPE_JQ <<'JQ' || true
+def shell_msgs: if . == null or . == "bash" or . == "sh" or . == "bash --noprofile --norc -eo pipefail {0}" then []
+  else ["shell: \(.) is not bash, sh or bash --noprofile --norc -eo pipefail {0}, so the step may not run its lines with -e"] end;
+def env_msgs: if type != "object" then ["env: is not a plain map (an expression such as fromJSON can set any variable)"]
+  else [to_entries[] | select(.key != "GH_TOKEN" or .value != "${{ github.token }}")
+    | "env: \(.key) is not allowed; the only env entry is GH_TOKEN: ${{ github.token }} (LD_*, BASH_FUNC_*, PATH and expressions can change what the step runs)"] end;
+def defaults_msgs: if type != "object" then ["defaults: is not a map"] else
+  [keys[] | select(. != "run") | "defaults.\(.) is not allowed"]
+  + (if has("run") then (.run | if type != "object" then ["defaults.run is not a map"] else
+      [keys[] | select(. != "shell") | if . == "working-directory" then "defaults.run.working-directory is set, so the gate may run another scripts/verify.sh" else "defaults.run.\(.) is not allowed" end]
+      + (.shell | shell_msgs) end) else [] end) end;
+def coe: "continue-on-error is set (\(.)), so a failed check does not fail the job";
+def perm: if . == {"contents": "read"} then [] else ["permissions must be exactly contents: read"] end;
+def step_msgs: if type != "object" then ["step is not a map"] else . as $s |
+  [keys[] | select(test("^(name|id|uses|with|run|env|shell|timeout-minutes|__line)$") | not)
+    | if . == "if" then "step if: is set, so the step may be skipped and the job still passes"
+      elif . == "working-directory" then "working-directory is set, so the step may run another scripts/verify.sh"
+      elif . == "continue-on-error" then ($s[.] | coe)
+      else "step key \(.) is not allowed in a gate workflow" end]
+  + (if has("uses") then
+      (if (.uses | type) == "string" and (.uses | test("^actions/checkout@[0-9a-f]{40}$")) then [] else ["uses: \(.uses) is not actions/checkout@<40 hex>; gate only through ./scripts/verify.sh"] end)
+      + (if (.with | type) != "object" then ["checkout has no with: persist-credentials: false"] else
+          [.with | keys[] | select(. != "persist-credentials" and . != "fetch-depth") | "checkout with: \(.) is not allowed (only persist-credentials: false and fetch-depth), so it may check out other code"]
+          + (if .with["persist-credentials"] == false then [] else ["checkout must set with: persist-credentials: false"] end)
+          + (if (.with | has("fetch-depth")) and ((.with["fetch-depth"] | type) != "number") then ["checkout fetch-depth is not a number"] else [] end) end)
+    elif has("with") then ["with: on a step without uses:"] else [] end)
+  + (if has("env") then (.env | env_msgs) else [] end)
+  + (.shell | shell_msgs) end;
+def job_msgs($j): if type != "object" then ["job \($j) is not a map"] else . as $v |
+  [keys[] | select(test("^(name|runs-on|timeout-minutes|permissions|steps|defaults|env|__line)$") | not)
+    | if . == "if" then "job \($j) if: is set, so the job may be skipped and the run still passes"
+      elif . == "container" or . == "services" then "job \($j) sets \(.), so the gate may run inside or beside another image"
+      elif . == "continue-on-error" then ($v[.] | coe)
+      else "job \($j) key \(.) is not allowed in a gate workflow" end]
+  + (if .["runs-on"] == "ubuntu-latest" then [] else ["job \($j) runs-on must be ubuntu-latest"] end)
+  + (if has("permissions") then (.permissions | perm | map("job \($j) " + .)) else [] end)
+  + (if has("defaults") then (.defaults | defaults_msgs | map("job \($j) " + .)) else [] end)
+  + (if has("env") then (.env | env_msgs | map("job \($j) " + .)) else [] end)
+  + (if (.steps | type) == "array" then [] else ["job \($j) steps: is not a list"] end) end;
+. as $d
+| ([keys[] | select(test("^(name|run-name|on|permissions|concurrency|jobs|env|defaults|__line)$") | not) | {k: ., m: "top-level key \(.) is not allowed in a gate workflow"}]
+  + [(.permissions | perm)[] | {k: "permissions", m: .}]
+  + (if has("env") then [(.env | env_msgs)[] | {k: "env", m: .}] else [] end)
+  + (if has("defaults") then [(.defaults | defaults_msgs)[] | {k: "defaults", m: .}] else [] end)
+  + (if (.jobs | type) != "object" then [{k: "jobs", m: "jobs: is not a map"}] else
+      [.jobs | to_entries[] | .key as $j | .value as $v | (($v | objects | .__line) // 1) as $l
+        | ([($v | job_msgs($j))[] | {l: $l, m: .}]
+           + [($v | objects | .steps | arrays | .[]) | ((objects | .__line) // $l) as $sl | (step_msgs[] | {l: $sl, m: .})])[]]
+      + [[.jobs[] | objects | .steps | arrays | .[] | objects | select(has("uses")) | .__line] | .[1:][] | {l: ., m: "second uses: step (one actions/checkout per workflow), so another checkout may replace scripts/verify.sh"}]
+    end))
+| .[] | "\(.l // ("key:" + .k))\u001f\(.m)"
+JQ
+
+shape_hits() {
+  local f=$1 id=$2 r l m k; r=$(rel "$f")
+  l=$(yq '[.. | select(anchor != "" or tag == "")] | .[0] | line' "$f" 2>/dev/null)
+  if [ -n "$l" ] && [ "$l" != null ] && [ "$l" != 0 ]; then hit "$r" "$l" "$id" "YAML anchor or alias, so a value may come from a node no check reads"; fi
+  local js rows
+  js=$(yq -o json -I0 'explode(.) | .__line = 1 | with(.jobs | select(tag == "!!map") | .[] | select(tag == "!!map"); .__line = line) | with(.jobs | select(tag == "!!map") | .[] | select(tag == "!!map") | .steps | select(tag == "!!seq") | .[] | select(tag == "!!map"); .__line = line)' "$f" 2>/dev/null) \
+    && [ "$(jq -r type <<<"$js" 2>/dev/null)" = object ] && rows=$(jq -r "$SHAPE_JQ" <<<"$js" 2>/dev/null) \
+    || { hit "$r" 1 "$id" "workflow shape unreadable (not a YAML map, or the shape check failed), fail closed"; return; }
+  while IFS=$'\037' read -r l m; do [ -n "$l" ] && hit "$r" "$l" "$id" "$m"; done < <(
+    while IFS=$'\037' read -r l m; do
+      [ -n "$l" ] || continue
+      case "$l" in key:*) k=${l#key:}; l=$(grep -nE -m1 "^${k}:" "$f" | cut -d: -f1); l=${l:-1} ;; esac
+      printf '%s\037%s\n' "$l" "$m"
+    done <<<"$rows" \
+      | awk -F '\037' '{ if (!($1 in m)) { o[++n] = $1; m[$1] = $2 } else m[$1] = m[$1] "; " $2 } END { for (i = 1; i <= n; i++) printf "%s\037%s\n", o[i], m[o[i]] }')
+  return 0
 }
+

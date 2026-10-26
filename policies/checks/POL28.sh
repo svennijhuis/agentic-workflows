@@ -10,8 +10,10 @@
 #   policies/POL28.yml as a whole line, or of setup_allow: in a file named verify.yml (POL27 checks every
 #   download there), and anything else (bash -c, if, go run, npx, make, sudo -u root actionlint and the
 #   rest) is a hit. A missing, empty or non-list run_allow or setup_allow, or an entry that is not a
-#   non-empty valid regex, is a hit (fail closed). Every uses: (step or job) is actions/checkout@<40 hex>. No
-#   step or job sets continue-on-error or a shell without -e. A step that runs verify.sh runs
+#   non-empty valid regex, is a hit (fail closed). The keys around the run lines are an allowlist too
+#   (shape_hits in lib.sh: one actions/checkout@<40 hex> with only persist-credentials and fetch-depth, shell
+#   only bash or sh, env only GH_TOKEN, no if, working-directory, container, services or YAML aliases,
+#   ubuntu-latest, contents: read). A step that runs verify.sh runs
 #   ./scripts/verify.sh and nothing else; a verify*.yml or verify*.yaml has that step.
 #   Agent surface: names scripts/verify.sh.
 # shellcheck source=lib.sh
@@ -48,10 +50,7 @@ check_workflow() { # FILE
     || [ "$(yq 'tag' "$f" 2>/dev/null)" != '!!map' ]; then
     hit "$r" 1 POL28 "parse error: not a YAML workflow"; return
   fi
-  while read -r line u; do
-    [ -n "$line" ] && hit "$r" "$line" POL28 "uses: $u is not actions/checkout@<40 hex>; gate only through $GATE"
-  done < <(yq '[(.jobs // {}) | .[] | (., ((.steps // []) | .[])) | select(has("uses")) | select(.uses | test("^actions/checkout@[0-9a-f]{40}$") | not)] | .[] | (.uses | line | tostring) + " " + .uses' "$f" 2>/dev/null)
-  errexit_hits "$f" POL28
+  shape_hits "$f" POL28
   while IFS=$'\037' read -r _ _ l _ txt; do
     [ -n "$l" ] || continue
     allowed "$txt" "$setup" || hit "$r" "$l" POL28 "run line is not in run_allow$([ "$setup" = 1 ] && echo ' or setup_allow') (policies/POL28.yml): $txt"
