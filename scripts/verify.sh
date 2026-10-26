@@ -5,6 +5,7 @@
 # Exit codes (PA5): 0 ok, 1 failed (a real finding), 2 needs-human (a tool missing or at the wrong version, or a
 # producer that could not run). An exit 2 line reads `file:line VERIFY needs-human <reason>`. Nothing is skipped.
 set -uo pipefail
+command -v git >/dev/null 2>&1 || { echo "scripts/verify.sh:1 VERIFY needs-human missing: git"; echo "1 failures"; exit 2; }
 ROOT=$(git rev-parse --show-toplevel 2>/dev/null) || { echo "scripts/verify.sh:1 VERIFY needs-human not inside a git repo"; echo "1 failures"; exit 2; }
 cd "$ROOT" || exit 2
 # shellcheck source=lib/gate-steps.sh

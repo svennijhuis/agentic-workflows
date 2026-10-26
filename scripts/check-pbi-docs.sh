@@ -3,11 +3,11 @@
 # Exit 0 only with empty output, 1 on any finding, 2 when it cannot run (VF01).
 #   A1    every PBI file has `- proof: <cmd>` and `- door: two-way|one-way`; one-way also has a one-way gate line
 #   DONE  every PBI in docs/pbi/done/ has `- Status: done` and `- PR: #<n>`
-#   LINK  every relative markdown link in tracked .md files resolves (fixtures excluded)
+#   LINK  every relative markdown link in tracked or untracked (not ignored) .md files resolves (fixtures excluded)
 set -uo pipefail
 cd "$(git rev-parse --show-toplevel)" || exit 2
 command -v python3 >/dev/null 2>&1 || { echo "scripts/check-pbi-docs.sh:1 VERIFY needs-human missing: python3"; exit 2; }
-git ls-files -z '*.md' | python3 -c '
+git ls-files -z --cached --others --exclude-standard '*.md' | python3 -c '
 import os, re, sys
 hits = 0
 _print = print
