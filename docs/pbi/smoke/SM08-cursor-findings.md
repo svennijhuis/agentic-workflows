@@ -48,7 +48,6 @@ Counts after the fix: SM01 gains 2 bad and 1 good fixture (11 bad, 2 good). SM04
 - [ ] Finding 2: SM04 applies the environment rule to jobs that inherit `id-token: write` and lists `bad-env-object.yml` and `bad-inherited-id-token.yml`
 - [ ] Finding 3: SM05 diagram has the POL03 staged node before `OK` on the agentic path, tied to `bad/POL03-smoke-unstaged-write.md`
 - [ ] Finding 4: SM05 rule order says `sven_yes` does not bypass the `deployment_status` fail or the `workflow_call` allowlist, names `$POL25_CFG` and lists both `bad/POL25-smoke-sven-yes-*` cases
-- [ ] Finding 4 (PO, 2026-10-26): the `sven_yes` skip stays; SM05 lists the bad fixture `test/fixtures/bad/POL25-smoke-sven-yes-deployment-status/` (case `POL25.yml` has a `sven_yes` row for the workflow, the workflow uses `deployment_status`) and POL25 must exit 1 on it
 - [ ] Finding 5: SM05 node RT is POL03 only; `good/POL25-smoke-call-plus-pr/` and `bad/POL03-smoke-entry-extra/` listed
 - [ ] SM07 still documents Sven's manual setup step as switched off and non-blocking; no SM build PR waits on it
 - [ ] Finding 6: SM07 defines the parse step (frontmatter via `yq`, fence count) and lists `bad-broken.md` (bad YAML) and `bad-unclosed-fence.md`
