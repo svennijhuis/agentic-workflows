@@ -4,12 +4,17 @@
 # Args: a file named *aw.json or *verify.yml, or a folder holding aw.json and or verify.yml (a folder
 #   without either is a folder of cases). Any other file is not a POL27 root: no line, exit 0.
 # aw.json: one gh-aw pin (top-level `gh-aw`), and tools: actionlint, gitleaks, yq, shellcheck each with
-#   version, url (naming that version) and sha256. verify.yml: every curl downloads a tools: url and
-#   checks its sha256, every tools: url is installed, and gh-aw is installed at the gh-aw pin.
+#   version, url (naming that version as its own token) and sha256. verify.yml (VF02d1): the only download
+#   is a plain `curl ... -o FILE <tools: url>` line at the top level of a step run: block, and that same
+#   block checks FILE with the exact sha256 line, top level, after the curl; every tools: url is
+#   downloaded that way; no step or job sets continue-on-error or a shell without -e; gh-aw is
+#   installed at the gh-aw pin.
 # shellcheck source=lib.sh
 . "$(dirname "$0")/lib.sh"
 command -v jq >/dev/null 2>&1 || { echo "policies/checks/POL27.sh:1 VERIFY needs-human missing: jq"; exit 2; }
 TOOLS="actionlint gitleaks yq shellcheck"
+# SET_E: a set that turns errexit off (set +e, set +eu, set +o errexit, quoted or not).
+SET_E="(^|[;&|({[:space:]])set[[:space:]]+['\"]?(\\+[A-Za-z]*e[A-Za-z]*|\\+o[[:space:]]+['\"]?errexit)(['\"[:space:];]|\$)"
 
 check_aw() { # FILE: 0 when it parses (later checks may read it)
   local f=$1 r t v u s n; r=$(rel "$f")
@@ -25,54 +30,63 @@ check_aw() { # FILE: 0 when it parses (later checks may read it)
     s=$(jq -r --arg t "$t" '.tools[$t].sha256 // "" | strings' "$f")
     if [ -z "$v$u$s" ]; then hit "$r" 1 POL27 "tools: has no $t pin"; continue; fi
     [[ "$v" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || hit "$r" "$(fline "$f" "\"$t\"")" POL27 "$t version missing or not X.Y.Z"
-    case "$u" in https://*"$v"*) ;; *) hit "$r" "$(fline "$f" "\"$t\"")" POL27 "$t url missing, not https, or not naming version $v" ;; esac
+    # The version is its own token in the url, so 1.7.1 does not match a 1.7.12 url (Cursor 5655973880 low 5).
+    case "$u" in https://*) grep -qE "(^|[^0-9.])${v//./\\.}([^0-9.]|\\.[^0-9]|\\.?\$)" <<<"$u" ;; *) false ;; esac \
+      || hit "$r" "$(fline "$f" "\"$t\"")" POL27 "$t url missing, not https, or not naming version $v as its own token"
     [[ "$s" =~ ^[0-9a-f]{64}$ ]] || hit "$r" "$(fline "$f" "\"$t\"")" POL27 "$t sha256 missing or not 64 hex (C14)"
   done
 }
 
-# Allowlist, not a denylist (Reviewer 6421748756, round 3): a download is checked only by a non-comment
-# line that is exactly `echo "<pinned sha256>  FILE" | sha256sum -c -` (two spaces, FILE the -o file,
-# nothing else on the line but surrounding blanks). Any other form (|| echo, || /bin/true, | true, a
-# leading !, if ! (...), another file name) is not a check. A set +e (or set +o errexit) on any line
-# before it still lets a failed check go on, so that is a hit too (Tester 2 6421487873 item 2).
-# Prints nothing when one line passes, else why the download is unchecked.
-check_line() { # CODE SHA256 FILE
-  local code=$1 s=$2 o=$3 c n txt want
-  want="echo \"$s  $o\" | sha256sum -c -"
-  while IFS= read -r c; do
-    n=${c%%:*}; txt=${c#*:}
-    txt=${txt#"${txt%%[![:space:]]*}"}; txt=${txt%"${txt##*[![:space:]]}"}
-    [ "$txt" = "$want" ] || continue
-    if head -n "$n" <<<"$code" | grep -qE '(^|[;&|({[:space:]])set[[:space:]]+(\+[A-Za-z]*e[A-Za-z]*|\+o[[:space:]]+errexit)([[:space:];]|$)'; then
-      echo "check line $n runs after set +e, so a failed sha256sum -c does not stop the step"; return
-    fi
-    return 0
-  done < <(grep -nF -- "$s" <<<"$code")
-  echo "has no line that is exactly: $want"
-}
-
+# Allowlist, not a denylist (Reviewer 6421748756, round 3; VF02d1). Rows come from run_lines (lib.sh): one
+# trimmed, comment-free shell line per row with its job, step, file line and TOP flag. A download is only a
+# row that starts with plain `curl ` at the top level. Any other spelling of curl (\curl, /usr/bin/curl,
+# bin/curl, command curl, after && or $( ) and any wget or aria2c is a hit (Cursor 5655973880 high 1). The
+# check is a row in the SAME run: block, after the curl, at the top level (no if, then, case, loop,
+# heredoc or continuation opened before it in that block), that is exactly
+# `echo "<pinned sha256>  FILE" | sha256sum -c -` (Cursor 5655973880 high 2). A set +e or set +o errexit
+# (quoted or not) earlier in that block is a hit (Tester 2 6421487873 item 2, Cursor 5655973880 medium 3).
 check_verify() { # VERIFY_YML AW_JSON
-  local f=$1 aw=$2 r t u s o l pin code why; r=$(rel "$f")
+  local f=$1 aw=$2 r t u s o pin rows j st l top txt want found urls="" k jj ss ll tt xx; r=$(rel "$f")
   if ! yq -e 'tag == "!!map"' "$f" >/dev/null 2>&1; then hit "$r" 1 POL27 "parse error: not a YAML map"; return; fi
-  # Comments do not count: a url, sha256 or check that only sits after # is not installed or checked
-  # (Cursor 5655409212 medium 1). sed keeps the line count, so line numbers still match the file.
-  code=$(sed -E 's/(^|[[:space:]])#.*$//' "$f")
-  while IFS= read -r l; do
-    u=$(grep -oE 'https://[^[:space:]"|]+' <<<"${l#*:}" | head -1)
+  errexit_hits "$f" POL27
+  rows=$(run_lines "$f")
+  while IFS=$'\037' read -r j st l top txt; do
+    [ -n "$l" ] || continue
+    if grep -qE '(^|[^A-Za-z0-9_.-])(wget|aria2c)([^A-Za-z0-9_.-]|$)' <<<"$txt"; then
+      hit "$r" "$l" POL27 "downloader $(grep -oE -m1 'wget|aria2c' <<<"$txt") is not allowed; the only download is plain curl ... -o FILE (C14)"; continue
+    fi
+    if [[ "$txt" != "curl "* ]]; then
+      grep -qE '(^|[^A-Za-z0-9_.-])curl([^A-Za-z0-9_.-]|$)' <<<"$txt" \
+        && hit "$r" "$l" POL27 "curl is not a plain curl ... -o FILE line (\\curl, a path, a wrapper or a chain); only that shape is a download (C14)"
+      continue
+    fi
+    [ "$top" = 1 ] || { hit "$r" "$l" POL27 "curl sits inside if, a loop, a heredoc or a continuation; a download must be top level (C14)"; continue; }
+    u=$(grep -oE 'https://[^[:space:]"|;&]+' <<<"$txt" | head -1)
     t=$(jq -r --arg u "$u" '.tools // {} | to_entries[] | select(.value.url == $u) | .key' "$aw" 2>/dev/null | head -1)
-    if [ -z "$t" ]; then hit "$r" "${l%%:*}" POL27 "curl downloads ${u:-an unnamed url}, not a tools: url in .github/aw.json"; continue; fi
+    if [ -z "$t" ]; then hit "$r" "$l" POL27 "curl downloads ${u:-an unnamed url}, not a tools: url in .github/aw.json"; continue; fi
     s=$(jq -r --arg t "$t" '.tools[$t].sha256' "$aw")
-    o=$(grep -oE -- '(^|[[:space:]])-o[[:space:]]+[^[:space:]]+' <<<"${l#*:}" | head -1 | awk '{print $2}')
-    if [ -z "$o" ]; then hit "$r" "${l%%:*}" POL27 "$t curl has no -o file to check (C14)"; continue; fi
-    why=$(check_line "$code" "$s" "$o")
-    [ -z "$why" ] || hit "$r" "${l%%:*}" POL27 "$t download $why (C14)"
-  done < <(grep -nE '(^|[[:space:]])curl[[:space:]]' <<<"$code")
+    o=$(grep -oE -- '(^|[[:space:]])-o[[:space:]]+[^[:space:]]+' <<<"$txt" | head -1 | awk '{print $2}')
+    if [ -z "$o" ]; then hit "$r" "$l" POL27 "$t curl has no -o file to check (C14)"; continue; fi
+    want="echo \"$s  $o\" | sha256sum -c -"; found=""
+    while IFS=$'\037' read -r jj ss ll k tt; do
+      if [ "$jj" != "$j" ] || [ "$ss" != "$st" ] || [ "$ll" -le "$l" ] || [ "$tt" != "$want" ]; then continue; fi
+      if [ "$k" != 1 ]; then found="check line $ll sits inside if, a loop, a heredoc or a continuation, so it may never run"; continue; fi
+      xx=$(while IFS=$'\037' read -r a b c _ e; do [ "$a" = "$j" ] && [ "$b" = "$st" ] && [ "$c" -lt "$ll" ] && grep -qE -- "$SET_E" <<<"$e" && echo "$c"; done <<<"$rows" | head -1)
+      if [ -n "$xx" ]; then found="check line $ll runs after set +e (line $xx), so a failed sha256sum -c does not stop the step"; continue; fi
+      found=ok; break
+    done <<<"$rows"
+    case "$found" in
+      ok) urls="$urls $u" ;;
+      "") hit "$r" "$l" POL27 "$t download has no top-level line in the same run: block after it that is exactly: $want (C14)" ;;
+      *) hit "$r" "$l" POL27 "$t download $found (C14)" ;;
+    esac
+  done <<<"$rows"
   for t in $TOOLS; do
     u=$(jq -r --arg t "$t" '.tools[$t].url // "" | strings' "$aw" 2>/dev/null)
-    [ -n "$u" ] && ! grep -qF -- "$u" <<<"$code" && hit "$r" 1 POL27 "does not install the $t pin from .github/aw.json"
+    [ -n "$u" ] && [[ " $urls " != *" $u "* ]] && hit "$r" 1 POL27 "does not download and check the $t pin from .github/aw.json with plain curl -o FILE plus its sha256 line"
   done
   pin=$(jq -r '.["gh-aw"] // ""' "$aw" 2>/dev/null)
-  grep -qE "gh extension install github/gh-aw --pin $pin([[:space:]]|$)" <<<"$code" || hit "$r" "$(gline "$f" 'gh-aw')" POL27 "does not install gh-aw at the pin $pin"
+  cut -d $'\037' -f5 <<<"$rows" | grep -qxF "gh extension install github/gh-aw --pin $pin" || hit "$r" "$(gline "$f" 'gh-aw')" POL27 "does not install gh-aw at the pin $pin"
 }
 
 check_pair() { # AW_JSON|"" VERIFY_YML|""

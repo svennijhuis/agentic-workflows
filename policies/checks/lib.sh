@@ -64,3 +64,36 @@ fline() { local l; l=$(grep -nF -m1 -- "$2" "$1" | cut -d: -f1); echo "${l:-1}";
 
 # repo_mode ARGS...: true when the check runs on the default catalog (no args)
 repo_mode() { [ $# -eq 0 ]; }
+
+# run_lines FILE: one row per shell line of every step run: in every job (VF02d1), fields split by
+#   \x1f: JOB STEP LINE TOP TEXT. Blank lines and comments are dropped and TEXT is trimmed. TOP is 0
+#   once an earlier line of the same run: block opened if, then, else, elif, case, while, until, for,
+#   do, select, a { or ( group, a heredoc (<<) or ended in a \ continuation; else 1. Prints nothing
+#   when FILE does not parse (the caller reports the parse error).
+run_lines() {
+  # shellcheck disable=SC2016 # $j is a yq variable, not a shell one
+  yq -o json -I0 '[(.jobs // {}) | to_entries | .[] | .key as $j | (.value.steps // []) | to_entries | .[] | select(.value | has("run")) | {"job": $j, "step": .key, "line": (.value.run | line), "block": ((.value.run | style) == "literal" or (.value.run | style) == "folded"), "run": (.value.run | tostring)}]' "$1" 2>/dev/null \
+    | jq -r '.[] | . as $s | ($s.run | split("\n")) | to_entries[] | "\($s.job)\u001f\($s.step)\u001f\($s.line + .key + (if $s.block then 1 else 0 end))\u001f\(.value)"' \
+    | awk -F '\037' -v OFS='\037' '
+        { k = $1 OFS $2; if (k != cur) { cur = k; open = 0; cont = 0 }
+          t = $4; sub(/(^|[[:space:]])#.*$/, "", t); gsub(/^[[:space:]]+|[[:space:]]+$/, "", t)
+          if (t == "") next
+          top = (open || cont) ? 0 : 1
+          print $1, $2, $3, top, t
+          if (t ~ /^(if|then|else|elif|case|while|until|for|do|select|function)([[:space:];(]|$)/ || t ~ /^[{(]/ || t ~ /<</) open = 1
+          cont = (t ~ /\\$/) ? 1 : 0 }'
+}
+
+# errexit_hits FILE ID: hit when a step or job sets continue-on-error (any value), or a step shell:,
+#   job defaults.run.shell or workflow defaults.run.shell is set and not bash or sh (both run with -e
+#   on GitHub) and names no -e flag or errexit, or names a +e flag (Cursor 5655973880 medium 3).
+errexit_hits() {
+  local f=$1 id=$2 r l k v; r=$(rel "$f")
+  while read -r l k v; do
+    [ -n "$l" ] || continue
+    if [ "$k" = continue-on-error ]; then hit "$r" "$l" "$id" "continue-on-error is set ($v), so a failed check does not fail the job"; continue; fi
+    case "$v" in bash | sh) continue ;; esac
+    if grep -qE -- '(^|[[:space:]])(-[A-Za-z]*e[A-Za-z]*|-o[[:space:]]+errexit)([[:space:]]|$)' <<<"$v" && ! grep -qE -- '(^|[[:space:]])\+[A-Za-z]*e' <<<"$v"; then continue; fi
+    hit "$r" "$l" "$id" "shell: $v runs without -e, so a failed command does not stop the step"
+  done < <(yq '[.. | select((path | join(".")) | test("^(defaults\\.run\\.shell|jobs\\.[^.]+\\.(continue-on-error|defaults\\.run\\.shell|steps\\.[0-9]+\\.(continue-on-error|shell)))$"))] | .[] | (line | tostring) + " " + (key | tostring) + " " + (. | tostring)' "$f" 2>/dev/null)
+}

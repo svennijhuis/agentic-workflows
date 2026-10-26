@@ -9,7 +9,7 @@
 #                         .github/aw/imports/) into DEST and commit it, so drift diffs against it
 # gate_compile            gh aw compile --dir workflows --strict --actionlint (writes only this tree)
 # gate_drift              files under workflows/ that differ from the snapshot commit after compile
-# gate_actionlint         actionlint on .github/workflows/*.yml (not *.lock.yml)
+# gate_actionlint         actionlint on .github/workflows/*.yml and *.yaml (not *.lock.yml, Cursor 5655973880 low 6)
 # gate_shellcheck         shellcheck on scripts/*.sh scripts/lib/*.sh policies/checks/*.sh
 
 gate_snapshot() {
@@ -52,8 +52,8 @@ gate_drift() {
 
 gate_actionlint() {
   local y s rc=0
-  for y in .github/workflows/*.yml; do
-    [ -e "$y" ] || continue; case "$y" in *.lock.yml) continue ;; esac
+  for y in .github/workflows/*.yml .github/workflows/*.yaml; do
+    [ -e "$y" ] || continue; case "$y" in *.lock.yml | *.lock.yaml) continue ;; esac
     actionlint -no-color -oneline "$y" | sed -E 's#^([^:]+):([0-9]+):[0-9]+: #\1:\2 ACTIONLINT #'
     s=${PIPESTATUS[0]}
     case "$s" in 0) ;; 1) rc=1 ;; *) return "$s" ;; esac
