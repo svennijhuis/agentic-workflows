@@ -10,7 +10,7 @@ From the repo root:
 ./scripts/verify.sh
 ```
 
-`scripts/verify.sh` checks tools (gh, gh-aw v0.93.4, actionlint, gitleaks, yq, shellcheck), compiles `workflows/` with `--strict`, ensures lock files are fresh, lints Actions YAML, runs shellcheck on scripts, exercises import-schema fixtures, runs every `policies/checks/POLnn.sh`, and runs the POL23 meta check.
+`scripts/verify.sh` checks tools (gh, gh-aw v0.93.5, actionlint, gitleaks, yq, shellcheck), compiles `workflows/` with `--strict`, ensures lock files are fresh, lints Actions YAML, runs shellcheck on scripts, exercises import-schema fixtures, runs every `policies/checks/POLnn.sh`, and runs the POL23 meta check.
 
 Pass: last line `0 failures`, exit `0`. Fail: one line per issue as `file:line RULE message`.
 

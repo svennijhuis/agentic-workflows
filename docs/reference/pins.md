@@ -6,7 +6,7 @@ Reproducible compiles require pinned gh-aw and Copilot engine versions ([POL01](
 
 Catalog pin file (Block 1):
 
-- gh-aw compiler **v0.93.4**
+- gh-aw compiler **v0.93.5**
 - Copilot engine **1.0.101**
 
 Fields follow gh-aw compiler config: action pins, `compiler_version`, and `engine_versions.copilot` (plus checksum when set). `scripts/verify.sh` runs `gh aw compile --dir workflows --strict --actionlint` against these pins.
