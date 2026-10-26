@@ -30,8 +30,25 @@ check_aw() { # FILE: 0 when it parses (later checks may read it)
   done
 }
 
+# A check line holds the pinned sha256 and sha256sum -c, names the -o file as a whole token (split on
+# space and quotes, so xgitleaks.tar.gz does not count for gitleaks.tar.gz), does not mask a failed
+# check with || true or || :, and has no set +e (or set +o errexit) on any line before it (Tester 2
+# 6421487873 items 1 and 2). Prints nothing when one line passes, else why the download is unchecked.
+check_line() { # CODE SHA256 FILE
+  local code=$1 s=$2 o=$3 c n txt why
+  why="has no sha256sum -c line naming its pinned sha256 and $o"
+  while IFS= read -r c; do
+    n=${c%%:*}; txt=${c#*:}
+    tr -s ' \t"'"'"'' '\n' <<<"$txt" | grep -qxF -- "$o" || continue
+    if grep -qE '\|\|[[:space:]]*(true|:)([[:space:];)]|$)' <<<"$txt"; then why="check line $n masks a failed sha256sum -c with || true or || :"; continue; fi
+    if head -n "$n" <<<"$code" | grep -qE '(^|[;&|({[:space:]])set[[:space:]]+(\+[A-Za-z]*e[A-Za-z]*|\+o[[:space:]]+errexit)([[:space:];]|$)'; then why="check line $n runs after set +e, so a failed sha256sum -c does not stop the step"; continue; fi
+    return 0
+  done < <(grep -nF -- "$s" <<<"$code" | grep -F 'sha256sum -c')
+  echo "$why"
+}
+
 check_verify() { # VERIFY_YML AW_JSON
-  local f=$1 aw=$2 r t u s o l pin code; r=$(rel "$f")
+  local f=$1 aw=$2 r t u s o l pin code why; r=$(rel "$f")
   if ! yq -e 'tag == "!!map"' "$f" >/dev/null 2>&1; then hit "$r" 1 POL27 "parse error: not a YAML map"; return; fi
   # Comments do not count: a url, sha256 or check that only sits after # is not installed or checked
   # (Cursor 5655409212 medium 1). sed keeps the line count, so line numbers still match the file.
@@ -43,8 +60,8 @@ check_verify() { # VERIFY_YML AW_JSON
     s=$(jq -r --arg t "$t" '.tools[$t].sha256' "$aw")
     o=$(grep -oE -- '(^|[[:space:]])-o[[:space:]]+[^[:space:]]+' <<<"${l#*:}" | head -1 | awk '{print $2}')
     if [ -z "$o" ]; then hit "$r" "${l%%:*}" POL27 "$t curl has no -o file to check (C14)"; continue; fi
-    grep -F -- "$s" <<<"$code" | grep -F 'sha256sum -c' | grep -qF -- "$o" \
-      || hit "$r" "${l%%:*}" POL27 "$t download has no sha256sum -c line naming its pinned sha256 and $o (C14)"
+    why=$(check_line "$code" "$s" "$o")
+    [ -z "$why" ] || hit "$r" "${l%%:*}" POL27 "$t download $why (C14)"
   done < <(grep -nE '(^|[[:space:]])curl[[:space:]]' <<<"$code")
   for t in $TOOLS; do
     u=$(jq -r --arg t "$t" '.tools[$t].url // "" | strings' "$aw" 2>/dev/null)
