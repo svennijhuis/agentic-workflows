@@ -34,7 +34,7 @@ uses_hit() { # FILE USES
   [[ "$2" =~ $SHA ]] || hit "$(rel "$1")" "$(fline "$1" "$2")" POL01 "action not pinned to a full SHA: $2"
 }
 
-yml_walk() { # FILE: whole-file yq walk for *.yml (md keeps q()), a parse error is a hit
+yml_walk() { # FILE: whole-file yq walk for *.yml and *.yaml (md keeps q()), a parse error is a hit
   local f=$1 out l u
   if ! out=$(yq '.. | select(tag == "!!map" and has("uses")) | .uses' "$f" 2>/dev/null); then
     l=$(yq '.' "$f" 2>&1 >/dev/null | grep -oE 'line [0-9]+' | head -1 | grep -oE '[0-9]+')
@@ -44,7 +44,7 @@ yml_walk() { # FILE: whole-file yq walk for *.yml (md keeps q()), a parse error 
 }
 
 for f in $(targets "$@"); do
-  case "$f" in *.yml) yml_walk "$f"; continue ;; esac
+  case "$f" in *.yml|*.yaml) yml_walk "$f"; continue ;; esac
   for kind in imports skills plugins; do
     while IFS= read -r ref; do [ -n "$ref" ] && check_ref "$f" "$kind" "$ref"; done \
       < <(q "$f" ".${kind}[]? | select(tag == \"!!str\") , (.${kind}[]? | select(tag == \"!!map\") | .uses // .path)")
@@ -52,11 +52,27 @@ for f in $(targets "$@"); do
   while IFS= read -r u; do uses_hit "$f" "$u"; done < <(q "$f" 'del(.imports) | .. | select(tag == "!!map" and has("uses")) | .uses')
 done
 
+ROOTS=('.github/workflows/*.yml') # always on; policies/POL01.yml yml_roots can only add roots; *.yml globs also walk *.yaml
+
+add_yml_roots() { # a missing, empty, non-list or unreadable yml_roots is a hit, never fewer roots
+  local c="$POL_ROOT/policies/POL01.yml" l t
+  l=$(fline "$c" 'yml_roots:')
+  if ! t=$(yq '.yml_roots | tag' "$c" 2>/dev/null); then hit policies/POL01.yml 1 POL01 "yml_roots unreadable (yq error)"; return; fi
+  [ "$t" = '!!seq' ] || { hit policies/POL01.yml "$l" POL01 "yml_roots missing or not a list"; return; }
+  [ "$(yq '.yml_roots | length' "$c")" -gt 0 ] || { hit policies/POL01.yml "$l" POL01 "yml_roots empty"; return; }
+  [ "$(yq '[.yml_roots[] | select(tag != "!!str" or . == "")] | length' "$c")" -eq 0 ] \
+    || { hit policies/POL01.yml "$l" POL01 "yml_roots entry is not a glob string"; return; }
+  mapfile -t -O "${#ROOTS[@]}" ROOTS < <(yq '.yml_roots[]' "$c")
+}
+
 if repo_mode "$@"; then
-  mapfile -t ROOTS < <(polcfg POL01 '.yml_roots[]')
+  add_yml_roots
+  declare -A SEEN=()
   for g in "${ROOTS[@]}"; do
-    for y in "$POL_ROOT"/$g; do
-      [ -e "$y" ] || continue; case "$y" in *.lock.yml) continue ;; esac
+    gy=$g; case "$g" in *.yml) gy=${g%.yml}.yaml ;; esac
+    for y in "$POL_ROOT"/$g "$POL_ROOT"/$gy; do
+      [ -e "$y" ] || continue; case "$y" in *.lock.yml|*.lock.yaml) continue ;; esac
+      [ -n "${SEEN[$y]:-}" ] && continue; SEEN[$y]=1
       yml_walk "$y"
     done
   done
