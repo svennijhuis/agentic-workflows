@@ -13,3 +13,5 @@ flowchart LR
   RUN -->|SM04 OIDC app token| APIM[APIM validate-jwt, party, roles] --> API[API tst/acc]
   RUN --> REP[SM06 report + issue]
 ```
+
+Parts: [SM07a](../done/SM07a-setup-check.md) (`smoke/SETUP.md` and `scripts/check-smoke-setup.sh`) is done; SM07b (Sven runs the setup steps and says yes) is todo, no PR.

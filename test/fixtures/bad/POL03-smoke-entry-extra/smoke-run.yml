@@ -1,0 +1,13 @@
+# Bad POL03 case: pull_request only in the entry triggers list, not in on:, not promoted.
+name: smoke-run
+on:
+  workflow_dispatch:
+  workflow_call:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - run: echo fixture

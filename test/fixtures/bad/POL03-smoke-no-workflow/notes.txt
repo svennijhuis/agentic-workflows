@@ -1,0 +1,1 @@
+Bad POL03 case: a case folder with no workflow file, only rollout.yml.
