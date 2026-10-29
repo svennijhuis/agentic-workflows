@@ -1,0 +1,17 @@
+# FAKE bad POL28 case (VF02d1 round 2): env built by fromJSON sets BASH_ENV (Tester 6424839165 item 9)
+name: Verify
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+      - name: Verify
+        env: ${{ fromJSON('{"BASH_ENV":"/tmp/fake"}') }}
+        run: ./scripts/verify.sh

@@ -1,0 +1,17 @@
+# FAKE bad POL28 case (VF02d1 round 2): checkout of another repository runs its scripts/verify.sh (Tester 6424839165 item 3, Cursor 5657508090 f4)
+name: Verify
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+          repository: other-owner/evil
+      - name: Verify
+        run: ./scripts/verify.sh

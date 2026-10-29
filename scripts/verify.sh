@@ -31,6 +31,9 @@ produce() {
   while IFS= read -r l; do [ -n "$l" ] && fail "$l"; done <"$OUT"
 }
 
+# pol03_roots: only the failed case lines of scripts/test-POL03-roots.sh (its ok lines and tally are not findings)
+pol03_roots() { local o rc; o=$(bash scripts/test-POL03-roots.sh 2>&1); rc=$?; grep ' POL03T ' <<<"$o"; [ "$rc" -eq 0 ] || [ "$rc" -eq 1 ] || return 2; return "$rc"; }
+
 # version_of TOOL: X.Y.Z the installed TOOL reports, empty when it cannot say
 version_of() {
   case "$1" in
@@ -100,6 +103,9 @@ done
 echo "# POL23 no tautological checks (every check vs its bad and good fixture)"
 produce POL23 bash policies/checks/POL23.sh
 
+echo "# POL03 repo-mode cases (scripts/test-POL03-roots.sh: *.yaml, locks, POL_ROLLOUT, promoted)"
+produce test-POL03-roots.sh pol03_roots
+
 echo "# PBI docs (gist A1 proof/door fields, links, dashes)"
 produce check-pbi-docs.sh bash scripts/check-pbi-docs.sh
 
@@ -120,6 +126,19 @@ P=test/fixtures/pr-body
 produce check-pr-body.sh bash scripts/check-pr-body.sh --template .github/pull_request_template.md
 bash scripts/check-pr-body.sh "$P/good.md" >/dev/null || fail "$P/good.md:1 G02a good PR body fixture fails"
 for b in "$P"/bad-*.md; do bash scripts/check-pr-body.sh "$b" >/dev/null && fail "$b:1 G02a bad PR body fixture passes (tautological)"; done
+
+echo "# smoke setup checklist (SM07a: smoke/SETUP.md and each good exit 0, each bad exits exactly 1 with one hit)"
+U=test/fixtures/smoke-setup
+produce check-smoke-setup.sh bash scripts/check-smoke-setup.sh smoke/SETUP.md
+shopt -s nullglob; UG=("$U"/good*.md); UB=("$U"/bad-*.md); shopt -u nullglob
+[ "${#UG[@]}" -gt 0 ] || fail "$U:1 SMOKESETUP no good setup fixtures"
+[ "${#UB[@]}" -gt 0 ] || fail "$U:1 SMOKESETUP no bad setup fixtures"
+for g in "${UG[@]}"; do bash scripts/check-smoke-setup.sh "$g" >/dev/null || fail "$g:1 SMOKESETUP good setup fixture fails"; done
+for b in "${UB[@]}"; do
+  [ -f "$b" ] || { fail "$b:1 SMOKESETUP bad setup fixture is not a file"; continue; }
+  h=$(bash scripts/check-smoke-setup.sh "$b"); rc=$?
+  { [ "$rc" -eq 1 ] && [ "$(grep -c . <<<"$h")" -eq 1 ]; } || fail "$b:1 SMOKESETUP bad setup fixture does not exit 1 with exactly one hit (rc $rc)"
+done
 
 echo "$N failures"
 [ "$N" -eq 0 ]
