@@ -1,0 +1,12 @@
+# Bad POL03 case: the smoke-run.yml entry is a string, not a map, runner is dispatch-only.
+name: smoke-run
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - run: echo fixture
