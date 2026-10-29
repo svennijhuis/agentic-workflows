@@ -1,0 +1,34 @@
+# Good: guard job with permissions {} and no environment, smoke job on smoke-${{ inputs.env }}, report job read-all with no environment
+name: smoke-auth fixture
+on:
+  workflow_call:
+    inputs:
+      env:
+        type: string
+        required: true
+  workflow_dispatch:
+    inputs:
+      env:
+        type: choice
+        options: [tst, acc]
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - run: echo "env ok"
+  smoke:
+    needs: guard
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    environment: smoke-${{ inputs.env }}
+    steps:
+      - run: echo "smoke"
+  report:
+    needs: smoke
+    runs-on: ubuntu-latest
+    permissions: read-all
+    steps:
+      - run: echo "report"

@@ -1,0 +1,23 @@
+# Bad: job permissions come from an alias (*p) of an anchored id-token: write map, environment prd (Reviewer #17 r1 case 1)
+name: smoke-auth fixture
+on:
+  workflow_call:
+    inputs:
+      env:
+        type: string
+        required: true
+  workflow_dispatch:
+    inputs:
+      env:
+        type: choice
+        options: [tst, acc]
+x-perm: &p
+  id-token: write
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    permissions: *p
+    environment: prd
+    steps:
+      - run: echo "smoke"

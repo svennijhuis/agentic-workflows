@@ -1,0 +1,16 @@
+# Bad: jobs: {} (no job to check) with workflow-level id-token: write (Reviewer #17 r1)
+name: smoke-auth fixture
+on:
+  workflow_call:
+    inputs:
+      env:
+        type: string
+        required: true
+  workflow_dispatch:
+    inputs:
+      env:
+        type: choice
+        options: [tst, acc]
+permissions:
+  id-token: write
+jobs: {}
