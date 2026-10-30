@@ -52,10 +52,11 @@ det_entry_err() {
   [ "$(K=$2 yq '.deterministic_triggers[strenv(K)] | tag' "$r")" = '!!map' ] || { echo "$e is not a map (fail closed)"; return; }
   if [ "$(K=$2 yq '.deterministic_triggers[strenv(K)].triggers | tag' "$r")" != '!!seq' ] \
     || [ "$(K=$2 yq '.deterministic_triggers[strenv(K)].triggers | length' "$r")" = 0 ] \
-    || [ "$(K=$2 yq '[.deterministic_triggers[strenv(K)].triggers[] | select(tag != "!!str")] | length' "$r")" != 0 ]; then
+    || [ "$(K=$2 yq '[.deterministic_triggers[strenv(K)].triggers[] | select(tag != "!!str")] | length' "$r")" != 0 ] \
+    || [ "$(K=$2 yq '[.deterministic_triggers[strenv(K)].triggers[] | tostring | trim | select(. == "")] | length' "$r")" != 0 ]; then
     echo "$e: triggers must be a non-empty list of trigger names (fail closed)"
   fi
-  [ -n "$(K=$2 yq '.deterministic_triggers[strenv(K)].yes.date | select(tag == "!!str" or tag == "!!timestamp") | trim' "$r")" ] \
+  [ -n "$(K=$2 yq '.deterministic_triggers[strenv(K)].yes.date | select(. != null) | tostring | trim' "$r")" ] \
     || echo "$e: yes.date is empty (Sven's exact yes needs a date)"
   [ -n "$(K=$2 yq '.deterministic_triggers[strenv(K)].yes.quote | select(tag == "!!str") | trim' "$r")" ] \
     || echo "$e: yes.quote is empty (Sven's exact yes needs his words)"
@@ -63,4 +64,16 @@ det_entry_err() {
 
 det_entry_triggers() { K=$2 yq '.deterministic_triggers[strenv(K)].triggers[]' "$1" 2>/dev/null; }
 
-det_agentic() { case "$1" in *.md|*.lock.yml) return 0 ;; esac; head -3 "$1" | grep -q '^# gh-aw-metadata:'; }
+det_agentic() {
+  case "$1" in
+    *.md|*.lock.yml) return 0 ;;
+  esac
+  sed $'1s/^\xEF\xBB\xBF//' "$1" | awk '
+    /^[[:space:]]*$/ { next }
+    /^[[:space:]]*#/ {
+      if ($0 ~ /gh-aw-metadata:/) { found=1; exit 0 }
+      next
+    }
+    { exit 1 }
+    END { exit found ? 0 : 1 }'
+}
