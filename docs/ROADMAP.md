@@ -31,7 +31,7 @@ flowchart TD
   end
 
   subgraph SM[SM smoke, B3]
-    SM01[SM01 done #11] --> SM01a[SM01a done #15] --> SM01b[SM01b todo, file in #18]
+    SM01[SM01 done #11] --> SM01a[SM01a todo, file on main] --> SM01b[SM01b todo, file in #18]
     SM05a[SM05a done #14] --> SM05b[SM05b todo] --> SM05c[SM05c todo]
     SM07a[SM07a done #16] --> SM07b{{SM07b Sven only}}
     SM04a[SM04a done #17] --> SM04b[SM04b todo]
@@ -50,7 +50,7 @@ flowchart TD
   end
 
   subgraph G[G governance]
-    G00[G00 G00a G02a done #4] --> G05[G05 done #12] --> G05a[G05a done #15]
+    G00[G00 G00a G02a done #4] --> G05[G05 done #12] --> G05a[G05a todo, file on main]
     G05 --> GSW{{org switch, Sven exact yes}}
   end
 
@@ -93,7 +93,7 @@ Next: VF02b, after WF01 (lane 1, edits POL23).
 
 - Goal: a fixed smoke scenario format, offline checks for setup, auth and triggers, a runner and a report, then one live install in the API repo.
 - Why: smoke runs against real environments with a token, so a bad scenario or workflow could leak secrets, hit prod or run on the wrong trigger. Every check fails closed before anything goes live.
-- Steps in order (lane 2 unless noted): SM07a (done), SM04a (done), SM01a (done), SM04b, SM01b, SM03a, SM03b, SM06, VF02f. Lane 1: SM05a, SM05b, SM05c. Then Sven only: SM07b, SM03L. SM02 (agentic) is last. SM03a has no section in any PBI file yet.
+- Steps in order (lane 2 unless noted): SM07a (done), SM04a (done), SM01a, SM04b, SM01b, SM03a, SM03b, SM06, VF02f. Lane 1: SM05a, SM05b, SM05c. Then Sven only: SM07b, SM03L. SM02 (agentic) is last. SM03a has no section in any PBI file yet. SM01a includes the fix-map row 1 `|` repair as one line in [SM01a](pbi/smoke/SM01a.md).
 - SM08 holds the Cursor findings and closes when SM01, SM04a, SM05a, SM05b, SM05c and SM07a are merged.
 - Index: [docs/pbi/smoke/README.md](pbi/smoke/README.md).
 
@@ -103,7 +103,7 @@ Next: VF02b, after WF01 (lane 1, edits POL23).
 | SM05a | merged #14, squash `5ef9b6a` | [docs/pbi/done/SM05a-det-triggers-pol03.md](pbi/done/SM05a-det-triggers-pol03.md) |
 | SM07a | merged #16, squash `2d8c764` | [docs/pbi/done/SM07a-setup-check.md](pbi/done/SM07a-setup-check.md) |
 | SM04a | merged #17, squash `41adeab` | [docs/pbi/done/SM04a-auth-check.md](pbi/done/SM04a-auth-check.md) |
-| SM01a | merged #15, squash `341c790` | [docs/pbi/smoke/SM01a.md](pbi/smoke/SM01a.md) |
+| SM01a | todo (file on main) | [docs/pbi/smoke/SM01a.md](pbi/smoke/SM01a.md) |
 | SM01b | todo, PBI file in open [#18](https://github.com/svennijhuis/agentic-workflows/pull/18), head `0e4bad4` | `docs/pbi/smoke/SM01b.md` (in #18 at 0e4bad4) |
 | SM05b, SM05c | todo, sections in [SM05.md](pbi/smoke/SM05.md) | [docs/pbi/smoke/SM05.md](pbi/smoke/SM05.md) |
 | SM04b | todo, section and Reviewer lows in [SM04.md](pbi/smoke/SM04.md) SM04b bullet (parts list) | [docs/pbi/smoke/SM04.md](pbi/smoke/SM04.md) |
@@ -115,7 +115,7 @@ Next: VF02b, after WF01 (lane 1, edits POL23).
 | SM02 | todo, agentic, last | [docs/pbi/smoke/SM02.md](pbi/smoke/SM02.md) |
 | SM08 | todo, closes with the build PBIs | [docs/pbi/smoke/SM08-cursor-findings.md](pbi/smoke/SM08-cursor-findings.md) |
 
-Next: SM05b (lane 1) and SM04b (lane 2).
+Next: SM05b (lane 1) and SM01a (lane 2, before SM04b).
 
 ### G: governance and the org switch
 
@@ -127,15 +127,15 @@ Next: SM05b (lane 1) and SM04b (lane 2).
 |---|---|---|
 | G00, G00a, G02a | merged #4, squash `2ccf76d` | [G00](pbi/done/G00-org-target-structure.md), [G00a](pbi/done/G00a-consumer-strategy.md), [G02a](pbi/done/G02a-pr-owner-architecture-questions.md) |
 | G05 | merged #12, squash `f184995` | [docs/pbi/done/G05-org-only-appendix.md](pbi/done/G05-org-only-appendix.md), checklist [governance/ORG-ONLY.md](../governance/ORG-ONLY.md) |
-| G05a | merged #15, squash `341c790` | [docs/pbi/governance/G05a-org-only-followups.md](pbi/governance/G05a-org-only-followups.md) |
+| G05a | todo (file on main) | [docs/pbi/governance/G05a-org-only-followups.md](pbi/governance/G05a-org-only-followups.md) |
 | Org switch | off, needs Sven's exact yes | [governance/ORG-ONLY.md](../governance/ORG-ONLY.md) |
 
-Next: the org switch itself (Sven only).
+Next: G05a (lane 3, docs only), then the org switch itself (Sven only).
 
 ### TPL: one PBI template
 
-- Goal: one PBI template for this repo and agentPacks, with 5 fields plus Source.
-- Why: reviewers and testers need the same fields (proof, door, triage, feedback, harness, review input) in every PBI, or gates are judged on chat instead of the file.
+- Goal: one PBI template for this repo and agentPacks; shared fields are `triage`, `feedback`, `harness`, `review-input`, and `kind`, plus `Source` (see [docs/pbi/_template.md](pbi/_template.md)).
+- Why: reviewers and testers need the same shared fields (`triage`, `feedback`, `harness`, `review-input`, `kind`) plus proof and door in every PBI, or gates are judged on chat instead of the file.
 - Steps in order: TPL01, then TPL02 (backfill old PBIs).
 
 | PBI | Status | File |
@@ -150,7 +150,7 @@ Next: TPL02, lane 3.
 - Goal: every policy and the verify loops find workflow files the same way (`*.yml`, `*.yaml`, `*.lock.yml`).
 - Why: the same bug hit 3 times (#14 POL03 loop, verify.sh fixture loops, check-smoke), each time because a script had its own `*.yml` glob.
 - Steps in order: shared lib plus unit test, switch every loop to it, POL23 case for local globs, delete the dead globs.
-- Related carry (not WF01 scope): hex and odd integer literals in smoke yml (`status: 0x12C`, `steps: 0x2`) are a note only in `docs/pbi/verify/WF01.md` (in #18 at 0e4bad4). The owning fix is [SM01a](pbi/smoke/SM01a.md) row 1, not the workflow-file lister.
+- Related carry (not WF01 scope): `status: 0x12C` is [SM01a](pbi/smoke/SM01a.md) row 1. `steps: 0x2` is the SM07a follow-up at `scripts/check-smoke-setup.sh:81` (#16). Both are noted in `docs/pbi/verify/WF01.md` (in #18 at 0e4bad4); a shared decimal-int helper stays outside WF01, not the workflow-file lister.
 
 | PBI | Status | File |
 |---|---|---|
@@ -158,14 +158,16 @@ Next: TPL02, lane 3.
 
 Next: lane 1, after SM05c and before VF02b.
 
-## 3. Todo PBIs (parked, filed, not started)
+## 3. Todo PBIs (parked, filed)
+
+WF01 and SM01b are filed on open [#18](https://github.com/svennijhuis/agentic-workflows/pull/18) at head `0e4bad4`.
 
 | Item | Where it is written | Lane, after |
 |---|---|---|
 | WF01 shared lister | `docs/pbi/verify/WF01.md` (in #18 at 0e4bad4) | lane 1, after SM05c |
 | SM01b check-smoke carry (Cursor 5657706637) | `docs/pbi/smoke/SM01b.md` (in #18 at 0e4bad4) | lane 2, after SM01a |
-| SM01a row 1 `\|` fix in the fix-map table | apply to [docs/pbi/smoke/SM01a.md](pbi/smoke/SM01a.md) | lane 3 |
-| SM04b token hygiene and Reviewer lows | [docs/pbi/smoke/SM04.md](pbi/smoke/SM04.md) SM04b bullet | lane 2, after SM04a |
+| G05a ORG-ONLY follow-ups | [docs/pbi/governance/G05a-org-only-followups.md](pbi/governance/G05a-org-only-followups.md) | lane 3, file on main |
+| SM04b token hygiene and Reviewer lows | [docs/pbi/smoke/SM04.md](pbi/smoke/SM04.md) SM04b bullet | lane 2, after SM01a |
 | SM05b, SM05c | [docs/pbi/smoke/SM05.md](pbi/smoke/SM05.md) | lane 1, after SM05a |
 | VF02d carries | 4 open todo rows in [docs/pbi/verify/VF02.md](pbi/verify/VF02.md) on main, plus 5 waiver rows in #18 at `0e4bad4` | lane 1, VF02d |
 
@@ -174,8 +176,8 @@ Next: lane 1, after SM05c and before VF02b.
 | Lane | Who | Order |
 |---|---|---|
 | 1 | Builder, Grok path (policy chain, edits POL23) | VF02d1 (done), SM05a (done), SM05b, SM05c, WF01, VF02b, VF02c, VF02d, VF02e |
-| 2 | Builder, Cursor CLI (one script each) | SM07a (done), SM04a (done), SM01a (done), SM04b, SM01b, SM03a, SM03b, SM06, VF02f |
-| 3 | Docs only PRs | #18 now; later TPL02, the SM01a row 1 `\|` fix |
+| 2 | Builder, Cursor CLI (one script each) | SM07a (done), SM04a (done), SM01a, SM04b, SM01b, SM03a, SM03b, SM06, VF02f |
+| 3 | Docs only PRs | #18 now; G05a (file on main); later TPL02 |
 
 ## 5. What stays off and why
 
@@ -194,7 +196,8 @@ Next: lane 1, after SM05c and before VF02b.
 | Issue | Seen in | Shared fix |
 |---|---|---|
 | Workflow files listed as `*.yml` only, so `*.yaml` and lock files are missed | #14, verify.sh loops, check-smoke | WF01 `scripts/lib/wf-files.sh` |
-| Hex where an int is expected (`0x12C`, `0x2`) | SM01a row 1, #16 | [SM01a](pbi/smoke/SM01a.md) status literal rules (not WF01) |
+| Hex status literal (`0x12C`) | SM01a row 1 | [SM01a](pbi/smoke/SM01a.md) status literal rules (not WF01) |
+| Hex steps literal (`0x2`) | #16, SM07a | `scripts/check-smoke-setup.sh:81` (decimal int; shared helper outside WF01) |
 | YAML anchors, aliases and duplicate keys slip past checks | #13, #16, #17 | shared `yaml_strict` precheck in `scripts/lib` (candidate, no PBI id yet; next session assigns one) |
 | Denylists keep getting bypassed | #10, #13 | allowlists (VF02d1 run allowlist) |
 
@@ -210,9 +213,8 @@ Next: lane 1, after SM05c and before VF02b.
 
 Other open PR, no decision yet: [#7](https://github.com/svennijhuis/agentic-workflows/pull/7) "Bump gh-aw compiler pin to v0.93.5". State from gh: open, draft, head `6242cf2`, branch `aw-upstream/2026-10-26`, no checks reported, mergeable CONFLICTING.
 
-1. Check #18 for gate state on its current head. #14 and #17 are merged. Before GO, #18 must merge main, keep #14's SM05 parts list and the SM08 close rule, must not renumber SM05 steps 6 to 9.
-2. Apply the SM01a row 1 `|` fix (lane 3).
-3. Lane 1: SM05b. Lane 2: SM04b.
-4. Lane 3: TPL02 when free.
-5. Give `yaml_strict` a PBI id with PO.
-6. Sven only, any time: SM07b.
+1. Check #18 for gate state on its current head. #14 and #17 are merged. Before GO, #18 must merge main, keep #14's SM05 parts list and the SM08 close rule, must not renumber SM05 steps 6 to 9. On merge, keep main's parts list and SM08 close rule, and keep #18's SM05 step 7 POL25 `det_agentic` / late `# gh-aw-metadata:` sentence (not main's step 7 that stops at the three POL03 metadata fixtures alone) and step 8 line numbers (L46 and `det_entry_err` L53 to L55, not main's L38 blank-trigger wording).
+2. Lane 1: SM05b. Lane 2: SM01a (fix-map row 1 `|` repair as one line in [SM01a](pbi/smoke/SM01a.md)), then SM04b.
+3. Lane 3: G05a when free; TPL02 after that.
+4. Give `yaml_strict` a PBI id with PO.
+5. Sven only, any time: SM07b.
