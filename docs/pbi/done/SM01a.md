@@ -1,5 +1,6 @@
 # SM01a: check-smoke.sh hardening follow-ups (fail closed on values, carry from #11)
-- Status: todo
+- Status: done
+- PR: #0
 - Area: smoke
 - Wave: W3
 - Block: 3
@@ -22,7 +23,7 @@ Fix map (Strategy draft plus the Tester PASS 6424705361 and the Cursor run on 68
 
 | # | Source | Gap (exits 0 at 68b63f2) | Fix |
 |---|---|---|---|
-| 1 | Cursor 5657322997 f1 medium, 5657407855 f2 high | `status: 0x1000` (and `0o1130`): yq tags it `!!int`, `tostring` keeps `0x1000`, `[ "$status" -gt 599 ]` at :73 prints `integer expression expected` and the `elif` never calls `hit` (fails open) the status literal must match `^[0-9]+$` first (read as the raw scalar text, so `0x12C` and `0o144` are hits even though yq tags them `!!int` with a value inside the range), then the range test inside yq: `tag == "!!int"` and `. >= 100 and . <= 599`; exit 1 when yq or the compare cannot decide (Cursor 5657575895 f1 high on PR #15: `0x1000` is 4096 and `0o1130` is 600, both outside the range, so a range test alone catches them but still fails open on `0x12C`, which is 300; Cursor 5657764107 f4 medium on PR #15: `0o144` is 100 and a `0b` literal yq tags `!!int` inside 100..599, so a check that only rejects the `0x` prefix still fails open; both get their own fixture; Cursor 5658018053 f1 medium on PR #15: `status: +200` and `2_00` are `!!int` inside the range and exit 0 today, so a prefix-only denylist of `0x`, `0o` and `0b` must fail them, and each gets its own fixture) |
+| 1 | Cursor 5657322997 f1 medium, 5657407855 f2 high | `status: 0x1000` (and `0o1130`): yq tags it `!!int`, `tostring` keeps `0x1000`, `[ "$status" -gt 599 ]` at :73 prints `integer expression expected` and the `elif` never calls `hit` (fails open) | the status literal must match `^[0-9]+$` first (read as the raw scalar text, so `0x12C` and `0o144` are hits even though yq tags them `!!int` with a value inside the range), then the range test on the numeric value (100 to 599); exit 1 when yq or the compare cannot decide (Cursor 5657575895 f1 high on PR #15: `0x1000` is 4096 and `0o1130` is 600, both outside the range, so a range test alone catches them but still fails open on `0x12C`, which is 300; Cursor 5657764107 f4 medium on PR #15: `0o144` is 100 and a `0b` literal yq tags `!!int` inside 100..599, so a check that only rejects the `0x` prefix still fails open; both get their own fixture; Cursor 5658018053 f1 medium on PR #15: `status: +200` and `2_00` are `!!int` inside the range and exit 0 today, so a prefix-only denylist of `0x`, `0o` and `0b` must fail them, and each gets its own fixture) |
 | 2 | Cursor 5657322997 f2 medium, 5657407855 f1 high | a token, `Bearer ` or `ghp_` value split by a newline (`\n` escape or a block scalar) in `expect.json[].equals` or a header (`X-Request-Id: "ok\nghp_FAKE0000000000"`); a leading space makes `@tsv` quote the value, so `Accept: "  bearer FAKE00000000"` passes; a token (the `@tsv` read at :40 is one physical line at a time, so the rest of the scalar is never tested), and on one line with a short middle segment (`FAKE000000.e30.FAKE000000000`, `e30` is under 10 chars) | run the token `test()` inside yq on the whole scalar, print only `line` plus a fixed code, exit 1 when that yq call fails; JWT shape is three dot segments with a short middle allowed, or an `eyJ` start; move the `env`, `path`, `auth` reads into yq too so a newline cannot drop a field |
 | 3 | Cursor 5657322997 f3 low, 5657407855 f5 low | `exists: "true"` (`!!str`): `.exists != true` at :26 treats the string as equal | `exists` must be tag `!!bool` and value `true`, same as `test_data_only` |
 | 4 | Cursor 5657322997 f4 low, 5657407855 f7 low, Tester 6424705361 | `docs/pbi/README.md` the Block 3 `**PBIs:**` line (line 437 once this PR lands, line 435 on main at f184995) still says "SM01-SM07 smoke (docs only so far)" and line 56 says SM01 waits on SM08, while #11 marks SM01 done; `docs/pbi/smoke/README.md:2` (Tester: `smoke/README.md:2`) still has the old order with SM08 first | #11 (9680af0) already fixed line 56 and the smoke README gate line, so only two lines are still old: the Block 3 `**PBIs:**` sentence "SM01-SM07 smoke (docs only so far)" and the order line at `docs/pbi/smoke/README.md:2` (SM08 first). Update both to the 2026-10-26 split (SM01 build carries its SM08 rows, SM08 closes after its last target PBI); line 56 keeps main's split sentence plus SM01a (Cursor 5657764107 f1 medium on PR #15) |
@@ -49,40 +50,40 @@ Rows 16 and 17 are false hits (a valid file fails), not leaks; they get good fix
 5. Run `./scripts/verify.sh` twice, `bash scripts/check-pbi-docs.sh`, `bash scripts/check-pbi-template.sh`, gitleaks.
 6. Move this file to `docs/pbi/done/` with `- Status: done` and `- PR: #<n>`, update the README rows.
 ## Definition of Done
-- [ ] Row 1: `test/fixtures/smoke/bad-status-hex.yml` (`status: 0x1000`) exits 1 with one hit, no bash compare error on stderr
-- [ ] Row 1: `bad-status-hex-inrange.yml` (`status: 0x12C`, value 300, inside 100..599) exits 1 with one hit from the `^[0-9]+$` literal rule
-- [ ] Row 1: `bad-status-oct-inrange.yml` (`status: 0o144`, value 100) and `bad-status-bin-inrange.yml` (`status: 0b1100100`, value 100) each exit 1 with one hit from that same literal rule
-- [ ] Row 1: `bad-status-plus.yml` (`status: +200`) and `bad-status-underscore.yml` (`status: 2_00`) each exit 1 with one hit from that same literal rule (Cursor 5658018053 f1)
-- [ ] Row 2: `bad-equals-token-oneline.yml` (`equals: FAKE000000.e30.FAKE000000000`) exits 1
-- [ ] Row 2: `bad-auth-token-multiline.yml` (the FAKE token in `equals` split by a newline) exits 1
-- [ ] Row 2: `bad-auth-newline.yml` (`X-Request-Id: "ok\nghp_FAKE0000000000"`) exits 1
-- [ ] Row 2: `bad-auth-bearer-space.yml` (`Accept: "  bearer FAKE00000000"`) exits 1
-- [ ] Row 3: `bad-exists-string.yml` (`exists: "true"`) exits 1
-- [ ] Row 4: the Block 3 `**PBIs:**` line with "SM01-SM07 smoke (docs only so far)" and the order line at `docs/pbi/smoke/README.md:2` match the 2026-10-26 split (line 56 and the smoke README gate line were fixed by #11)
-- [ ] Row 5: `bad-path-fragment.yml` (`path: /x#access_token=FAKE0000000000`) exits 1
-- [ ] Row 5: `bad-path-fragment-encoded.yml` (`path: /x%23access_token=FAKE0000000000`) exits 1
-- [ ] Row 5: `bad-path-double-encoded.yml` (`path: /x%2523%2561ccess_token=FAKE0000000000`, no raw `#`, no plaintext key, still holds `%` after one decode) exits 1
-- [ ] Row 6: `bad-query-client-secret.yml` (`?client_secret=FAKE0000000000`) exits 1
-- [ ] Row 6: `bad-query-password.yml` (`?password=FAKE0000000000`) exits 1
-- [ ] Row 6: `smoke/_schema.yml` and `smoke/README.md` list `limit` as the only allowed query key and say any other key is a hit; `good.yml` (`?limit=1`) still exits 0
-- [ ] Row 7: `bad-auth-glpat.yml` (`glpat-FAKE00000000000000`) exits 1
-- [ ] Row 8: `bad-path-jwt.yml` (`path: /x/FAKE000000.e30.FAKE000000000`) exits 1
-- [ ] Row 9: `bad-yaml-ext.yaml` (a bad scenario saved as `.yaml`) is run by the verify fixture loop and exits 1
-- [ ] Row 10: `bad-dup-id.yml` from #11 still exits 1 (no change)
-- [ ] Row 11: `test/fixtures/smoke/bad-dup-id-cross/a.yml` plus `b.yml` (same `id` in both) exits 1 when passed together, and the verify loop runs that pair as one case
-- [ ] Row 12: `bad-query-sig.yml` (`?sig=FAKE0000000000`) and `bad-query-semicolon.yml` (`;token=FAKE0000000000`) each exit 1
-- [ ] Row 13: `bad-query-encoded.yml` (`?%74oken=FAKE0000000000`) exits 1
-- [ ] Row 13: new good `good-query-encoded.yml` (`?%6cimit=1`) exits 0, and exits 1 if the decode step is removed
-- [ ] Row 13: `bad-query-double-encoded.yml` (`?%256cimit=1`: one decode is `%6cimit`, which still holds `%`; a second decode would be the allowed `limit`) exits 1, so a check that decodes more than once fails it
-- [ ] Row 13: `bad-query-second-key.yml` (`?limit=1&password=FAKE0000000000`) exits 1
-- [ ] Row 14: `bad-auth-ghr.yml`, `bad-auth-xoxe.yml`, `bad-auth-rk-live.yml`, `bad-auth-rk-test.yml` and `bad-auth-sk-dash.yml` (FAKE plus zeros after the prefix) each exit 1
-- [ ] Row 14: `.gitleaks.toml` allowlist gets one path entry each for `test/fixtures/smoke/bad-auth-rk-live.yml` and `bad-auth-rk-test.yml` (no wider glob), and gitleaks stays clean with them in the tree
-- [ ] Row 15: `bad-auth-scheme-mid.yml` (`X-Request-Id: "id Bearer FAKE0000000000"`) exits 1
-- [ ] Row 16: new good `good-json-oneline.yml` (two `expect.json` items on one line sharing `path`) exits 0; `bad-dup-env.yml` still exits 1
-- [ ] Row 17: `good-json-oneline.yml` also holds ids `orders-list` and `list` and exits 0; `bad-id-space.yml` (an id with whitespace) exits 1
-- [ ] `good.yml` and `good-dotted.yml` (`path: /v1.2.3`) still exit 0
-- [ ] `./scripts/verify.sh` ends with `0 failures` (run twice); `bash scripts/check-pbi-docs.sh` and `bash scripts/check-pbi-template.sh` print nothing; gitleaks clean; no em or en dash; `policies/checks/POL23.sh` untouched
-- [ ] No real or JWT-prefixed token in any file (FAKE plus zeros only)
+- [x] Row 1: `test/fixtures/smoke/bad-status-hex.yml` (`status: 0x1000`) exits 1 with one hit, no bash compare error on stderr
+- [x] Row 1: `bad-status-hex-inrange.yml` (`status: 0x12C`, value 300, inside 100..599) exits 1 with one hit from the `^[0-9]+$` literal rule
+- [x] Row 1: `bad-status-oct-inrange.yml` (`status: 0o144`, value 100) and `bad-status-bin-inrange.yml` (`status: 0b1100100`, value 100) each exit 1 with one hit from that same literal rule
+- [x] Row 1: `bad-status-plus.yml` (`status: +200`) and `bad-status-underscore.yml` (`status: 2_00`) each exit 1 with one hit from that same literal rule (Cursor 5658018053 f1)
+- [x] Row 2: `bad-equals-token-oneline.yml` (`equals: FAKE000000.e30.FAKE000000000`) exits 1
+- [x] Row 2: `bad-auth-token-multiline.yml` (the FAKE token in `equals` split by a newline) exits 1
+- [x] Row 2: `bad-auth-newline.yml` (`X-Request-Id: "ok\nghp_FAKE0000000000"`) exits 1
+- [x] Row 2: `bad-auth-bearer-space.yml` (`Accept: "  bearer FAKE00000000"`) exits 1
+- [x] Row 3: `bad-exists-string.yml` (`exists: "true"`) exits 1
+- [x] Row 4: the Block 3 `**PBIs:**` line with "SM01-SM07 smoke (docs only so far)" and the order line at `docs/pbi/smoke/README.md:2` match the 2026-10-26 split (line 56 and the smoke README gate line were fixed by #11)
+- [x] Row 5: `bad-path-fragment.yml` (`path: /x#access_token=FAKE0000000000`) exits 1
+- [x] Row 5: `bad-path-fragment-encoded.yml` (`path: /x%23access_token=FAKE0000000000`) exits 1
+- [x] Row 5: `bad-path-double-encoded.yml` (`path: /x%2523%2561ccess_token=FAKE0000000000`, no raw `#`, no plaintext key, still holds `%` after one decode) exits 1
+- [x] Row 6: `bad-query-client-secret.yml` (`?client_secret=FAKE0000000000`) exits 1
+- [x] Row 6: `bad-query-password.yml` (`?password=FAKE0000000000`) exits 1
+- [x] Row 6: `smoke/_schema.yml` and `smoke/README.md` list `limit` as the only allowed query key and say any other key is a hit; `good.yml` (`?limit=1`) still exits 0
+- [x] Row 7: `bad-auth-glpat.yml` (`glpat-FAKE00000000000000`) exits 1
+- [x] Row 8: `bad-path-jwt.yml` (`path: /x/FAKE000000.e30.FAKE000000000`) exits 1
+- [x] Row 9: `bad-yaml-ext.yaml` (a bad scenario saved as `.yaml`) is run by the verify fixture loop and exits 1
+- [x] Row 10: `bad-dup-id.yml` from #11 still exits 1 (no change)
+- [x] Row 11: `test/fixtures/smoke/bad-dup-id-cross/a.yml` plus `b.yml` (same `id` in both) exits 1 when passed together, and the verify loop runs that pair as one case
+- [x] Row 12: `bad-query-sig.yml` (`?sig=FAKE0000000000`) and `bad-query-semicolon.yml` (`;token=FAKE0000000000`) each exit 1
+- [x] Row 13: `bad-query-encoded.yml` (`?%74oken=FAKE0000000000`) exits 1
+- [x] Row 13: new good `good-query-encoded.yml` (`?%6cimit=1`) exits 0, and exits 1 if the decode step is removed
+- [x] Row 13: `bad-query-double-encoded.yml` (`?%256cimit=1`: one decode is `%6cimit`, which still holds `%`; a second decode would be the allowed `limit`) exits 1, so a check that decodes more than once fails it
+- [x] Row 13: `bad-query-second-key.yml` (`?limit=1&password=FAKE0000000000`) exits 1
+- [x] Row 14: `bad-auth-ghr.yml`, `bad-auth-xoxe.yml`, `bad-auth-rk-live.yml`, `bad-auth-rk-test.yml` and `bad-auth-sk-dash.yml` (FAKE plus zeros after the prefix) each exit 1
+- [x] Row 14: `.gitleaks.toml` allowlist gets one path entry each for `test/fixtures/smoke/bad-auth-rk-live.yml` and `bad-auth-rk-test.yml` (no wider glob), and gitleaks stays clean with them in the tree
+- [x] Row 15: `bad-auth-scheme-mid.yml` (`X-Request-Id: "id Bearer FAKE0000000000"`) exits 1
+- [x] Row 16: new good `good-json-oneline.yml` (two `expect.json` items on one line sharing `path`) exits 0; `bad-dup-env.yml` still exits 1
+- [x] Row 17: `good-json-oneline.yml` also holds ids `orders-list` and `list` and exits 0; `bad-id-space.yml` (an id with whitespace) exits 1
+- [x] `good.yml` and `good-dotted.yml` (`path: /v1.2.3`) still exit 0
+- [x] `./scripts/verify.sh` ends with `0 failures` (run twice); `bash scripts/check-pbi-docs.sh` and `bash scripts/check-pbi-template.sh` print nothing; gitleaks clean; no em or en dash; `policies/checks/POL23.sh` untouched
+- [x] No real or JWT-prefixed token in any file (FAKE plus zeros only)
 - [ ] A fresh Cursor review on the SM01a PR head has no open medium or above
 ## Technical design
 - Components and files: `scripts/check-smoke.sh`, `smoke/_schema.yml`, `smoke/README.md`, `.gitleaks.toml` (two rk fixture paths only), `scripts/verify.sh` (smoke fixture loops only), `test/fixtures/smoke/bad-*.yml`, `bad-yaml-ext.yaml`, `bad-dup-id-cross/`, `good-json-oneline.yml`, `good-query-encoded.yml`, `docs/pbi/README.md`, `docs/pbi/smoke/README.md`
@@ -118,8 +119,8 @@ flowchart LR
   C --> D[verify.sh 0 failures]
 ```
 ## Todo (carried, not built here)
-SM01b (`docs/pbi/smoke/SM01b.md`) only exists on PR #18 and is not on main yet, so the low findings from PR #15 sit here until #18 merges; whoever merges second moves them to SM01b.
-- [ ] Cursor 5657764107 f5 low (PBI template, ARC08): `docs/pbi/docs/TPL02-template-backfill.md` L26, the G05 DoD item lists ten Technical design fields and omits `Module boundary`. G05 already has that line above the Definition of Done, and a rewrite that adds exactly the ten listed fields would drop the line `check-pbi-template.sh` requires. Fix: move `Module boundary` into the section below the DoD and list it with the other fields (eleven).
+SM01b (`../smoke/SM01b.md` when on main) only exists on PR #18 and is not on main yet, so the low findings from PR #15 sit here until #18 merges; whoever merges second moves them to SM01b.
+- [ ] Cursor 5657764107 f5 low and Cursor 5658018053 f5 low (PBI template, ARC08): `docs/pbi/docs/TPL02-template-backfill.md` L26, the G05 DoD item lists ten Technical design fields and omits `Module boundary`. G05 already has that line above the Definition of Done, and a rewrite that adds exactly the ten listed fields would drop the line `check-pbi-template.sh` requires. Fix: move `Module boundary` into the section below the DoD and list it with the other fields (eleven).
 ## Named asks for Sven
 none
 ## Cost
@@ -132,3 +133,4 @@ none
 - Cursor review 5657575895 on PR #15 at 030ee71 (f1 to f4 and f6 folded into rows 1, 4, 5, 6, 13 and 14): https://github.com/svennijhuis/agentic-workflows/pull/15#pullrequestreview-5657575895
 - Sven 2026-10-26 19:34, 2-round cap, leftovers to a todo PBI
 - Cursor review 5657764107 on PR #15 at d6881e4 (f1 to f4 medium folded into rows 1, 4, 5 and 13; f5 low in the Todo section): https://github.com/svennijhuis/agentic-workflows/pull/15#pullrequestreview-5657764107
+- Cursor review 5658018053 on PR #15 at 368f837 (f1 medium folded into row 1; f4 low into row 9; f5 low in the Todo section): https://github.com/svennijhuis/agentic-workflows/pull/15#pullrequestreview-5658018053

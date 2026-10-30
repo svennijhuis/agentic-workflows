@@ -1,0 +1,8 @@
+scenarios:
+  - id: orders-list
+    env: tst
+    method: GET
+    path: /x/FAKE000000.e30.FAKE000000000
+    auth: none
+    expect:
+      status: 200

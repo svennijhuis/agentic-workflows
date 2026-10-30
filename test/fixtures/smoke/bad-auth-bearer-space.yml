@@ -1,0 +1,10 @@
+scenarios:
+  - id: orders-list
+    env: tst
+    method: GET
+    path: /api/orders?limit=1
+    auth: none
+    headers:
+      Accept: "  bearer FAKE00000000"
+    expect:
+      status: 200
