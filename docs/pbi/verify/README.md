@@ -9,6 +9,7 @@ Where things live: `scripts/verify.sh` is the only runner (C01). Each rule lives
 | VF02 | Verify workflow template for consumer repos (API and frontend) | 2 | one-way | W2 | todo | VF01, POL01, POL03, C12, G00a, X06b | POL30 | [VF02.md](VF02.md) |
 | VF02a | VF02 part: POL01 yml whole-file walk, parse error, yml roots | 2 | two-way | W2 | done | none | none | [VF02a](../done/VF02a-pol01-extension.md) |
 | VF02d1 | VF02 part: gate job run allowlist (POL27 and POL28) | 2 | two-way | W2 | done | VF01 | none | [VF02d1](../done/VF02d1.md) |
+| WF01 | One shared workflow file lister | 2 | two-way | W2 | todo | SM05c | none | [WF01.md](WF01.md) |
 
 New POL ids: POL27 (toolchain pinned in one place), POL28 (one verify entry point), POL29 (gate self-test), POL30 (consumer template: no spend, no auto trigger without Sven's yes). POL01 to POL26 are taken on main. PR #5 adds no POL id.
 
