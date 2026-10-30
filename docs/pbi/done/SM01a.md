@@ -1,6 +1,6 @@
 # SM01a: check-smoke.sh hardening follow-ups (fail closed on values, carry from #11)
 - Status: done
-- PR: #0
+- PR: #20
 - Area: smoke
 - Wave: W3
 - Block: 3

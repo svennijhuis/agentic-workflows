@@ -53,7 +53,7 @@ flowchart LR
 - [loops/](loops/00-overview.md): [LP00](loops/LP00-improvement-loop.md) improvement loop (incl. LP00 v2 cross-repo self-fix), [LP01](loops/LP01-delivery-loop.md) delivery loop (P05 board, P12 planning, P13 grilling, P14 pick-up at WIP 1), [LP02](loops/LP02-event-map.md) event map (automatic events, human triggers incl. slash commands and `/stop`, guards, rollout, doors).
 - [architecture/](architecture/00-overview.md): ARC01-ARC06 (context, topology, identity, safe-output flow incl. cross-repo, release, org switch). G00 owns these pages.
 - [agent-ops/](agent-ops/00-overview.md): AO01-AO14, sourced (S1-S11). AO01 retro and AO02 scorecards in B3, AO03 kill switch in B2 (guard dependency for `/stop`), the rest in B5. AO10 absorbs F75.
-- [smoke/](smoke/README.md): SM01-SM08 and SM01a post-deploy API smoke on tst and acc (Block 3; SM01 and SM01a checks done, SM02-SM07 docs only). Build order (split check 2026-10-26): SM08 rows live in the build PBIs SM01, SM04a, SM05a, SM05b, SM05c and SM07a, and SM08 closes once those have merged; SM07 (Sven's manual step, switched off), then SM01, SM05, SM04, SM03, SM06, SM02 (agentic, last). Nothing enabled until Sven's yes.
+- [smoke/](smoke/README.md): SM01-SM08, SM01a and SM01b post-deploy API smoke on tst and acc (Block 3; SM01 and SM01a checks done, the rest docs only). Build order (split check 2026-10-26): SM08 rows live in the build PBIs SM01, SM04a, SM05a, SM05b, SM05c and SM07a, and SM08 closes once those have merged; SM07 (Sven's manual step, switched off), then SM01, SM01b (lane 2 after SM01a), SM05, SM04, SM03, SM06, SM02 (agentic, last). Nothing enabled until Sven's yes.
 - Folds: F76 log insights is in [M05](monitoring/M05-github-log-watcher.md), F77 issue to PR is in [P04](multi-repo/P04-research-plan-assign-copilot.md). The human go label is `agent-ok`. C01 is `scripts/verify.sh` only.
 
 ```mermaid
@@ -158,6 +158,7 @@ flowchart LR
 | VF02 | Verify workflow template for consumer repos (API and frontend) | 2 | one-way | verify | W2 | todo | VF01, POL01, POL03, C12, G00a, X06b | Builder | [verify/VF02.md](verify/VF02.md) |
 | VF02a | VF02 part: POL01 yml whole-file walk, parse error, yml roots | 2 | two-way | verify | W2 | done | none | Builder | [done/VF02a-pol01-extension.md](done/VF02a-pol01-extension.md) |
 | VF02d1 | VF02 part: gate job run allowlist (POL27 and POL28) | 2 | two-way | verify | W2 | done | VF01 | Builder | [done/VF02d1.md](done/VF02d1.md) |
+| WF01 | One shared workflow file lister | 2 | two-way | verify | W2 | todo | SM05c | Builder | [verify/WF01.md](verify/WF01.md) |
 | AO01 | Retro workflow | 3 | one-way | agent-ops | W3 | todo | B01, AO02, X07 | Builder | [agent-ops/AO01-retro-workflow.md](agent-ops/AO01-retro-workflow.md) |
 | AO02 | Agent scorecards | 3 | two-way | agent-ops | W3 | todo | B01, AO10 | Builder | [agent-ops/AO02-agent-scorecards.md](agent-ops/AO02-agent-scorecards.md) |
 | B01 | Logs + audit + session runbook | 3 | one-way | observability | PR 0 | todo | C01 | Cursor CLI | [observability/B01-logs-audit-session-runbook.md](observability/B01-logs-audit-session-runbook.md) |
@@ -193,6 +194,7 @@ flowchart LR
 | R05a | Event guards: untrusted payload, fail-closed filters, dedupe | 3 | two-way | triggers | W3 | todo | R05, M01, AO08 | Builder | [triggers/R05a-event-guards.md](triggers/R05a-event-guards.md) |
 | LP02a | Lint: two workflows sharing a trigger and filter | 3 | two-way | loops | W3 | todo | LP02, POL25 | Builder | [loops/LP02a-duplicate-trigger-lint.md](loops/LP02a-duplicate-trigger-lint.md) |
 | SM01 | Smoke scenario format and folder per feature | 3 | two-way | smoke | W3 | done | none | Builder | [done/SM01.md](done/SM01.md) |
+| SM01b | check-smoke carry (Cursor 5657706637 on PR #11) | 3 | two-way | smoke | W3 | todo | SM01a | Builder | [smoke/SM01b.md](smoke/SM01b.md) |
 | SM02 | Scenario generator at PR time | 3 | one-way | smoke | W3 | todo | SM01, BH08, P14 | Builder | [smoke/SM02.md](smoke/SM02.md) |
 | SM03 | Post-deploy smoke runner for tst and acc (no AI) | 3 | one-way | smoke | W3 | todo | SM01, SM04, SM05, SM07 | Builder | [smoke/SM03.md](smoke/SM03.md) |
 | SM04 | Smoke token: GitHub OIDC to Entra to APIM validate-jwt to backend | 3 | one-way | smoke | W3 | todo | SM07 | Builder | [smoke/SM04.md](smoke/SM04.md) |
@@ -382,7 +384,7 @@ Related: [agentPacks PR #80](https://github.com/svennijhuis/agentPacks/pull/80) 
 - [_template.md](_template.md) PBI template (technical design required)
 - [decisions/](decisions/) ADRs
 - [done/](done/) completed PBI moves (Block 1 from PR #4)
-- [verify/](verify/README.md): VF01-VF02 one verify entry point and the consumer verify template (Block 2; VF01 done in #10 with POL27-POL29, VF02 todo, VF02a POL01 part done in #9, VF02d1 POL27 and POL28 run allowlist done in #13). New rule POL30 with VF02.
+- [verify/](verify/README.md): VF01-WF01 one verify entry point, shared workflow file lister (WF01 todo), and the consumer verify template (Block 2; VF01 done in #10 with POL27-POL29, VF02 todo, VF02a POL01 part done in #9, VF02d1 POL27 and POL28 run allowlist done in #13). New rule POL30 with VF02.
 
 
 ## Block 0
@@ -421,7 +423,7 @@ Empty until Sven tests block 1; new PBIs get the next free id per area.
 
 ## Block 2
 
-**PBIs:** BH09, C13, HX03, TPL02, C12a (v3.12, docs only so far), VF01 verify (done, #10), VF02 verify (docs only so far), S00-S06, O01-O03, R01-R03, L01, D01, G01-G03, X07 benchmark harness, AO03 kill switch (guard for `/stop`), LP02 guards (POL10 actor check, concurrency), F01 staged smoke, G00a proof run.
+**PBIs:** BH09, C13, HX03, TPL02, C12a (v3.12, docs only so far), VF01 verify (done, #10), WF01 shared workflow file lister (todo), VF02 verify (docs only so far), S00-S06, O01-O03, R01-R03, L01, D01, G01-G03, X07 benchmark harness, AO03 kill switch (guard for `/stop`), LP02 guards (POL10 actor check, concurrency), F01 staged smoke, G00a proof run.
 
 **What Sven can test:** Tag v0.1; `gh aw add` F01 into trial repo; staged run shows safe-output preview, no writes.
 
@@ -438,7 +440,7 @@ Empty until Sven tests block 2; new PBIs get the next free id per area.
 
 ## Block 3
 
-**PBIs:** BH01, P12a, F01a, BH08, BH03 (doc), LP00b, HX05, R05a, LP02a (v3.12, docs only so far), SM01 and SM01a smoke checks done; SM02-SM07 smoke (docs only so far), F02-F07, F11, F13-F15, F17, F72, F74, F01 live, F01b gated, B01, B02, B03a, Y01, R04, M05 step 1 (report-only on 1 repo), P05 board, P12 planning, P13 grilling, AO01 retro, AO02 scorecards. Each NOW workflow gets 5 or more X07 cases and a passing score in its DoD.
+**PBIs:** BH01, P12a, F01a, BH08, BH03 (doc), LP00b, HX05, R05a, LP02a (v3.12, docs only so far), SM01 and SM01a smoke checks done; SM02-SM07 and SM01b smoke (docs only so far), F02-F07, F11, F13-F15, F17, F72, F74, F01 live, F01b gated, B01, B02, B03a, Y01, R04, M05 step 1 (report-only on 1 repo), P05 board, P12 planning, P13 grilling, AO01 retro, AO02 scorecards. Each NOW workflow gets 5 or more X07 cases and a passing score in its DoD.
 
 **What Sven can test:** NOW workflows in trial repo; F01 manual only; cost dashboard.
 

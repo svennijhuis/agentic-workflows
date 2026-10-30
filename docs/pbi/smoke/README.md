@@ -1,5 +1,5 @@
 # docs/pbi/smoke/
-Post-deploy API smoke on tst and acc. Order (split check 2026-10-26): SM01 and SM01a build (SM01 done in PR #11; SM01a hardening), SM08 rows live in SM01, SM04a, SM05a, SM05b, SM05c and SM07a and SM08 closes when those merge; SM07 (Sven manual step, switched off), then SM05, SM04, SM03, SM06, SM02 (agentic, last).
+Post-deploy API smoke on tst and acc. Order: SM08 (docs, first), SM07 (Sven's manual step, switched off), SM01, SM01a (done), SM01b (lane 2, same `check-smoke.sh`), SM05, SM04, SM03, SM06, SM02 (agentic, last).
 Follow-up: [SM01a](../done/SM01a.md) (check-smoke.sh hardening, done; SM01 merged in PR #11).
 Nothing enabled until Sven yes; Actions billing blocked today.
 Gate (split check 2026-10-26): the rows of [SM08](SM08-cursor-findings.md) (the 8 open Cursor findings on PR #5) live in the build PBIs SM01, SM04a, SM05a, SM05b, SM05c and SM07a. SM08 closes once those have merged.
