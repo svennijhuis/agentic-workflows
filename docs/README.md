@@ -1,6 +1,6 @@
 # Documentation
 
-Diataxis layout for the catalog. PBI backlog: [pbi/README.md](pbi/README.md).
+Diataxis layout for the catalog. PBI backlog: [pbi/README.md](pbi/README.md). Session order and lanes: [ROADMAP.md](ROADMAP.md).
 
 ## How-to
 
