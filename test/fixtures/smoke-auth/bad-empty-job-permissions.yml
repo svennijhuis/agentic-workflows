@@ -1,0 +1,22 @@
+# Bad: workflow-level id-token: write, job has an empty permissions: (null), environment prd (Reviewer #17 r1 case 4)
+name: smoke-auth fixture
+on:
+  workflow_call:
+    inputs:
+      env:
+        type: string
+        required: true
+  workflow_dispatch:
+    inputs:
+      env:
+        type: choice
+        options: [tst, acc]
+permissions:
+  id-token: write
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    permissions:
+    environment: prd
+    steps:
+      - run: echo "smoke"

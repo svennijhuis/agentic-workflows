@@ -1,0 +1,3 @@
+promoted: []
+deterministic_triggers:
+  smoke-run.yml: workflow_call
