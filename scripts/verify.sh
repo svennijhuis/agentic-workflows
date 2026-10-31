@@ -101,6 +101,10 @@ sm05b_one_hit policies/checks/POL03.sh test/fixtures/bad/POL03-smoke-date-list
 sm05b_one_hit policies/checks/POL25.sh test/fixtures/bad/POL25-smoke-date-bool
 sm05b_one_hit policies/checks/POL25.sh test/fixtures/bad/POL25-smoke-date-list
 sm05b_one_hit policies/checks/POL03.sh test/fixtures/bad/POL03-smoke-trigger-blank
+sm05b_one_hit policies/checks/POL25.sh test/fixtures/bad/POL25-smoke-sven-yes-superstring
+sm05b_one_hit policies/checks/POL25.sh test/fixtures/bad/POL25-smoke-sven-yes-orphan-lock
+sm05b_one_hit policies/checks/POL25.sh test/fixtures/bad/POL25-smoke-sven-yes-date-blank
+sm05b_one_hit policies/checks/POL25.sh test/fixtures/bad/POL25-smoke-sven-yes-quote-blank
 
 echo "# import-schema fixtures (C05)"
 for kind in good bad; do

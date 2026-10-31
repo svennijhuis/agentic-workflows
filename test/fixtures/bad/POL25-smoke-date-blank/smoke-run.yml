@@ -1,0 +1,12 @@
+# Bad POL25 case: yes.date is one space, runner is dispatch-only (SM08 f8).
+name: smoke-run
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - run: echo fixture
