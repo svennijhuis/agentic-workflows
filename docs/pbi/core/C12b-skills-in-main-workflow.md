@@ -5,7 +5,7 @@
 - Block: 2
 - Lane: Builder
 - Depends on: C12, C05, POL01
-- proof: `./scripts/verify.sh` exits 0 with `0 failures`; `sed -n 2p workflows/squad-review.lock.yml` manifest has `"skills":["svennijhuis/agentPacks/plugins/squad/skills/squad@<pin>"]`; `bash policies/checks/POL31.sh test/fixtures/bad/POL31/<case>` exits 1 with 1 hit per case
+- proof: `./scripts/verify.sh` exits 0 with `0 failures`; `sed -n 2p workflows/squad-review.lock.yml | grep -F '"skills":["svennijhuis/agentPacks/plugins/squad/skills/squad@34e1dec3535baa1d77cb441ea8c98498dc9b3684"]'` exits 0; `bash policies/checks/POL31.sh test/fixtures/bad/POL31/shared-skills` and `bash policies/checks/POL31.sh test/fixtures/bad/POL31/parse-error` each exit 1 with 1 hit; `bash policies/checks/POL31.sh test/fixtures/good/POL31/main-skills` exits 0
 - door: two-way
 - triage: build (real bug on main 14998b6: the squad skill never installs)
 - feedback: `./scripts/verify.sh` with `0 failures`, plus the lock manifest `skills` grep above
@@ -16,25 +16,26 @@
 ## Goal
 Make the agentPacks squad skill actually install. gh-aw reads `skills:` only from the main workflow and silently drops it from an imported fragment, so `workflows/shared/agentpacks.md` installs nothing today.
 ## Context
-Repo Research proof (`/workspace/research/agentpacks/ghaw-import-map.md` P9, P10, P11, gh-aw v1.0.1). Strategy re-checked on the pinned v0.93.4: the committed `workflows/squad-review.lock.yml` manifest has no `skills` key; with `skills:` moved into `squad-review.md` the compile is clean (0 warnings) and the manifest lists the pinned skill. Two side findings from the same map: a `workflows/shared/` file with `applyTo`, `globs`, `license` or `name` in frontmatter is a compile schema error (compile already catches it, no new rule), and offline `compile --strict` on v1.0.1 needs a committed `.github/aw/actions-lock.json` (not needed on v0.93.4; todo row for the gh-aw bump, not this PBI). F01 builds on squad-review, so this lands before F01.
+The gh-aw [frontmatter reference](https://github.com/github/gh-aw/blob/main/docs/src/content/docs/reference/frontmatter.md) lists `skills:` as a main workflow key; it is not merged from imports. Strategy re-checked on the pinned v0.93.4: the committed `workflows/squad-review.lock.yml` manifest has no `skills` key; with `skills:` moved into `squad-review.md` the compile is clean (0 warnings) and the manifest lists the pinned skill. Two side findings: a `workflows/shared/` file with `applyTo`, `globs`, `license` or `name` in frontmatter is a compile schema error (compile already catches it, no new rule), and offline `compile --strict` on gh-aw v1.x needs a committed `.github/aw/actions-lock.json` (not needed on v0.93.4; todo row for the gh-aw bump, not this PBI). F01 builds on squad-review, so this lands before F01.
 ## Steps
-1. Move the `skills:` list from `workflows/shared/agentpacks.md` into `workflows/squad-review.md` frontmatter, same 40-hex pin. Keep the fragment import for its prose note; reword the note to say skills go in the consumer workflow.
+1. Move the `skills:` list from `workflows/shared/agentpacks.md` into `workflows/squad-review.md` frontmatter, same 40-hex pin `34e1dec3535baa1d77cb441ea8c98498dc9b3684`. Keep the fragment import for its prose note; reword the note to say skills go in the consumer workflow.
 2. Recompile the lock with the pinned gh-aw; commit md and lock together.
-3. New rule POL31: any `workflows/shared/*.md` frontmatter with a `skills:` key is a hit (`<file>:<line> POL31 skills in shared fragment is silently dropped`), exit 1. Bad fixture `test/fixtures/bad/POL31/shared-skills/`, good fixture `test/fixtures/good/POL31/main-skills/`, both in the POL23 one-hit loop.
+3. New rule POL31 (`policies/POL31.yml`, `policies/checks/POL31.sh`). No args: scan `workflows/shared/*.md`. Path arg: scan `workflows/shared/*.md` under that root. A `skills:` key in that frontmatter is one hit (`<file>:<line> POL31 skills in shared fragment is silently dropped`). Frontmatter that cannot be read or does not parse is also one hit (`<file>:<line> POL31 parse error`), never a skip (fail closed, same as `policies/checks/POL25.sh`). Any hit exits 1. Bad fixtures `test/fixtures/bad/POL31/shared-skills/` (shared file has `skills:`) and `test/fixtures/bad/POL31/parse-error/` (shared file with broken frontmatter); good fixture `test/fixtures/good/POL31/main-skills/` (`workflows/squad-review.md` has `skills:`, `workflows/shared/*.md` does not). All three in the POL23 one-hit loop in `scripts/verify.sh`.
 4. POL01 allowlist mirror keeps the skill path (no change expected; prove it).
 5. Update `docs/reference/agentpacks-contract.md` and `docs/reference/squad-review.md`: skills live in the consumer workflow. Add the "copy this" note: an org copies `squad-review.md`, its lock and `workflows/shared/`, and the skill comes with the md.
 ## Definition of Done
-- [ ] `workflows/squad-review.lock.yml` manifest lists the squad skill at the same pin (grep in Evidence)
+- [ ] `workflows/squad-review.lock.yml` manifest lists the squad skill at pin `34e1dec3535baa1d77cb441ea8c98498dc9b3684` (grep in Evidence)
 - [ ] `workflows/shared/agentpacks.md` has no `skills:` key
-- [ ] POL31 bad fixture exits 1 with 1 hit, good exits 0, inside `./scripts/verify.sh` with `0 failures`
-- [ ] Lock drift check clean; still `workflow_dispatch` only (POL03), `staged: true`, no new secrets
+- [ ] POL31 bad fixtures (shared-skills, parse-error) each exit 1 with 1 hit, good exits 0, inside `./scripts/verify.sh` with `0 failures`
+- [ ] A shared fragment whose frontmatter does not parse is a POL31 hit (exit 1), never skipped
+- [ ] Lock drift check clean; still `workflow_dispatch` only (POL03, POL25), `staged: true`, no new secrets
 - [ ] Docs updated, plus the "copy this" note
-- [ ] Todo row added: `.github/aw/actions-lock.json` needed when gh-aw moves to v1.x (import map P1)
+- [ ] Todo row added: `.github/aw/actions-lock.json` needed when gh-aw moves to v1.x
 - [ ] Offline proof only, no run, no token spend
 ## Technical design
-- Components and files: `workflows/squad-review.md`, `workflows/squad-review.lock.yml`, `workflows/shared/agentpacks.md`, `policies/POL31.yml`, `policies/checks/POL31.sh`, `test/fixtures/{bad,good}/POL31/`, `docs/reference/agentpacks-contract.md`, `docs/reference/squad-review.md`
+- Components and files: `workflows/squad-review.md`, `workflows/squad-review.lock.yml`, `workflows/shared/agentpacks.md`, `policies/POL31.yml`, `policies/checks/POL31.sh`, `test/fixtures/bad/POL31/{shared-skills,parse-error}/`, `test/fixtures/good/POL31/main-skills/`, `scripts/verify.sh`, `docs/reference/agentpacks-contract.md`, `docs/reference/squad-review.md`
 - Module boundary: the consumer workflow frontmatter `skills:` is the interface; gh-aw install steps in the lock are the deep part
-- Interfaces: frontmatter `skills:` (list of `owner/repo/path@<40-hex>`); POL31 exit 0 or 1, one line per hit
+- Interfaces: frontmatter `skills:` (list of `owner/repo/path@<40-hex>`); `POL31.sh [root]` exit 0 or 1, one `<file>:<line> POL31 ...` line per hit
 - Sequence:
 
 ```mermaid
@@ -43,19 +44,44 @@ sequenceDiagram
   participant S as shared/agentpacks.md
   participant C as gh aw compile
   participant L as lock.yml
+  participant P as POL31.sh
   M->>C: skills: pinned squad skill
   S->>C: prose only (skills here are dropped)
   C->>L: Install frontmatter skill steps
-  Note over S: POL31 fails if skills: comes back here
+  P->>S: read frontmatter
+  alt skills key or parse error
+    P-->>P: file:line POL31 hit, exit 1
+  else clean
+    P-->>P: exit 0
+  end
 ```
 
-- Data and state: none
-- Errors and exits: POL31 exit 1 with `<file>:<line> POL31 ...`
-- Security: same pin, no new secrets, no new triggers
-- Tests: POL31 one-hit loop fixtures; lock manifest grep
-- Rollout and rollback: revert the PR
-- Open questions: none
+- Failure modes: `skills:` back in a shared fragment installs nothing (POL31 hit, exit 1); broken shared frontmatter would hide a `skills:` key (POL31 parse error hit, exit 1); lock not recompiled (lock drift check fails)
+- Security: same 40-hex pin, no new secrets, no new triggers, no network in POL31
+- Observability: `scripts/verify.sh` log lines `<file>:<line> POL31 ...`; lock manifest line 2 lists the skill
+- Cost: 0 (script and offline compile, no AIC)
+- Rollback: revert the PR (md, lock, POL31 files and fixtures go back together)
+- Proof: same as proof: above
+- Door: two-way (revert is one commit, nothing live)
 ## Evidence
+(todo: `scripts/verify.sh` log on the exact SHA, lock manifest grep, POL31 fixture exits)
+## Flow
+```mermaid
+flowchart LR
+  S1[Move skills into squad-review.md same pin]
+  S2[Recompile lock commit md and lock]
+  S1 --> S2
+  S3[POL31 check plus bad and good fixtures]
+  S2 --> S3
+  S4[POL01 mirror unchanged]
+  S3 --> S4
+  S5[Docs and copy this note]
+  S4 --> S5
+```
+## Named asks for Sven
+none (offline only, two-way)
+## Cost
+0 (script, no AIC)
 ## Sources
-- /workspace/research/agentpacks/ghaw-import-map.md (P9, P10, P11, P1)
 - https://github.com/github/gh-aw/blob/main/docs/src/content/docs/reference/frontmatter.md
+- [agentic-workflows PR #4](https://github.com/svennijhuis/agentic-workflows/pull/4)
