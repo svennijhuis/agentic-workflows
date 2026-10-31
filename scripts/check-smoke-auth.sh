@@ -8,7 +8,9 @@
 #   4 triggers through on_triggers (allowlist workflow_dispatch, workflow_call)
 #   5 jobs non-empty map; permissions shape; id-token permission value must be exactly write when present
 #   6 OIDC environment on each job that can mint id-token: write
-#   7 token hygiene on each minting job that passes 6: azure/login from AZURE_* vars, masked get-access-token step
+#   7 token hygiene on each minting job that passes 6: azure/login@v2, every get-access-token step masked on its var,
+#     no token reads before mask (echo, printf, curl, same line as capture or mask), shell debug trace on any step,
+#     no ACTIONS_STEP_DEBUG true or 1 at workflow, job, or step; yq read errors on inputs, scalars, or id-token are hits
 set -uo pipefail
 case "${1:-}" in -h|--help) sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;; esac
 command -v yq >/dev/null 2>&1 || { echo "scripts/check-smoke-auth.sh:1 VERIFY needs-human missing: yq"; exit 2; }
@@ -33,62 +35,140 @@ MINTS='((tag == "!!str" and . == "write-all") or (tag == "!!map" and .["id-token
 BAD_IDTOKEN='.. | select(tag == "!!map" and has("id-token")) | .["id-token"] | select(tag == "!!str" and . != "write") | [line, .] | @tsv'
 # shellcheck disable=SC2016
 SCALARS='.. | select(tag == "!!str") | select(. | contains("\n") | not) | [line, .] | @tsv'
+# shellcheck disable=SC2016
+STEP_RUNS='.jobs[]?.steps[]? | select(.run) | [line, .run] | @json'
+# shellcheck disable=SC2016
+STEP_ENVS='.jobs[]?.steps[]? | select(.env) | . as $s | $s.env | to_entries | [.[] | [($s | line), .value]] | .[] | @json'
+
+scalar_value_banned() {
+  local f=$1 line=$2 v=$3
+  [ -n "$line" ] || return 1
+  if grep -qE '(^|[^A-Za-z0-9_])(client_secret|clientSecret|client-secret|password)([^A-Za-z0-9_]|$)' <<<"$v"; then
+    hit "$f" "$line" "forbidden secret-shaped name in a workflow value"; return 0
+  fi
+  if grep -qF 'grant_type=password' <<<"$v"; then hit "$f" "$line" "ROPC grant_type=password not allowed"; return 0; fi
+  if grep -qF 'AZURE_USERNAME' <<<"$v"; then hit "$f" "$line" "AZURE_USERNAME not allowed"; return 0; fi
+  if [ "$v" = 'party.*' ]; then hit "$f" "$line" "party.* role not allowed"; return 0; fi
+  if grep -qE '(^|[^A-Za-z0-9_])([A-Za-z0-9_.]*\.Write|API\.Write)([^A-Za-z0-9_]|$)' <<<"$v"; then
+    hit "$f" "$line" "Write role must not be requested in smoke auth"; return 0
+  fi
+  if grep -qE '(^|[^A-Za-z0-9_])([A-Za-z0-9_.]*\.Admin|API\.Admin)([^A-Za-z0-9_]|$)' <<<"$v"; then
+    hit "$f" "$line" "Admin role must not be requested in smoke auth"; return 0
+  fi
+  return 1
+}
 
 check_forbidden_inputs() {
-  local f=$1 key line
+  local f=$1 key line keys ontag
   line=$(yq '.on | line' "$f" 2>/dev/null) || line=1
+  ontag=$(yq '.on | tag' "$f" 2>/dev/null) || { hit "$f" "$line" "workflow inputs do not read"; return 1; }
+  [ "$ontag" = '!!map' ] || return 0
+  if ! keys=$(yq -r '[(.on.workflow_call.inputs // {} | keys | .[]), (.on.workflow_dispatch.inputs // {} | keys | .[])] | .[]' "$f" 2>/dev/null); then
+    hit "$f" "$line" "workflow inputs do not read"; return 1
+  fi
   while IFS= read -r key; do
     [ -n "$key" ] || continue
     case $key in
       client_secret|clientSecret|client-secret|password) hit "$f" "$line" "forbidden workflow input '$key'"; return 1 ;;
     esac
-  done < <(yq -r '[(.on.workflow_call.inputs // {} | keys | .[]), (.on.workflow_dispatch.inputs // {} | keys | .[])] | .[]' "$f" 2>/dev/null)
+  done <<<"$keys"
   return 0
 }
 
 check_banned_scalars() {
-  local f=$1 line v
+  local f=$1 line v row el
+  if ! v=$(yq -r "$SCALARS" "$f" 2>/dev/null); then hit "$f" 1 "scalars do not read"; return 1; fi
   while IFS=$'\t' read -r line v; do
-    [ -n "$line" ] || continue
-    if grep -qF 'grant_type=password' <<<"$v"; then hit "$f" "$line" "ROPC grant_type=password not allowed"; return 1; fi
-    if grep -qF 'AZURE_USERNAME' <<<"$v"; then hit "$f" "$line" "AZURE_USERNAME not allowed"; return 1; fi
-    if [ "$v" = 'party.*' ]; then hit "$f" "$line" "party.* role not allowed"; return 1; fi
-    if grep -qE '(^|[^A-Za-z0-9_])([A-Za-z0-9_.]*\.Write|API\.Write)([^A-Za-z0-9_]|$)' <<<"$v"; then
-      hit "$f" "$line" "Write role must not be requested in smoke auth"; return 1
-    fi
-    if grep -qE '(^|[^A-Za-z0-9_])([A-Za-z0-9_.]*\.Admin|API\.Admin)([^A-Za-z0-9_]|$)' <<<"$v"; then
-      hit "$f" "$line" "Admin role must not be requested in smoke auth"; return 1
-    fi
-  done < <(yq -r "$SCALARS" "$f" 2>/dev/null)
+    scalar_value_banned "$f" "$line" "$v" && return 1
+  done <<<"$v"
+  if ! v=$(yq -r "$STEP_RUNS" "$f" 2>/dev/null); then hit "$f" 1 "step run scalars do not read"; return 1; fi
+  while IFS= read -r row; do
+    [ -n "$row" ] || continue
+    line=$(<<<"$row" yq -r '.[0]')
+    el=$(<<<"$row" yq -r '.[1]')
+    scalar_value_banned "$f" "$line" "$el" && return 1
+  done <<<"$v"
+  if ! v=$(yq -r "$STEP_ENVS" "$f" 2>/dev/null); then hit "$f" 1 "step env scalars do not read"; return 1; fi
+  while IFS= read -r row; do
+    [ -n "$row" ] || continue
+    line=$(<<<"$row" yq -r '.[0]')
+    el=$(<<<"$row" yq -r '.[1]')
+    scalar_value_banned "$f" "$line" "$el" && return 1
+  done <<<"$v"
   return 0
 }
 
 check_id_token_case() {
   local f=$1 line val
+  if ! val=$(yq -r "$BAD_IDTOKEN" "$f" 2>/dev/null); then hit "$f" 1 "id-token permission values do not read"; return 1; fi
   while IFS=$'\t' read -r line val; do
     [ -n "$line" ] && { hit "$f" "$line" "id-token permission must be lowercase write (got '$val')"; return 1; }
-  done < <(yq -r "$BAD_IDTOKEN" "$f" 2>/dev/null)
+  done <<<"$val"
   return 0
 }
 
-check_mint_job_steps() {
-  local f=$1 job=$2 jl=$3
-  local sl cid tid allow sub run envdbg maskln tokln usetokln loginln
-  loginln=$(J=$job yq '.jobs[strenv(J)].steps[]? | select(.["uses"] // "" | test("^azure/login@")) | line' "$f" 2>/dev/null | head -n1)
-  if [ -z "$loginln" ]; then hit "$f" "$jl" "job $job can mint an OIDC token but has no azure/login step"; return; fi
-  cid=$(J=$job yq -r '.jobs[strenv(J)].steps[]? | select(.["uses"] // "" | test("^azure/login@")) | .with["client-id"] // ""' "$f" | head -n1)
-  tid=$(J=$job yq -r '.jobs[strenv(J)].steps[]? | select(.["uses"] // "" | test("^azure/login@")) | .with["tenant-id"] // ""' "$f" | head -n1)
-  allow=$(J=$job yq -r '.jobs[strenv(J)].steps[]? | select(.["uses"] // "" | test("^azure/login@")) | .with["allow-no-subscriptions"] // ""' "$f" | head -n1)
-  sub=$(J=$job yq -r '.jobs[strenv(J)].steps[]? | select(.["uses"] // "" | test("^azure/login@")) | .with["subscription-id"] // ""' "$f" | head -n1)
-  if [ "$cid" != "$WANT_CID" ]; then hit "$f" "$loginln" "azure/login client-id must be $WANT_CID"; return; fi
-  if [ "$tid" != "$WANT_TID" ]; then hit "$f" "$loginln" "azure/login tenant-id must be $WANT_TID"; return; fi
-  if [ "$allow" != true ] && [ "$allow" != 'true' ]; then hit "$f" "$loginln" "azure/login must set allow-no-subscriptions: true"; return; fi
-  if [ -n "$sub" ] && grep -q 'secrets\.' <<<"$sub"; then hit "$f" "$loginln" "azure/login must not use subscription-id from secrets"; return; fi
-  if grep -q 'secrets\.' <<<"$cid$tid"; then hit "$f" "$loginln" "azure/login must use environment vars AZURE_CLIENT_ID and AZURE_TENANT_ID (vars.*), not secrets"; return; fi
+debug_env_true() {
+  [ "$1" = true ] || [ "$1" = 'true' ] || [ "$1" = 1 ] || [ "$1" = '1' ]
+}
 
-  sl=$(J=$job yq '.jobs[strenv(J)].steps[]? | select(.run // "" | test("get-access-token")) | line' "$f" 2>/dev/null | head -n1)
-  if [ -z "$sl" ]; then hit "$f" "$jl" "job $job must capture token with az account get-access-token --scope \"\$SMOKE_API_SCOPE\""; return; fi
-  run=$(J=$job yq -r '.jobs[strenv(J)].steps[]? | select(.run // "" | test("get-access-token")) | .run' "$f" 2>/dev/null)
+token_var_from_run() {
+  grep -E '^[[:space:]]*[A-Za-z_][A-Za-z0-9_]*=\$\(az account get-access-token' <<<"$1" | head -n1 | sed -E 's/^[[:space:]]*([A-Za-z_][A-Za-z0-9_]*)=.*/\1/'
+}
+
+run_masks_var() {
+  local run=$1 var=$2
+  grep -qF "::add-mask::\$${var}" <<<"$run" || grep -qF "::add-mask::\${${var}}" <<<"$run"
+}
+
+run_has_debug_trace() {
+  grep -qE '(^|[[:space:]])set[[:space:]]+-[a-zA-Z]*x([[:space:]]|;|$|[&|])' <<<"$1" \
+    || grep -qE '(^|[[:space:]])set[[:space:]]+-o[[:space:]]+xtrace' <<<"$1"
+}
+
+run_leaks_token_var() {
+  local run=$1 var=$2 line
+  while IFS= read -r line; do
+    [[ $line =~ ^[[:space:]]*${var}=\$\(az[[:space:]]account[[:space:]]get-access-token ]] && continue
+    [[ $line =~ add-mask ]] && continue
+    [[ $line =~ GITHUB_ENV ]] && continue
+    if [[ $line =~ (\$\{${var}\}|\$${var}([^A-Za-z0-9_]|$)) ]]; then
+      if [[ $line =~ (^|[[:space:]])(echo|printf|cat|tee|curl|wget)[[:space:]] ]]; then
+        return 0
+      fi
+    fi
+  done <<<"$run"
+  return 1
+}
+
+run_capture_mask_same_line() {
+  local run=$1 var=$2 line
+  while IFS= read -r line; do
+    [[ $line =~ ^[[:space:]]*${var}=\$\(az[[:space:]]account[[:space:]]get-access-token ]] \
+      && [[ $line =~ add-mask ]] && return 0
+  done <<<"$run"
+  return 1
+}
+
+run_uses_var_before_mask() {
+  local run=$1 var=$2 tokln maskln n line
+  tokln=$(grep -nF "${var}=\$(az account get-access-token" <<<"$run" | head -n1 | cut -d: -f1)
+  maskln=$(grep -nF "::add-mask::\$${var}" <<<"$run" | head -n1 | cut -d: -f1)
+  [ -z "$maskln" ] && maskln=$(grep -nF "::add-mask::\${${var}}" <<<"$run" | head -n1 | cut -d: -f1)
+  [ -z "$tokln" ] || [ -z "$maskln" ] && return 1
+  n=0
+  while IFS= read -r line; do
+    n=$((n + 1))
+    [ "$n" -le "$tokln" ] && continue
+    [ "$n" -ge "$maskln" ] && break
+    [[ $line =~ add-mask ]] && continue
+    [[ $line =~ (\$\{${var}\}|\$${var}([^A-Za-z0-9_]|$)) ]] && return 0
+  done <<<"$run"
+  return 1
+}
+
+check_token_run_step() {
+  local f=$1 job=$2 sl=$3 run=$4
+  local var
   if ! grep -q 'get-access-token' <<<"$run" || ! grep -q 'SMOKE_API_SCOPE' <<<"$run"; then
     hit "$f" "$sl" "token step must use az account get-access-token with scope SMOKE_API_SCOPE"; return
   fi
@@ -100,20 +180,65 @@ check_mint_job_steps() {
   if grep -qE '(^|[^A-Za-z0-9_])([A-Za-z0-9_.]*\.Admin|API\.Admin)([^A-Za-z0-9_]|$)' <<<"$run"; then
     hit "$f" "$sl" "Admin role must not be requested in smoke auth"; return
   fi
-  envdbg=$(J=$job yq -r '.jobs[strenv(J)].steps[]? | select(.run // "" | test("get-access-token")) | .env.ACTIONS_STEP_DEBUG // ""' "$f" 2>/dev/null | head -n1)
-  if [ "$envdbg" = true ] || [ "$envdbg" = 'true' ]; then hit "$f" "$sl" "token step must not enable ACTIONS_STEP_DEBUG"; return; fi
-  if grep -qE '(^|[[:space:]])set[[:space:]]+-x' <<<"$run"; then hit "$f" "$sl" "token step must not enable shell debug trace (set -x)"; return; fi
-  # shellcheck disable=SC2016
-  if grep -nE '^[[:space:]]*echo[[:space:]]' <<<"$run" | grep -v 'add-mask' | grep -v 'GITHUB_ENV' | grep -qE '\$TOKEN|accessToken'; then
-    hit "$f" "$sl" "token must not be echoed or printed"; return
+  var=$(token_var_from_run "$run")
+  if [ -z "$var" ]; then hit "$f" "$sl" "token step must capture az account get-access-token into a shell variable"; return; fi
+  if run_capture_mask_same_line "$run" "$var"; then
+    hit "$f" "$sl" "::add-mask:: must run after the token is captured"; return
   fi
-  maskln=$(grep -n '::add-mask::' <<<"$run" | head -n1 | cut -d: -f1)
-  if [ -z "$maskln" ]; then hit "$f" "$sl" "token must be masked with ::add-mask:: before any other use"; return; fi
-  tokln=$(grep -nE 'TOKEN=\$\(az account get-access-token|TOKEN=' <<<"$run" | head -n1 | cut -d: -f1)
-  # shellcheck disable=SC2016
-  usetokln=$(grep -nE 'GITHUB_ENV|echo[[:space:]]+"?\$TOKEN' <<<"$run" | grep -v 'add-mask' | head -n1 | cut -d: -f1)
-  if [ -n "$usetokln" ] && [ -n "$maskln" ] && [ "$usetokln" -lt "$maskln" ]; then hit "$f" "$sl" "token used before ::add-mask::"; return; fi
-  if [ -n "$tokln" ] && [ -n "$maskln" ] && [ "$maskln" -le "$tokln" ]; then hit "$f" "$sl" "::add-mask:: must run after the token is captured"; return; fi
+  if run_leaks_token_var "$run" "$var"; then hit "$f" "$sl" "token must not be echoed or printed"; return; fi
+  tokln=$(grep -nF "${var}=\$(az account get-access-token" <<<"$run" | head -n1 | cut -d: -f1)
+  maskln=$(grep -nF "::add-mask::\$${var}" <<<"$run" | head -n1 | cut -d: -f1)
+  [ -z "$maskln" ] && maskln=$(grep -nF "::add-mask::\${${var}}" <<<"$run" | head -n1 | cut -d: -f1)
+  if [ -n "$tokln" ] && [ -n "$maskln" ] && [ "$maskln" -le "$tokln" ]; then
+    hit "$f" "$sl" "::add-mask:: must run after the token is captured"; return
+  fi
+  if run_uses_var_before_mask "$run" "$var"; then hit "$f" "$sl" "token used before ::add-mask::"; return; fi
+  if ! run_masks_var "$run" "$var"; then
+    if grep -q '::add-mask::' <<<"$run"; then
+      hit "$f" "$sl" "::add-mask:: must mask the captured token variable"; return
+    fi
+    hit "$f" "$sl" "token must be masked with ::add-mask:: before any other use"; return
+  fi
+}
+
+check_mint_job_steps() {
+  local f=$1 job=$2 jl=$3
+  local loginln uses cid tid allow sub envdbg wfl sl run
+  wfl=$(yq '.env | line' "$f" 2>/dev/null) || wfl=1
+  envdbg=$(yq -r '.env.ACTIONS_STEP_DEBUG // ""' "$f" 2>/dev/null)
+  if debug_env_true "$envdbg"; then hit "$f" "$wfl" "workflow must not set ACTIONS_STEP_DEBUG"; return; fi
+  envdbg=$(J=$job yq -r '.jobs[strenv(J)].env.ACTIONS_STEP_DEBUG // ""' "$f" 2>/dev/null)
+  if debug_env_true "$envdbg"; then hit "$f" "$jl" "job $job must not set ACTIONS_STEP_DEBUG"; return; fi
+  while IFS= read -r sl; do
+    [ -n "$sl" ] || continue
+    envdbg=$(J=$job SL=$sl yq -r '.jobs[strenv(J)].steps[]? | select(line == (env(SL) | tonumber)) | .env.ACTIONS_STEP_DEBUG // ""' "$f" 2>/dev/null)
+    if debug_env_true "$envdbg"; then hit "$f" "$sl" "step must not enable ACTIONS_STEP_DEBUG"; return; fi
+    run=$(J=$job SL=$sl yq -r '.jobs[strenv(J)].steps[]? | select(line == (env(SL) | tonumber)) | .run // ""' "$f" 2>/dev/null)
+    if run_has_debug_trace "$run"; then hit "$f" "$sl" "step must not enable shell debug trace (set -x)"; return; fi
+  done < <(J=$job yq '.jobs[strenv(J)].steps[]? | line' "$f" 2>/dev/null)
+  loginln=$(J=$job yq '.jobs[strenv(J)].steps[]? | select(.["uses"] // "" | test("^azure/login@")) | line' "$f" 2>/dev/null | head -n1)
+  if [ -z "$loginln" ]; then hit "$f" "$jl" "job $job can mint an OIDC token but has no azure/login step"; return; fi
+  while IFS=$'\t' read -r loginln uses; do
+    [ -n "$loginln" ] || continue
+    if [ "$uses" != 'azure/login@v2' ]; then hit "$f" "$loginln" "azure/login must be pinned to azure/login@v2"; return; fi
+  done < <(J=$job yq -r '.jobs[strenv(J)].steps[]? | select(.["uses"] // "" | test("^azure/login@")) | [line, .["uses"]] | @tsv' "$f" 2>/dev/null)
+  cid=$(J=$job yq -r '.jobs[strenv(J)].steps[]? | select(.["uses"] // "" | test("^azure/login@")) | .with["client-id"] // ""' "$f" | head -n1)
+  tid=$(J=$job yq -r '.jobs[strenv(J)].steps[]? | select(.["uses"] // "" | test("^azure/login@")) | .with["tenant-id"] // ""' "$f" | head -n1)
+  allow=$(J=$job yq -r '.jobs[strenv(J)].steps[]? | select(.["uses"] // "" | test("^azure/login@")) | .with["allow-no-subscriptions"] // ""' "$f" | head -n1)
+  sub=$(J=$job yq -r '.jobs[strenv(J)].steps[]? | select(.["uses"] // "" | test("^azure/login@")) | .with["subscription-id"] // ""' "$f" | head -n1)
+  if [ "$cid" != "$WANT_CID" ]; then hit "$f" "$loginln" "azure/login client-id must be $WANT_CID"; return; fi
+  if [ "$tid" != "$WANT_TID" ]; then hit "$f" "$loginln" "azure/login tenant-id must be $WANT_TID"; return; fi
+  if [ "$allow" != true ] && [ "$allow" != 'true' ]; then hit "$f" "$loginln" "azure/login must set allow-no-subscriptions: true"; return; fi
+  if [ -n "$sub" ] && grep -q 'secrets\.' <<<"$sub"; then hit "$f" "$loginln" "azure/login must not use subscription-id from secrets"; return; fi
+  if grep -q 'secrets\.' <<<"$cid$tid"; then hit "$f" "$loginln" "azure/login must use environment vars AZURE_CLIENT_ID and AZURE_TENANT_ID (vars.*), not secrets"; return; fi
+  sl=$(J=$job yq '.jobs[strenv(J)].steps[]? | select(.run // "" | test("get-access-token")) | line' "$f" 2>/dev/null | head -n1)
+  if [ -z "$sl" ]; then hit "$f" "$jl" "job $job must capture token with az account get-access-token --scope \"\$SMOKE_API_SCOPE\""; return; fi
+  while IFS= read -r sl; do
+    [ -n "$sl" ] || continue
+    run=$(J=$job SL=$sl yq -r '.jobs[strenv(J)].steps[]? | select(line == (env(SL) | tonumber)) | .run // ""' "$f" 2>/dev/null)
+    check_token_run_step "$f" "$job" "$sl" "$run"
+    [ "$N" -gt 0 ] && return
+  done < <(J=$job yq '.jobs[strenv(J)].steps[]? | select(.run // "" | test("get-access-token")) | line' "$f" 2>/dev/null)
 }
 
 check_file() {

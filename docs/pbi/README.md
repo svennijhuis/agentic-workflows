@@ -200,6 +200,7 @@ flowchart LR
 | SM04 | Smoke token: GitHub OIDC to Entra to APIM validate-jwt to backend | 3 | one-way | smoke | W3 | todo | SM07 | Builder | [smoke/SM04.md](smoke/SM04.md) |
 | SM04a | SM04 part: check-smoke-auth.sh parse, triggers and OIDC environment rule | 3 | two-way | smoke | W3 | done | VF01 | Builder | [done/SM04a-auth-check.md](done/SM04a-auth-check.md) |
 | SM04b | SM04 part: check-smoke-auth.sh token hygiene and PR #17 lows | 3 | two-way | smoke | W3 | done | SM04a | Builder | [done/SM04b-token-hygiene.md](done/SM04b-token-hygiene.md) |
+| SM04c | check-smoke-auth.sh hardening follow-ups (PR #22 Tester 2 lows) | 3 | two-way | smoke | W3 | todo | SM04b | Builder | [smoke/SM04c.md](smoke/SM04c.md) |
 | SM05 | POL03 + POL25 allow workflow_call for the smoke runner only | 3 | two-way | smoke | W3 | todo | POL25, POL03, POL23, scripts/lib/on-triggers.sh | Builder | [smoke/SM05.md](smoke/SM05.md) |
 | SM05a | SM05 part: deterministic_triggers lib, POL03 workflow_call allowlist, case folders | 3 | two-way | smoke | W3 | done | VF01 | Builder | [done/SM05a-det-triggers-pol03.md](done/SM05a-det-triggers-pol03.md) |
 | SM06 | Smoke reporting on PR or release, ping on fail | 3 | two-way | smoke | W3 | todo | SM03 | Builder | [smoke/SM06.md](smoke/SM06.md) |
