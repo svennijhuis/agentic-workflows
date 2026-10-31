@@ -3,12 +3,12 @@
 #   *.md workflow: frontmatter on: keys are workflow_dispatch plus settings only; its sibling .lock.yml too.
 #   *.lock.yml or a yml with a gh-aw-metadata header: on: keys are workflow_dispatch only.
 #   Deterministic CI yml: POL25 fails deployment_status (always) and workflow_call unless deterministic_triggers lists it;
-#     pull_request, push and other triggers are out of scope here (POL03 promoted: gates them).
-#   sven_yes (SM05c): reads $POL25_CFG (default policies/POL25.yml). deployment_status, workflow_call allowlist and
+#     pull_request, push and other triggers are out of scope here (gh aw compile --strict covers the rest).
+#   sven_yes: reads $POL25_CFG (default policies/POL25.yml). deployment_status, workflow_call allowlist and
 #     agentic workflow_call fail before yes_for; yes_for lifts only the agentic dispatch-only rule (e.g. schedule).
 #     lock_keys: a .lock.yml under yes_for may only use triggers its .md also has; a lock with no sibling .md is a hit.
 #     yes_for matches the workflow name exactly and needs a non-blank date (str or timestamp) and quote.
-#   SM05b: deterministic_triggers (scripts/lib/det-triggers.sh). Rollout path matches POL03 case folders.
+#   deterministic_triggers: scripts/lib/det-triggers.sh reads governance/rollout.yml or a case folder rollout.yml.
 #   on: is read through scripts/lib/on-triggers.sh (string, list, map); a parse error is a hit (fail closed).
 # shellcheck source=lib.sh
 . "$(dirname "$0")/lib.sh"

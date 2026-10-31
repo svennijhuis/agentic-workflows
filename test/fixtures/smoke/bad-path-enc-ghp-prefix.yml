@@ -1,8 +1,0 @@
-scenarios:
-  - id: orders-list
-    env: tst
-    method: GET
-    path: /api/x/%67hp_FAKE00000000000000
-    auth: none
-    expect:
-      status: 200

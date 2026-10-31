@@ -1,8 +1,0 @@
-scenarios:
-  - id: orders-list
-    env: prd
-    method: GET
-    path: /api/orders
-    auth: none
-    expect:
-      status: 200

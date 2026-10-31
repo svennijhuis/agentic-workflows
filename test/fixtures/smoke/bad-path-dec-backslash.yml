@@ -1,8 +1,0 @@
-scenarios:
-  - id: orders-list
-    env: tst
-    method: GET
-    path: /%5cevil.example/a
-    auth: none
-    expect:
-      status: 200

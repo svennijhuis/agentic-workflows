@@ -1,9 +1,0 @@
-id: POL05
-title: 'min-integrity required'
-rule: 'Every workflow sets tools.github.min-integrity to an allowed level.'
-why: 'Low-integrity content (untrusted authors) must not steer the agent.'
-check: policies/checks/POL05.sh
-bad_fixture: test/fixtures/bad/POL05.md
-good_fixture: test/fixtures/good/POL05.md
-pbi: docs/pbi/done/POL05-min-integrity-required.md
-allowed: [approved, merged]

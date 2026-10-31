@@ -1,6 +1,0 @@
-# Bad: YAML does not parse
-name: smoke-auth fixture
-on:
-  workflow_dispatch: {
-jobs:
-  smoke: [

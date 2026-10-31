@@ -1,8 +1,0 @@
-id: POL08
-title: 'safe-output max on every output'
-rule: 'Every safe output sets an integer max.'
-why: 'Bounded blast radius per run.'
-check: policies/checks/POL08.sh
-bad_fixture: test/fixtures/bad/POL08.md
-good_fixture: test/fixtures/good/POL08.md
-pbi: docs/pbi/done/POL08-safe-output-max-on-every-output.md

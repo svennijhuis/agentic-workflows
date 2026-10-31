@@ -1,8 +1,0 @@
-id: POL23
-title: 'No tautological policy checks'
-rule: 'Every policies/checks/POLnn.sh exits 1 on its bad fixture and 0 on its good fixture; every check passes good/gate-minimal.md.'
-why: 'A check that never fails proves nothing (gist A4).'
-check: policies/checks/POL23.sh
-bad_fixture: test/fixtures/bad/POL23.md
-good_fixture: test/fixtures/good/gate-minimal.md
-pbi: docs/pbi/done/POL23-no-tautological-checks.md

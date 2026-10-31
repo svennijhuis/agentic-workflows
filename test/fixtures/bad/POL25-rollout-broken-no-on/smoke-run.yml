@@ -1,0 +1,9 @@
+# Bad POL25 case: broken rollout and no on: key.
+name: smoke-run
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo fixture

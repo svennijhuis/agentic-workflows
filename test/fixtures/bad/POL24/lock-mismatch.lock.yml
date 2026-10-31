@@ -1,6 +1,0 @@
-# gh-aw-metadata: {"schema_version":"v3"}
-# gh-aw-manifest: {"version":1,"secrets":["COPILOT_GITHUB_TOKEN","GH_AW_GITHUB_MCP_SERVER_TOKEN"],"mcp_servers":[{"name":"github"},{"name":"safeoutputs"}]}
-# Fixture lock for POL24 only (manifest header). Not a compiled workflow.
-name: lock-mismatch
-on:
-  workflow_dispatch:

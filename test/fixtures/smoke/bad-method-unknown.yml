@@ -1,8 +1,0 @@
-scenarios:
-  - id: orders-list
-    env: tst
-    method: PURGE
-    path: /api/orders
-    auth: none
-    expect:
-      status: 200

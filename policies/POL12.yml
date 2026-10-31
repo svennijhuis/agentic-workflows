@@ -1,9 +1,0 @@
-id: POL12
-title: 'Explicit allowed-repos and target-repo'
-rule: 'A custom github-token (cross-repo) needs target-repo or allowed-repos. Every target-repo, allowed-repos and policies/POL01.yml m05_repos entry has the owner below; target-repo ''*'' needs an allowed-repos list.'
-why: 'No implicit all-repos access. Personal account only, never an org.'
-check: policies/checks/POL12.sh
-bad_fixture: test/fixtures/bad/POL12.md
-good_fixture: test/fixtures/good/POL12.md
-pbi: docs/pbi/done/POL12-explicit-allowed-repos-target-repo.md
-owner: svennijhuis

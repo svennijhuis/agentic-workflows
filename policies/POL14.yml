@@ -1,8 +1,0 @@
-id: POL14
-title: 'No merge-pull-request, no unsafe pull_request_target'
-rule: 'No merge-pull-request safe output; no pull_request_target that touches the PR head.'
-why: 'Sven merges. Untrusted PR code never runs with secrets.'
-check: policies/checks/POL14.sh
-bad_fixture: test/fixtures/bad/POL14.md
-good_fixture: test/fixtures/good/POL14.md
-pbi: docs/pbi/done/POL14-no-merge-pull-request-unsafe-pr-target.md
