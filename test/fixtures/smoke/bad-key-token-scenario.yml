@@ -1,0 +1,9 @@
+scenarios:
+  - id: health
+    env: acc
+    method: HEAD
+    path: /health
+    auth: none
+    ghp_FAKE0000000000000000000000000000: x
+    expect:
+      status: 200

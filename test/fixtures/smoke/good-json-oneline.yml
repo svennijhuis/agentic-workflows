@@ -1,0 +1,16 @@
+scenarios:
+  - id: orders-list
+    env: tst
+    method: GET
+    path: /api/orders?limit=1
+    auth: none
+    expect:
+      status: 200
+      json: [{path: $.items, exists: true}, {path: $.n, equals: 1}]
+  - id: list
+    env: acc
+    method: HEAD
+    path: /health
+    auth: none
+    expect:
+      status: 200
