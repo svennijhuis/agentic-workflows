@@ -2,7 +2,7 @@ scenarios:
   - id: orders-list
     env: tst
     method: GET
-    path: /api/orders  # ghp_FAKE0000000000000000000000000000000000
+    path: /api/orders  # ghp_FAKE0000
     auth: none
     expect:
       status: 200

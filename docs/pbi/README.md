@@ -196,6 +196,7 @@ flowchart LR
 | SM01 | Smoke scenario format and folder per feature | 3 | two-way | smoke | W3 | done | none | Builder | [done/SM01.md](done/SM01.md) |
 | SM01b | check-smoke carry (Cursor 5657706637 on PR #11) | 3 | two-way | smoke | W3 | done | SM01a | Builder | [done/SM01b.md](done/SM01b.md) |
 | SM01c | check-smoke carry (PR #20 round 1 lows and Cursor 5723663360) | 3 | two-way | smoke | W3 | done | SM01a | Builder | [done/SM01c.md](done/SM01c.md) |
+| SM01d | check-smoke carry (PR #24 Tester 2 lows) | 3 | two-way | smoke | W3 | todo | SM01b | Builder | [smoke/SM01d.md](smoke/SM01d.md) |
 | SM02 | Scenario generator at PR time | 3 | one-way | smoke | W3 | todo | SM01, BH08, P14 | Builder | [smoke/SM02.md](smoke/SM02.md) |
 | SM03 | Post-deploy smoke runner for tst and acc (no AI) | 3 | one-way | smoke | W3 | todo | SM01, SM04, SM05, SM07 | Builder | [smoke/SM03.md](smoke/SM03.md) |
 | SM04 | Smoke token: GitHub OIDC to Entra to APIM validate-jwt to backend | 3 | one-way | smoke | W3 | todo | SM07 | Builder | [smoke/SM04.md](smoke/SM04.md) |
