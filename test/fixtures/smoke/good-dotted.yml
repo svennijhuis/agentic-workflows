@@ -1,4 +1,4 @@
-# SM01 good fixture: dots in a path with short segments do not look like a JWT.
+# SM01 good fixture: dots in a path with short segments are not a token shape.
 scenarios:
   - id: version
     env: acc

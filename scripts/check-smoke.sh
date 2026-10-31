@@ -218,17 +218,22 @@ import re, sys
 path = sys.argv[1]
 pem = re.compile(r"-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----")
 PRE = re.compile(r"(?i)(^|[^A-Za-z0-9])(gh[pousr]_|github_pat_|glpat-|sk_live_|sk_test_|rk_live_|rk_test_|xox[abpr]-|xoxe-|AKIA[0-9A-Z]{16}|sk-[A-Za-z0-9]{20,})")
-SCH = re.compile(r"(?i)(^|[^A-Za-z0-9])(bearer|basic)[ \t\u00a0]+[A-Za-z0-9_.-]+")
-TOK = re.compile(r"(?i)(^|[^A-Za-z0-9])token[ \t\u00a0]+(?!refresh[ \t\u00a0]*$)[A-Za-z0-9_.-]+")
+# comments are prose: a scheme word only hits when a credential-like value follows it, not a plain word
+SCH = re.compile(r"(?i)(?:^|[^A-Za-z0-9])(?:bearer|basic|token)[ \t\u00a0]+([A-Za-z0-9_.+/=-]+)")
+KEY = re.compile(r"(?<![A-Za-z0-9_+/=-])(?=[A-Za-z0-9_+/=-]*[0-9])(?=[A-Za-z0-9_+/=-]*[A-Za-z])[A-Za-z0-9_+/=-]{32,}")
 JWT = re.compile(r"[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]{10,}")
+
+def cred_like(v: str) -> bool:
+    # 8+ chars with a digit (FAKE0000, dXNlcjpwYXNz0) or 20+ chars; prose words like smoke, is, comes stay clean
+    return (len(v) >= 8 and any(c.isdigit() for c in v)) or len(v) >= 20
 
 def comment_token_hit(tail: str) -> bool:
     return bool(
         PRE.search(tail)
-        or SCH.search(tail)
-        or TOK.search(tail)
+        or any(cred_like(m.group(1)) for m in SCH.finditer(tail))
+        or KEY.search(tail)
         or JWT.search(tail)
-        or tail.lstrip().startswith("eyJ")
+        or re.search(r"(^|[^A-Za-z0-9])eyJ[A-Za-z0-9_-]{6,}", tail)
     )
 
 def opens_value(line: str, i: int) -> bool:
@@ -237,7 +242,7 @@ def opens_value(line: str, i: int) -> bool:
     return before == "" or before[-1] in ":-[{,?"
 
 def comment_tail(line: str) -> str:
-    # full-line and indented comments count too; the tail after # is scanned with the same token rules
+    # full-line and indented comments count too; the tail after # is scanned with the comment token rules above
     in_s = in_d = False
     esc = False
     i = 0
