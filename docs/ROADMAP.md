@@ -31,7 +31,7 @@ flowchart TD
   end
 
   subgraph SM[SM smoke, B3]
-    SM01[SM01 done #11] --> SM01a[SM01a done] --> SM01b[SM01b todo, file in #18]
+    SM01[SM01 done #11] --> SM01a[SM01a done] --> SM01b[SM01b and SM01c done #24]
     SM05a[SM05a done #14] --> SM05b[SM05b todo] --> SM05c[SM05c todo]
     SM07a[SM07a done #16] --> SM07b{{SM07b Sven only}}
     SM04a[SM04a done #17] --> SM04b[SM04b todo]
@@ -93,7 +93,7 @@ Next: VF02b, after WF01 (lane 1, edits POL23).
 
 - Goal: a fixed smoke scenario format, offline checks for setup, auth and triggers, a runner and a report, then one live install in the API repo.
 - Why: smoke runs against real environments with a token, so a bad scenario or workflow could leak secrets, hit prod or run on the wrong trigger. Every check fails closed before anything goes live.
-- Steps in order (lane 2 unless noted): SM07a (done), SM04a (done), SM01a (done), SM04b, SM01b, SM03a, SM03b, SM06, VF02f. Lane 1: SM05a, SM05b, SM05c. Then Sven only: SM07b, SM03L. SM02 (agentic) is last. SM03a has no section in any PBI file yet. SM01a includes the fix-map row 1 `|` repair in [SM01a](pbi/done/SM01a.md).
+- Steps in order (lane 2 unless noted): SM07a (done), SM04a (done), SM01a (done), SM04b, SM01b and SM01c (done, #24), SM03a, SM03b, SM06, VF02f. Lane 1: SM05a, SM05b, SM05c. Then Sven only: SM07b, SM03L. SM02 (agentic) is last. SM03a has no section in any PBI file yet. SM01a includes the fix-map row 1 `|` repair in [SM01a](pbi/done/SM01a.md).
 - SM08 holds the Cursor findings and closes when SM01, SM04a, SM05a, SM05b, SM05c and SM07a are merged.
 - Index: [docs/pbi/smoke/README.md](pbi/smoke/README.md).
 
@@ -104,7 +104,8 @@ Next: VF02b, after WF01 (lane 1, edits POL23).
 | SM07a | merged #16, squash `2d8c764` | [docs/pbi/done/SM07a-setup-check.md](pbi/done/SM07a-setup-check.md) |
 | SM04a | merged #17, squash `41adeab` | [docs/pbi/done/SM04a-auth-check.md](pbi/done/SM04a-auth-check.md) |
 | SM01a | done | [docs/pbi/done/SM01a.md](pbi/done/SM01a.md) |
-| SM01b | todo, PBI file in open [#18](https://github.com/svennijhuis/agentic-workflows/pull/18), head `0e4bad4` | `docs/pbi/smoke/SM01b.md` (in #18 at 0e4bad4) |
+| SM01b | done in #24 | [docs/pbi/done/SM01b.md](pbi/done/SM01b.md) |
+| SM01c | done in #24 | [docs/pbi/done/SM01c.md](pbi/done/SM01c.md) |
 | SM05b, SM05c | todo, sections in [SM05.md](pbi/smoke/SM05.md) | [docs/pbi/smoke/SM05.md](pbi/smoke/SM05.md) |
 | SM04b | todo, section and Reviewer lows in [SM04.md](pbi/smoke/SM04.md) SM04b bullet (parts list) | [docs/pbi/smoke/SM04.md](pbi/smoke/SM04.md) |
 | SM03a | not written yet | [docs/pbi/smoke/SM03.md](pbi/smoke/SM03.md) |
@@ -160,12 +161,11 @@ Next: lane 1, after SM05c and before VF02b.
 
 ## 3. Todo PBIs (parked, filed)
 
-WF01 and SM01b are filed on open [#18](https://github.com/svennijhuis/agentic-workflows/pull/18) at head `0e4bad4`.
+WF01 is filed on open [#18](https://github.com/svennijhuis/agentic-workflows/pull/18) at head `0e4bad4`.
 
 | Item | Where it is written | Lane, after |
 |---|---|---|
 | WF01 shared lister | `docs/pbi/verify/WF01.md` (in #18 at 0e4bad4) | lane 1, after SM05c |
-| SM01b check-smoke carry (Cursor 5657706637) | `docs/pbi/smoke/SM01b.md` (in #18 at 0e4bad4) | lane 2, after SM01a |
 | G05a ORG-ONLY follow-ups | [docs/pbi/governance/G05a-org-only-followups.md](pbi/governance/G05a-org-only-followups.md) | lane 3, file on main |
 | SM04b token hygiene and Reviewer lows | [docs/pbi/smoke/SM04.md](pbi/smoke/SM04.md) SM04b bullet | lane 2, after SM01a |
 | SM05b, SM05c | [docs/pbi/smoke/SM05.md](pbi/smoke/SM05.md) | lane 1, after SM05a |
@@ -176,7 +176,7 @@ WF01 and SM01b are filed on open [#18](https://github.com/svennijhuis/agentic-wo
 | Lane | Who | Order |
 |---|---|---|
 | 1 | Builder, Grok path (policy chain, edits POL23) | VF02d1 (done), SM05a (done), SM05b, SM05c, WF01, VF02b, VF02c, VF02d, VF02e |
-| 2 | Builder, Cursor CLI (one script each) | SM07a (done), SM04a (done), SM01a (done), SM04b, SM01b, SM03a, SM03b, SM06, VF02f |
+| 2 | Builder, Cursor CLI (one script each) | SM07a (done), SM04a (done), SM01a (done), SM04b, SM01b and SM01c (done, #24), SM03a, SM03b, SM06, VF02f |
 | 3 | Docs only PRs | #18 now; G05a (file on main); later TPL02 |
 
 ## 5. What stays off and why

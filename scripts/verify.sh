@@ -136,12 +136,12 @@ bash scripts/check-pbi-template.sh "$T/good.md" >/dev/null || fail "$T/good.md:1
 for b in "$T"/bad-*.md; do bash scripts/check-pbi-template.sh "$b" >/dev/null && fail "$b:1 TPL01 bad template fixture passes (tautological)"; done
 produce check-pbi-template.sh bash scripts/check-pbi-template.sh
 
-echo "# smoke scenarios (SM01: each good exits 0, each bad exits exactly 1, every smoke/*/scenarios.yml or .yaml)"
+echo "# smoke scenarios (SM01: each good exits 0, each bad exits exactly 1 with one hit (SM01b), every smoke/*/scenarios.yml or .yaml)"
 S=test/fixtures/smoke
 for g in "$S"/good*.yml; do bash scripts/check-smoke.sh "$g" >/dev/null || fail "$g:1 SMOKE good smoke fixture fails"; done
-for b in "$S"/bad-*.yml; do bash scripts/check-smoke.sh "$b" >/dev/null; [ $? -eq 1 ] || fail "$b:1 SMOKE bad smoke fixture does not exit 1 (tautological)"; done
+for b in "$S"/bad-*.yml; do h=$(bash scripts/check-smoke.sh "$b"); rc=$?; { [ "$rc" -eq 1 ] && [ "$(grep -c . <<<"$h")" -eq 1 ]; } || fail "$b:1 SMOKE bad smoke fixture does not exit 1 with exactly one hit (rc $rc)"; done
 shopt -s nullglob; BY=("$S"/bad-*.yaml); shopt -u nullglob
-for b in "${BY[@]}"; do bash scripts/check-smoke.sh "$b" >/dev/null; [ $? -eq 1 ] || fail "$b:1 SMOKE bad smoke fixture does not exit 1 (tautological)"; done
+for b in "${BY[@]}"; do h=$(bash scripts/check-smoke.sh "$b"); rc=$?; { [ "$rc" -eq 1 ] && [ "$(grep -c . <<<"$h")" -eq 1 ]; } || fail "$b:1 SMOKE bad smoke fixture does not exit 1 with exactly one hit (rc $rc)"; done
 bash scripts/check-smoke.sh "$S/bad-dup-id-cross/a.yml" "$S/bad-dup-id-cross/b.yml" >/dev/null; [ $? -eq 1 ] || fail "$S/bad-dup-id-cross:1 SMOKE cross-file duplicate id fixture does not exit 1"
 for s in smoke/*/scenarios.yml smoke/*/scenarios.yaml; do [ -e "$s" ] && produce check-smoke.sh bash scripts/check-smoke.sh "$s"; done
 
