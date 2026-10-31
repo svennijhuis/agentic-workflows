@@ -1,0 +1,5 @@
+settings: [roles, skip-bots, skip-roles]
+sven_yes:
+  - workflow: smoke-yes-quote-blank
+    date: "2026-01-01"
+    quote: "  "

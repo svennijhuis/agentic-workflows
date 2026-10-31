@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
-# deterministic_triggers reader for POL03 (SM05a) and POL25 (SM05b). Fail closed: every error is a message.
+# deterministic_triggers reader for POL03 (SM05a), POL25 (SM05b) and POL25_CFG (SM05c). Fail closed: every error is a message.
 # The rollout file is $POL_ROLLOUT (tests only; POL03 unsets it in repo mode), else <case>/rollout.yml for a case folder, else governance/rollout.yml.
 #
 # det_rollout [DIR]      path of the rollout file to use (DIR: a case folder or empty)
+# det_pol25_cfg [DIR]    path of POL25.yml to use ($POL25_CFG, else <case>/POL25.yml, else policies/POL25.yml)
 # det_case DIR           true when DIR is a case folder (holds a rollout.yml)
 # det_case_files DIR     workflow files in a case folder, one per line: *.md (not README.md), *.yml, *.yaml,
-#                        minus rollout.yml and minus an X.lock.yml beside X.md (one workflow, two files)
+#                        minus rollout.yml, POL25.yml and minus an X.lock.yml beside X.md (one workflow, two files)
 # det_map_err ROLLOUT    why the file or its deterministic_triggers key is unusable, empty when fine
 #                        (missing key = empty map; a list, string, null or parse error is an error)
 # det_listed ROLLOUT NAME     true when NAME (file basename) is a key in the map
@@ -22,12 +23,18 @@ det_rollout() {
   else echo "$POL_ROOT/governance/rollout.yml"; fi
 }
 
+det_pol25_cfg() {
+  if [ -n "${1:-}" ] && det_case "$1" && [ -f "${1%/}/POL25.yml" ]; then echo "${1%/}/POL25.yml"
+  elif [ -n "${POL25_CFG:-}" ]; then echo "$POL25_CFG"
+  else echo "$POL_ROOT/policies/POL25.yml"; fi
+}
+
 det_case_files() {
   local d=${1%/} f b
   for f in "$d"/*; do
     [ -f "$f" ] || continue; b=$(basename "$f")
     case "$b" in
-      rollout.yml|README.md) continue ;;
+      rollout.yml|POL25.yml|README.md) continue ;;
       *.lock.yml) [ -e "$d/${b%.lock.yml}.md" ] && continue; echo "$f" ;;
       *.md|*.yml|*.yaml) echo "$f" ;;
     esac
