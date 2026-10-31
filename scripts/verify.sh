@@ -74,7 +74,7 @@ produce actionlint gate_actionlint
 echo "# shellcheck"
 produce shellcheck gate_shellcheck
 
-echo "# smoke auth check (SM04a: each good exits 0, each bad exits exactly 1 with one hit)"
+echo "# smoke auth check (SM04a+SM04b: each good exits 0, each bad exits exactly 1 with one hit)"
 A=test/fixtures/smoke-auth
 shopt -s nullglob; G=("$A"/good*.yml); B=("$A"/bad-*.yml); shopt -u nullglob
 [ "${#G[@]}" -gt 0 ] || fail "$A:1 SMOKEAUTH no good smoke auth fixture"
