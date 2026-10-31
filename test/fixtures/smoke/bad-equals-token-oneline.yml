@@ -1,0 +1,11 @@
+scenarios:
+  - id: orders-list
+    env: tst
+    method: GET
+    path: /api/orders?limit=1
+    auth: none
+    expect:
+      status: 200
+      json:
+        - path: $.items
+          equals: FAKE000000.e30.FAKE000000000

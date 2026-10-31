@@ -9,4 +9,6 @@ paths = [
   '''test/fixtures/bad/POL04\.md''',
   '''test/fixtures/bad/POL20\.md''',
   '''test/fixtures/bad/POL26/''',
+  '''test/fixtures/smoke/bad-auth-rk-live\.yml''',
+  '''test/fixtures/smoke/bad-auth-rk-test\.yml''',
 ]
