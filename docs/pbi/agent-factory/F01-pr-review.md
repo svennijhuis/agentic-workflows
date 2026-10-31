@@ -6,8 +6,7 @@
 - Lane: Builder
 - Depends on: C03, C04, C05, C06, C12, C12b, O01, O02, O03, POL21, POL22
 - proof: `bash scripts/verify.sh` exits 0 with `0 failures` (offline: `gh aw compile --dir workflows --strict workflows/pr-review.md`, lock drift, `--no-emit` fixture); no run, no token spend
-- door: one-way
-- one-way gate: Sven's exact yes required (named ask in its block). Rollback: disable pr-review workflow in catalog and trial repo
+- door: two-way
 - triage: build (Block 2 workflow)
 - feedback: gh aw compile --dir workflows --strict, POL22, offline `scripts/verify.sh`
 - harness: gh-aw, engine copilot via shared/defaults.md (when built)

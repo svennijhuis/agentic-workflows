@@ -5,7 +5,7 @@
 - Block: 2
 - Lane: Builder
 - Depends on: C12, C05, POL01
-- proof: `./scripts/verify.sh` exits 0 with `0 failures`; `sed -n 2p workflows/squad-review.lock.yml | grep -F '"skills":["svennijhuis/agentPacks/plugins/squad/skills/squad@34e1dec3535baa1d77cb441ea8c98498dc9b3684"]'` exits 0; `bash policies/checks/POL31.sh test/fixtures/bad/POL31/shared-skills` and `bash policies/checks/POL31.sh test/fixtures/bad/POL31/parse-error` each exit 1 with 1 hit; `bash policies/checks/POL31.sh test/fixtures/good/POL31/main-skills` exits 0
+- proof: `./scripts/verify.sh` exits 0 with `0 failures`; `sed -n 2p workflows/squad-review.lock.yml | grep -F '"skills":["svennijhuis/agentPacks/plugins/squad/skills/squad@34e1dec3535baa1d77cb441ea8c98498dc9b3684"]'` exits 0; `bash policies/checks/POL31.sh test/fixtures/bad/POL31/shared-skills` and `bash policies/checks/POL31.sh test/fixtures/bad/POL31/parse-error` each exit 1 with 1 hit; `bash policies/checks/POL31.sh test/fixtures/bad/POL31/` exits 1; `bash policies/checks/POL31.sh test/fixtures/good/POL31/` exits 0 with no output
 - door: two-way
 - triage: build (real bug on main 14998b6: the squad skill never installs)
 - feedback: `./scripts/verify.sh` with `0 failures`, plus the lock manifest `skills` grep above
@@ -20,20 +20,20 @@ The gh-aw [frontmatter reference](https://github.com/github/gh-aw/blob/main/docs
 ## Steps
 1. Move the `skills:` list from `workflows/shared/agentpacks.md` into `workflows/squad-review.md` frontmatter, same 40-hex pin `34e1dec3535baa1d77cb441ea8c98498dc9b3684`. Keep the fragment import for its prose note; reword the note to say skills go in the consumer workflow.
 2. Recompile the lock with the pinned gh-aw; commit md and lock together.
-3. New rule POL31 (`policies/POL31.yml`, `policies/checks/POL31.sh`). No args: scan `workflows/shared/*.md`. Path arg: scan `workflows/shared/*.md` under that root. A `skills:` key in that frontmatter is one hit (`<file>:<line> POL31 skills in shared fragment is silently dropped`). Frontmatter that cannot be read or does not parse is also one hit (`<file>:<line> POL31 parse error`), never a skip (fail closed, same as `policies/checks/POL25.sh`). Any hit exits 1. Bad fixtures `test/fixtures/bad/POL31/shared-skills/` (shared file has `skills:`) and `test/fixtures/bad/POL31/parse-error/` (shared file with broken frontmatter); good fixture `test/fixtures/good/POL31/main-skills/` (`workflows/squad-review.md` has `skills:`, `workflows/shared/*.md` does not). All three in the POL23 one-hit loop in `scripts/verify.sh`.
+3. New rule POL31 (`policies/POL31.yml`, `policies/checks/POL31.sh`). No args: scan `workflows/shared/*.md`. Path arg: scan every `workflows/shared/*.md` found anywhere under that root (recursive, so the nested bad cases are seen from the parent). A `skills:` key in that frontmatter is one hit (`<file>:<line> POL31 skills in shared fragment is silently dropped`). Frontmatter that cannot be read or does not parse is also one hit (`<file>:<line> POL31 parse error`), never a skip (fail closed, same as `policies/checks/POL25.sh`). Any hit exits 1. Bad fixtures `test/fixtures/bad/POL31/shared-skills/` (shared file has `skills:`) and `test/fixtures/bad/POL31/parse-error/` (shared file with broken frontmatter); good fixture is `test/fixtures/good/POL31/` itself (`workflows/squad-review.md` has `skills:`, `workflows/shared/*.md` does not); no nested good child, because `policies/checks/POL23.sh:60` runs `good/POL31/` and its extra good glob is `good/POL31-*`, not a subdirectory. POL23 checks exit codes only: it runs the parent `test/fixtures/bad/POL31/` (`POL23.sh:59`, must exit 1; the recursive scan gives it 2 hits) and then each child (`POL23.sh:63` to `:67`, each must exit 1). Hit counts come from `scripts/verify.sh`: add three lines in the shape of `sm05b_one_hit` (`scripts/verify.sh:89`, an explicit list): `bad/POL31/shared-skills` and `bad/POL31/parse-error` each exit 1 with exactly one hit, and `good/POL31/` exits 0 with no output. The parent dir alone never counts as a one-hit proof.
 4. POL01 allowlist mirror keeps the skill path (no change expected; prove it).
 5. Update `docs/reference/agentpacks-contract.md` and `docs/reference/squad-review.md`: skills live in the consumer workflow. Add the "copy this" note: an org copies `squad-review.md`, its lock and `workflows/shared/`, and the skill comes with the md.
 ## Definition of Done
 - [ ] `workflows/squad-review.lock.yml` manifest lists the squad skill at pin `34e1dec3535baa1d77cb441ea8c98498dc9b3684` (grep in Evidence)
 - [ ] `workflows/shared/agentpacks.md` has no `skills:` key
-- [ ] POL31 bad fixtures (shared-skills, parse-error) each exit 1 with 1 hit, good exits 0, inside `./scripts/verify.sh` with `0 failures`
+- [ ] POL31 nested bad fixtures (`bad/POL31/shared-skills`, `bad/POL31/parse-error`) each exit 1 with exactly 1 hit via the `sm05b_one_hit` shaped lines in `scripts/verify.sh`; the parent `bad/POL31/` exits 1 under POL23 but is not counted as a one-hit proof; `good/POL31/` exits 0; all inside `./scripts/verify.sh` with `0 failures`
 - [ ] A shared fragment whose frontmatter does not parse is a POL31 hit (exit 1), never skipped
 - [ ] Lock drift check clean; still `workflow_dispatch` only (POL03, POL25), `staged: true`, no new secrets
 - [ ] Docs updated, plus the "copy this" note
 - [ ] Todo row added: `.github/aw/actions-lock.json` needed when gh-aw moves to v1.x
 - [ ] Offline proof only, no run, no token spend
 ## Technical design
-- Components and files: `workflows/squad-review.md`, `workflows/squad-review.lock.yml`, `workflows/shared/agentpacks.md`, `policies/POL31.yml`, `policies/checks/POL31.sh`, `test/fixtures/bad/POL31/{shared-skills,parse-error}/`, `test/fixtures/good/POL31/main-skills/`, `scripts/verify.sh`, `docs/reference/agentpacks-contract.md`, `docs/reference/squad-review.md`
+- Components and files: `workflows/squad-review.md`, `workflows/squad-review.lock.yml`, `workflows/shared/agentpacks.md`, `policies/POL31.yml`, `policies/checks/POL31.sh`, `test/fixtures/bad/POL31/{shared-skills,parse-error}/`, `test/fixtures/good/POL31/` (no nested child), `scripts/verify.sh` (three `sm05b_one_hit` shaped lines), `docs/reference/agentpacks-contract.md`, `docs/reference/squad-review.md`
 - Module boundary: the consumer workflow frontmatter `skills:` is the interface; gh-aw install steps in the lock are the deep part
 - Interfaces: frontmatter `skills:` (list of `owner/repo/path@<40-hex>`); `POL31.sh [root]` exit 0 or 1, one `<file>:<line> POL31 ...` line per hit
 - Sequence:

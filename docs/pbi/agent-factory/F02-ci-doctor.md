@@ -6,8 +6,7 @@
 - Lane: Builder
 - Depends on: C03, C04, C06, O01, O02, O03, R04
 - proof: `bash scripts/verify.sh` exits 0 with `0 failures` (offline: `gh aw compile --dir workflows --strict workflows/ci-doctor.md`, lock drift, `--no-emit` fixture); no run, no token spend
-- door: one-way
-- one-way gate: Sven's exact yes required (named ask in its block). Rollback: revert the PR (delete the workflow md and its lock; it has no trigger other than workflow_dispatch)
+- door: two-way
 - triage: build (Block 3 workflow)
 - feedback: gh aw compile --dir workflows --strict, offline `scripts/verify.sh`
 - harness: gh-aw, engine copilot via shared/defaults.md (when built)
