@@ -1,0 +1,13 @@
+scenarios:
+  - id: orders-list
+    env: tst
+    method: GET
+    path: /api/orders?limit=1
+    auth: none
+    headers:
+      X-Request-Id: token refresh
+    expect:
+      status: 200
+      json:
+        - path: $.note
+          equals: "token refresh"
