@@ -1,5 +1,6 @@
 # SM01b: check-smoke carry from Cursor 5657706637 (PR #11 at 4781aac)
-- Status: todo
+- Status: done
+- PR: #24
 - Area: smoke
 - Wave: W3
 - Block: 3
@@ -16,7 +17,7 @@
 ## Goal
 `check-smoke` fails closed on comment tails, PEM headers and every encoded path, with no false hit on an encoded allowed key.
 ## Context
-Lane 2 after SM01a (same file `scripts/check-smoke.sh`). Filed in the next lane 3 docs PR with [WF01](../verify/WF01.md). SM01a (in PR #15) stays frozen; this is its follow-up so PR #15 keeps its SHA.
+Lane 2 after [SM01a](SM01a.md) (same file `scripts/check-smoke.sh`). Filed in the next lane 3 docs PR with [WF01](../verify/WF01.md).
 
 Already in SM01a (PR #15 head 368f837), not repeated here (Cursor 5657888041 f3 on PR #18): f2 (hex status, row 1), f8 (stale README, row 4), f1 multi-line and leading-space values (row 2), f6 `exists: "true"` (row 3, `bad-exists-string.yml`), f5 GitHub refresh token and OpenAI style key prefixes (row 14), f4 two maps on one line (row 16, `good-json-oneline.yml`), f7 exact id match (row 17). SM01b keeps only what SM01a does not name.
 
@@ -29,7 +30,7 @@ Fix map:
 | 3 | f3 medium | `/%2F/evil.example/a` and `/%5C/evil.example/a` decode to a leading `//` or `/\` (host switch); `?api_key%3D` plus a FAKE value decodes to a secret key; a broken `%` escape | decode the path and the query once, then rerun the path rule (a leading `//` or any `\` is a hit) and the query key allowlist; a `%` that is not followed by two hex digits is a hit (fail closed) |
 | 4 | f6 low | none: SM01a row 3 already covers `exists: "true"` | no fix here; DoD only checks `bad-exists-string.yml` still exits 1 |
 
-Bad cases (FAKE only, zeros). After SM01a each of the six exits 0; after SM01b each exits 1 with one hit; the mutation run on the pre-SM01b script records six missed hits:
+Bad cases (FAKE only, zeros). After SM01b each exits 1 with exactly one hit. Mutation run on main 14998b6 (SM01a, before SM01b): cases 1 to 4 exit 0 (4 missed hits); cases 5 and 6 already exit 1 there, because SM01a round 1 on PR #20 added the one-decode query key rule and the "still holds `%`" rule, so they stay here as regression fixtures:
 1. FAKE token-shaped value after `#` on the value line (`bad-comment-tail.yml`)
 2. a PEM private key header line only, no body (`bad-pem-header.yml`)
 3. path `/%2F/evil.example/a` (`bad-path-enc-slash.yml`)
@@ -40,20 +41,30 @@ Bad cases (FAKE only, zeros). After SM01a each of the six exits 0; after SM01b e
 Good case: query `?limit%3D1` (`good-query-enc-limit.yml`) exits 0, because one decode gives the allowed key `limit` (SM01a row 6 and 13), so it must not become a false hit.
 
 Decode once in total (Reviewer FAIL 6425915794 item 8): the query is percent-decoded exactly once. The row 3 decode replaces SM01a's key decode (SM01a row 13) and does not add to it, so `bad-query-double-encoded.yml` (`?%256cimit=1`, one decode gives `%6cimit`, which still holds `%`) still exits 1.
+## Copy this
+Copy `scripts/check-smoke.sh` into any repo and run it on your scenario files:
+
+```
+bash scripts/check-smoke.sh smoke/<feature>/scenarios.yml
+```
+
+- Needs bash, mikefarah `yq` v4 and `python3` (standard library only). Either tool missing exits 2 (needs-human), never a pass.
+- No secrets, tokens, org names, repo names or network calls in the script; it reads only the files you pass.
+- Exit 0 ok, 1 one `file:line SMOKE message` line per hit, 2 a tool is missing. The rules are in `smoke/README.md`; copy that too if you want the docs.
 ## Steps
 1. Extend `scripts/check-smoke.sh` per the fix map (rows 1 to 3; row 4 has no code change).
 2. Add the 6 bad and 1 good fixtures; the existing verify loop picks them up.
 3. Run `./scripts/verify.sh` twice; mutation run: on the SM01a check-smoke (before SM01b) each of the 6 new bad fixtures exits 0, so the run records 6 missed hits, one per case.
 ## Definition of Done
-- [ ] Row 1: `bad-comment-tail.yml` exits 1 with one hit
-- [ ] Row 2: `bad-pem-header.yml` exits 1 with one hit
-- [ ] Row 3: `bad-path-enc-slash.yml`, `bad-path-enc-backslash.yml`, `bad-query-enc-eq.yml` and `bad-path-bad-escape.yml` each exit 1 with one hit; `good-query-enc-limit.yml` exits 0
-- [ ] Row 4: SM01a `bad-exists-string.yml` still exits 1 (no second fix)
-- [ ] All SM01a fixtures keep their exit code
-- [ ] Mutation proof counts only the 6 cases that still exit 0 after SM01a: on the pre-SM01b check each exits 0 (6 missed hits), after SM01b each exits 1 with one hit
-- [ ] The query is decoded exactly once in total (row 3 replaces the SM01a key decode): `good-query-enc-limit.yml` exits 0 and SM01a `bad-query-double-encoded.yml` (`?%256cimit=1`) still exits 1
-- [ ] `./scripts/verify.sh` ends with `0 failures` twice; both PBI checks print nothing; gitleaks clean (FAKE values allowlisted by path); POL23 untouched
-- [ ] Two fix rounds max; anything open after goes to the list
+- [x] Row 1: `bad-comment-tail.yml` exits 1 with one hit
+- [x] Row 2: `bad-pem-header.yml` exits 1 with one hit
+- [x] Row 3: `bad-path-enc-slash.yml`, `bad-path-enc-backslash.yml`, `bad-query-enc-eq.yml` and `bad-path-bad-escape.yml` each exit 1 with one hit; `good-query-enc-limit.yml` exits 0
+- [x] Row 4: SM01a `bad-exists-string.yml` still exits 1 (no second fix)
+- [x] All SM01a fixtures keep their exit code
+- [x] Mutation proof: on main 14998b6 (pre-SM01b) cases 1 to 4 exit 0 (4 missed hits) and cases 5 and 6 already exit 1 (closed by SM01a round 1 on PR #20); after SM01b all 6 exit 1 with one hit
+- [x] The query is decoded exactly once in total (row 3 replaces the SM01a key decode): `good-query-enc-limit.yml` exits 0 and SM01a `bad-query-double-encoded.yml` (`?%256cimit=1`) still exits 1
+- [x] `./scripts/verify.sh` ends with `0 failures` twice; both PBI checks print nothing; gitleaks clean (FAKE values allowlisted by path); POL23 untouched
+- [x] Two fix rounds max; anything open after goes to the list
 ## Technical design
 - Components and files: `scripts/check-smoke.sh`, `test/fixtures/smoke/bad-*` and good fixtures for SM01b rows, `scripts/verify.sh` loop
 - Module boundary: `scripts/check-smoke.sh` on `scenarios.yml`; multi-line and encoded-value rules sit behind the same exit 0/1 contract as SM01
@@ -79,7 +90,7 @@ sequenceDiagram
 - Proof: same as proof: above
 - Door: two-way (script and fixtures)
 ## Evidence
-Gate log comment, per-case exit table, mutation run (on the SM01a check-smoke each of the 6 new bad fixtures exits 0, 6 missed hits)
+Gate log comment on PR #24, per-case exit table, mutation run on main 14998b6: `bad-comment-tail.yml`, `bad-pem-header.yml`, `bad-path-enc-slash.yml` and `bad-path-enc-backslash.yml` exit 0 there (4 missed hits); `bad-query-enc-eq.yml` and `bad-path-bad-escape.yml` exit 1 there already. `scripts/verify.sh` now requires exactly one hit per bad smoke fixture, not only exit 1.
 ## Flow
 ```mermaid
 flowchart LR
@@ -87,7 +98,7 @@ flowchart LR
   S2 --> S3[verify loop, mutation proof]
 ```
 ## Named asks for Sven
-- none (SM01a on PR #15 stays frozen until this lands)
+- none
 ## Cost
 0 (script)
 ## Sources
