@@ -1,0 +1,13 @@
+# Bad POL25 case: gh-aw-metadata header after name: (SM05b round 1, Cursor 5719797898 f2).
+name: smoke-meta
+# gh-aw-metadata: {"schema_version":"v4","fixture":true}
+on:
+  workflow_dispatch:
+  workflow_call:
+permissions:
+  contents: read
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo fixture

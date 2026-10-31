@@ -35,14 +35,17 @@ check_triggers() { # FILE WFNAME: rollout, allowlist and on: triggers
   local f=$1 name=$2 r b t trig rc l err call_ok=0 agentic=0
   r=$(rel "$f"); b=$(basename "$f")
   det_agentic "$f" && agentic=1
-  trig=$(on_triggers "$f"); rc=$?
-  case $rc in
-    3) case "$f" in *.md) return 0 ;; *) return 0 ;; esac ;;
-    2) hit "$r" "$(on_line "$f")" POL25 "on: does not parse as a string, list or map (fail closed)"; return 0 ;;
-  esac
   l=$(on_line "$f")
   err=$(det_map_err "$ROLLOUT")
   if [ -n "$err" ]; then hit "$r" "$l" POL25 "$err"; return 0; fi
+  trig=$(on_triggers "$f"); rc=$?
+  case $rc in
+    3) case "$f" in
+         *.md) is_workflow "$f" || return 0 ;;
+         *) hit "$r" "$l" POL25 "no on: key (fail closed)"; return 0 ;;
+       esac ;;
+    2) hit "$r" "$(on_line "$f")" POL25 "on: does not parse as a string, list or map (fail closed)"; return 0 ;;
+  esac
   if det_listed "$ROLLOUT" "$b"; then
     while IFS= read -r err; do [ -n "$err" ] && hit "$r" "$l" POL25 "$err"; done < <(det_entry_err "$ROLLOUT" "$b")
     det_entry_triggers "$ROLLOUT" "$b" | grep -qx workflow_call && [ "$agentic" -eq 0 ] && call_ok=1

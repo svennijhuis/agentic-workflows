@@ -87,3 +87,16 @@ flowchart LR
 - [SM05](../smoke/SM05.md), [SM05b](SM05b-det-triggers-pol25.md), [SM08](../smoke/SM08-cursor-findings.md) finding 4
 - [PR #14 Cursor review 5657632108, finding 6](https://github.com/svennijhuis/agentic-workflows/pull/14#pullrequestreview-5657632108)
 - [PR #8 Cursor review 5654162636, finding 1](https://github.com/svennijhuis/agentic-workflows/pull/8#pullrequestreview-5654162636)
+
+## Copy this
+
+Use this order when a policy lets humans record an exact yes for extra agentic triggers without weakening fail-closed allowlists:
+
+1. Read rollout and map shape first; parse errors fail every file under test.
+2. Fail `deployment_status` and unlisted or agentic `workflow_call` before any per-workflow yes list is consulted.
+3. Only then apply the yes list: it may lift the agentic dispatch-only rule for named triggers (for example `schedule`), never the items in step 2.
+4. For a compiled lock file paired with a markdown workflow, every trigger on the lock must also appear on the markdown when the basename is on the yes list.
+5. In fixture mode, point the check at a case-local policy copy via an env var (default repo policy); exclude that copy from the workflow file list.
+6. Keep promoted-name bypasses downstream of allowlist hits so promoted `workflow_call` without a map entry still fails.
+
+No secrets, tokens, or repo-specific paths are required to reuse the pattern; wire names to your own policy ids and fixture layout.

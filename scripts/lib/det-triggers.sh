@@ -63,7 +63,7 @@ det_entry_err() {
     || [ "$(K=$2 yq '[.deterministic_triggers[strenv(K)].triggers[] | tostring | trim | select(. == "")] | length' "$r")" != 0 ]; then
     echo "$e: triggers must be a non-empty list of trigger names (fail closed)"
   fi
-  [ -n "$(K=$2 yq '.deterministic_triggers[strenv(K)].yes.date | select(. != null) | tostring | trim' "$r")" ] \
+  [ -n "$(K=$2 yq '.deterministic_triggers[strenv(K)].yes.date | select(. != null) | select(tag == "!!str" or tag == "!!timestamp") | tostring | trim' "$r")" ] \
     || echo "$e: yes.date is empty (Sven's exact yes needs a date)"
   [ -n "$(K=$2 yq '.deterministic_triggers[strenv(K)].yes.quote | select(tag == "!!str") | trim' "$r")" ] \
     || echo "$e: yes.quote is empty (Sven's exact yes needs his words)"
@@ -76,11 +76,8 @@ det_agentic() {
     *.md|*.lock.yml) return 0 ;;
   esac
   sed $'1s/^\xEF\xBB\xBF//' "$1" | awk '
-    /^[[:space:]]*$/ { next }
     /^[[:space:]]*#/ {
       if ($0 ~ /gh-aw-metadata:/) { found=1; exit 0 }
-      next
     }
-    { exit 1 }
     END { exit found ? 0 : 1 }'
 }

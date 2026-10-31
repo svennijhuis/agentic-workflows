@@ -202,7 +202,7 @@ flowchart LR
 | SM05 | POL03 + POL25 allow workflow_call for the smoke runner only | 3 | two-way | smoke | W3 | todo | POL25, POL03, POL23, scripts/lib/on-triggers.sh | Builder | [smoke/SM05.md](smoke/SM05.md) |
 | SM05a | SM05 part: deterministic_triggers lib, POL03 workflow_call allowlist, case folders | 3 | two-way | smoke | W3 | done | VF01 | Builder | [done/SM05a-det-triggers-pol03.md](done/SM05a-det-triggers-pol03.md) |
 | SM05b | SM05 part: POL25 deterministic_triggers allowlist, det-triggers steps 6 to 8 and 10 | 3 | two-way | smoke | W3 | done | SM05a | Builder | [done/SM05b-det-triggers-pol25.md](done/SM05b-det-triggers-pol25.md) |
-| SM05c | SM05 part: POL25 sven_yes order, POL25_CFG, md/lock pair, step 9 | 3 | two-way | smoke | W3 | done | SM05b | Builder | [done/SM05c-pol25-sven-yes-order.md](done/SM05c-pol25-sven-yes-order.md) |
+| SM05c | SM05 part: POL25 sven_yes order, POL25_CFG, md/lock pair, step 9 (PR #23) | 3 | two-way | smoke | W3 | done | SM05b | Builder | [done/SM05c-pol25-sven-yes-order.md](done/SM05c-pol25-sven-yes-order.md) |
 | SM06 | Smoke reporting on PR or release, ping on fail | 3 | two-way | smoke | W3 | todo | SM03 | Builder | [smoke/SM06.md](smoke/SM06.md) |
 | SM07 | Setup steps only Sven does | 3 | one-way | smoke | W3 | todo | none | Builder | [smoke/SM07.md](smoke/SM07.md) |
 | SM07a | SM07 part: smoke/SETUP.md checklist and check-smoke-setup.sh | 3 | two-way | smoke | W3 | done | VF01 | Builder | [done/SM07a-setup-check.md](done/SM07a-setup-check.md) |
