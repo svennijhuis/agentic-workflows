@@ -85,6 +85,23 @@ for b in "${B[@]}"; do
   { [ "$rc" -eq 1 ] && [ "$(grep -c . <<<"$h")" -eq 1 ]; } || fail "$b:1 SMOKEAUTH bad smoke auth fixture does not exit 1 with exactly one hit (rc $rc)"
 done
 
+echo "# SM05b round 1 (each bad exits exactly 1 with one hit)"
+sm05b_one_hit() {
+  local check=$1 path=$2 h rc
+  h=$(bash "$check" "$path"); rc=$?
+  { [ "$rc" -eq 1 ] && [ "$(grep -c . <<<"$h")" -eq 1 ]; } \
+    || fail "$path:1 SM05B bad case does not exit 1 with exactly one hit (rc $rc)"
+}
+sm05b_one_hit policies/checks/POL25.sh test/fixtures/bad/POL25-smoke-no-on
+sm05b_one_hit policies/checks/POL25.sh test/fixtures/bad/POL25-smoke-rollout-broken-no-on
+sm05b_one_hit policies/checks/POL03.sh test/fixtures/bad/POL03-smoke-metadata-after-name
+sm05b_one_hit policies/checks/POL25.sh test/fixtures/bad/POL25-smoke-metadata-after-name
+sm05b_one_hit policies/checks/POL03.sh test/fixtures/bad/POL03-smoke-date-bool
+sm05b_one_hit policies/checks/POL03.sh test/fixtures/bad/POL03-smoke-date-list
+sm05b_one_hit policies/checks/POL25.sh test/fixtures/bad/POL25-smoke-date-bool
+sm05b_one_hit policies/checks/POL25.sh test/fixtures/bad/POL25-smoke-date-list
+sm05b_one_hit policies/checks/POL03.sh test/fixtures/bad/POL03-smoke-trigger-blank
+
 echo "# import-schema fixtures (C05)"
 for kind in good bad; do
   d=test/fixtures/import-schema/$kind; tmp=$(mktemp -d); cp -r "$d" "$tmp/w"

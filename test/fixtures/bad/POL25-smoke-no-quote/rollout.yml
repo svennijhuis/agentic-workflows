@@ -1,0 +1,5 @@
+promoted: []
+deterministic_triggers:
+  smoke-run.yml:
+    triggers: [workflow_dispatch, workflow_call]
+    yes: {date: "2026-01-01"}

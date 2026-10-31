@@ -42,8 +42,9 @@ triggers_ok() { # FILE NAME: on: triggers are workflow_dispatch (plus settings) 
     while IFS= read -r err; do [ -n "$err" ] && hit "$r" "$l" POL03 "$err"; done < <(det_entry_err "$ROLLOUT" "$b")
     det_entry_triggers "$ROLLOUT" "$b" | grep -qx workflow_call && ! det_agentic "$f" && call_ok=1
     while IFS= read -r t; do
+      [ -n "$(printf '%s' "$t" | tr -d '[:space:]')" ] || continue
       case "$t" in
-        workflow_dispatch|workflow_call|'') ;;
+        workflow_dispatch|workflow_call) ;;
         *) promoted "$2" || hit "$r" "$l" POL03 "deterministic_triggers entry $b lists '$t': only workflow_dispatch and workflow_call (other triggers need promoted:)" ;;
       esac
     done < <(det_entry_triggers "$ROLLOUT" "$b")

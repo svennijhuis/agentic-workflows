@@ -1,0 +1,11 @@
+name: smoke-run
+on:
+  workflow_dispatch:
+  deployment_status:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo fixture
