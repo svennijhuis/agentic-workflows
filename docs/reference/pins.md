@@ -29,6 +29,10 @@ After frontmatter or pin bumps, recompile and commit fresh locks ([POL17](../../
 4. Run `./scripts/verify.sh`.
 5. Add an [CHANGELOG.md](../../CHANGELOG.md) entry under the release section.
 
+## Todo
+
+- [ ] gh-aw v1.x bump: offline `gh aw compile --strict` needs a committed `.github/aw/actions-lock.json` (not needed on v0.93.4; found in C12b).
+
 ## See also
 
 - PBI [C06](../pbi/done/C06-copilot-engine-version-pins.md)

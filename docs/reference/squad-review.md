@@ -9,9 +9,13 @@
 - Caps in workflow frontmatter ([POL02](../../policies/POL02.yml)).
 - Committed `squad-review.lock.yml` in the catalog ([POL17](../../policies/POL17.yml)).
 - `copilot-requests: none` ([POL21](../../policies/POL21.yml)).
-- agentPacks via `skills:` and `commands/` import at a pinned SHA; not `plugins:` at a main SHA ([agentpacks contract](agentpacks-contract.md)).
+- agentPacks via `skills:` in `squad-review.md` frontmatter and a `commands/` import at a pinned SHA; not `plugins:` at a main SHA ([agentpacks contract](agentpacks-contract.md)). `skills:` lives in this consumer workflow, not in `workflows/shared/` (gh-aw drops it from imports; C12b, [POL31](../../policies/POL31.yml)).
 
 Shared wiring: [`workflows/shared/agentpacks.md`](../../workflows/shared/agentpacks.md), [`defaults.md`](../../workflows/shared/defaults.md), [`security.md`](../../workflows/shared/security.md).
+
+## Copy this
+
+An org copies `workflows/squad-review.md`, `workflows/squad-review.lock.yml` and `workflows/shared/`. The pinned squad skill comes with the md (its `skills:` key); nothing in `workflows/shared/` installs a skill.
 
 ## Install in a consumer repo
 

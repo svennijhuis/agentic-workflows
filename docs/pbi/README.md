@@ -154,6 +154,7 @@ flowchart LR
 | HX03 | Harness-neutral prompts | 2 | two-way | harness | W2 | todo | ARC07, HX02, C12 | Builder | [harness/HX03-harness-neutral-prompts.md](harness/HX03-harness-neutral-prompts.md) |
 | TPL02 | Backfill template fields on the existing PBIs | 2 | two-way | docs | W2 | todo | TPL01 | Cursor CLI | [docs/TPL02-template-backfill.md](docs/TPL02-template-backfill.md) |
 | C12a | agentPacks release tag, then re-add plugins: to squad-review | 2 | two-way | core | W2 | todo | C12, agentPacks PBI 04 (first release) | Builder | [core/C12a-agentpacks-tag-plugins-repin.md](core/C12a-agentpacks-tag-plugins-repin.md) |
+| C12b | skills: in the main workflow, not in a shared fragment (POL31) | 2 | two-way | core | W3 | done | C12, C05, POL01 | Builder | [done/C12b-skills-in-main-workflow.md](done/C12b-skills-in-main-workflow.md) |
 | VF01 | One verify entry point: scripts/verify.sh for CI, local gate and every agent | 2 | two-way | verify | W2 | done | C01, POL02, POL17, POL23, X06, C14 | Builder | [done/VF01.md](done/VF01.md) |
 | VF02 | Verify workflow template for consumer repos (API and frontend) | 2 | one-way | verify | W2 | todo | VF01, POL01, POL03, C12, G00a, X06b | Builder | [verify/VF02.md](verify/VF02.md) |
 | VF02a | VF02 part: POL01 yml whole-file walk, parse error, yml roots | 2 | two-way | verify | W2 | done | none | Builder | [done/VF02a-pol01-extension.md](done/VF02a-pol01-extension.md) |

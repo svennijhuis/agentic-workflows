@@ -49,5 +49,5 @@ Link [policies/POLnn.yml](policies/) for rules. Do not restate policy text in pr
 
 ## Policies and backlog
 
-- Policies: `policies/POL01.yml` through `policies/POL29.yml`
+- Policies: `policies/POL01.yml` through `policies/POL29.yml`, plus `policies/POL31.yml`
 - PBI index: [docs/pbi/README.md](docs/pbi/README.md)
