@@ -23,11 +23,11 @@ Workflow PBIs must meet Bar H (plan v3 + gist A7):
 - Threat detection on
 - `on.roles` plus skip-bots
 - Fixed issue/PR format (`shared/reporting.md`)
-- Trial-repo run on X01
-- Audit of first 3 runs
-- Measured cost per run in PBI Evidence
+- Offline proof in the build DoD for the PBIs retargeted by X01 (F01, F02, F03, F04, F06, F07, F09, F13, F15): `scripts/verify.sh` 0 failures on the exact SHA (`gh aw compile --strict`, lock drift, `--no-emit` fixture); no run, no token spend. F05, F10, F11, F12, F14 and F16 to F75 still prove with the X01 trial and `gh aw audit` until a PBI retargets them
+- `workflow_dispatch` only (POL25) on those offline PBIs; any other trigger is a named ask with a row in `policies/POL25.yml` `sven_yes` first
+- Named ask, not build DoD, on those offline PBIs (Sven exact yes, it spends tokens): trial-repo run on X01, audit of the first 3 runs, measured cost per run in PBI Evidence
 - **Workflow fetches its own context with tools and imports; the prompt never pastes repo content** (gist A7)
-- Benchmark score at or above baseline ([X07](testing/X07-workflow-benchmark.md): 5 or more fixed cases per workflow in `docs/benchmarks/<workflow>.md`). A lower score blocks [L01](release/L01-v1-moving-v1-changelog.md), [L02](release/L02-update-vs-upgrade-safe-update.md) and [AO05](agent-ops/AO05-change-management.md); [C03](done/C03-shared-defaults.md) and [B03a](observability/B03a-value-vs-cost.md) use the score
+- Benchmark score at or above baseline ([X07](testing/X07-workflow-benchmark.md): 5 or more fixed cases per workflow in `docs/benchmarks/<workflow>.md`). On the offline PBIs (F01, F02, F03, F04, F06, F07, F09, F13, F15) the build DoD only writes the 5 or more cases (docs only, no run); the score is a named ask next to the trial and the 3-run audit, because each score is a live X07 run (`door: one-way`, Sven exact yes per run). A lower score blocks [L01](release/L01-v1-moving-v1-changelog.md), [L02](release/L02-update-vs-upgrade-safe-update.md) and [AO05](agent-ops/AO05-change-management.md); [C03](done/C03-shared-defaults.md) and [B03a](observability/B03a-value-vs-cost.md) use the score
 
 ## Block flow (B0 to B6)
 
@@ -53,7 +53,7 @@ flowchart LR
 - [loops/](loops/00-overview.md): [LP00](loops/LP00-improvement-loop.md) improvement loop (incl. LP00 v2 cross-repo self-fix), [LP01](loops/LP01-delivery-loop.md) delivery loop (P05 board, P12 planning, P13 grilling, P14 pick-up at WIP 1), [LP02](loops/LP02-event-map.md) event map (automatic events, human triggers incl. slash commands and `/stop`, guards, rollout, doors).
 - [architecture/](architecture/00-overview.md): ARC01-ARC06 (context, topology, identity, safe-output flow incl. cross-repo, release, org switch). G00 owns these pages.
 - [agent-ops/](agent-ops/00-overview.md): AO01-AO14, sourced (S1-S11). AO01 retro and AO02 scorecards in B3, AO03 kill switch in B2 (guard dependency for `/stop`), the rest in B5. AO10 absorbs F75.
-- [smoke/](smoke/README.md): SM01-SM08, SM01a and SM01b post-deploy API smoke on tst and acc (Block 3; SM01, SM01a and SM04b checks done, the rest docs only). Build order (split check 2026-10-26): SM08 rows live in the build PBIs SM01, SM04a, SM04b, SM05a, SM05b, SM05c and SM07a, and SM08 closes once those have merged; SM07 (Sven's manual step, switched off), then SM01, SM01b (lane 2 after SM01a), SM05, SM04, SM03, SM06, SM02 (agentic, last). Nothing enabled until Sven's yes.
+- [smoke/](smoke/README.md): SM01-SM08, SM01a, SM01b and SM01c post-deploy API smoke on tst and acc (Block 3; SM01, SM01a, SM01b, SM01c and SM04b checks done, the rest docs only). Build order (split check 2026-10-26): SM08 rows live in the build PBIs SM01, SM04a, SM04b, SM05a, SM05b, SM05c and SM07a, and SM08 closes once those have merged; SM07 (Sven's manual step, switched off), then SM01, SM01b (lane 2 after SM01a), SM01c, SM05, SM04, SM03, SM06, SM02 (agentic, last). Nothing enabled until Sven's yes.
 - Folds: F76 log insights is in [M05](monitoring/M05-github-log-watcher.md), F77 issue to PR is in [P04](multi-repo/P04-research-plan-assign-copilot.md). The human go label is `agent-ok`. C01 is `scripts/verify.sh` only.
 
 ```mermaid
@@ -128,9 +128,9 @@ flowchart LR
 | POL25 | Agentic workflows are workflow_dispatch only | 1 | two-way | policies | W1 | done | C01, POL03 | Builder | [done/POL25-agentic-dispatch-only.md](done/POL25-agentic-dispatch-only.md) |
 | POL26 | Run logs gitignored and scanned by gitleaks | 1 | two-way | policies | W1 | done | C01, POL04 | Builder | [done/POL26-run-logs-gitignored.md](done/POL26-run-logs-gitignored.md) |
 | AO03 | Kill switch | 2 | two-way | agent-ops | W2 | todo | POL10 | Builder | [agent-ops/AO03-kill-switch.md](agent-ops/AO03-kill-switch.md) |
-| D01 | Quick start and consumer guide | 2 | two-way | docs | W2 | todo | D00, C04, L01, X01, G00a | Cursor CLI | [docs/D01-quick-start-consumer-guide.md](docs/D01-quick-start-consumer-guide.md) |
+| D01 | Quick start and consumer guide | 2 | two-way | docs | W2 | todo | D00, C04, L01, X01, G00a, F01 | Cursor CLI | [docs/D01-quick-start-consumer-guide.md](docs/D01-quick-start-consumer-guide.md) |
 | D03 | Governance overview | 2 | two-way | docs | W5 | todo | G01, G02, D00 | Cursor CLI | [docs/D03-governance-overview.md](docs/D03-governance-overview.md) |
-| F01 | PR review (replaces squad-review) | 2, 3 | one-way | agent-factory | W3 | todo | C03, C04, C05, C06, C12, O01, O02, O03, X01, F00, POL21, POL22 | Builder | [agent-factory/F01-pr-review.md](agent-factory/F01-pr-review.md) |
+| F01 | PR review (replaces squad-review) | 2, 3 | two-way | agent-factory | W3 | todo | C03, C04, C05, C06, C12, C12b, O01, O02, O03, POL21, POL22 | Builder | [agent-factory/F01-pr-review.md](agent-factory/F01-pr-review.md) |
 | G01 | Rollout ladder + human review | 2 | two-way | governance | PR 0 | todo | O02, POL03 | Cursor CLI | [governance/G01-rollout-ladder-human-review.md](governance/G01-rollout-ladder-human-review.md) |
 | G02 | RACI | 2 | two-way | governance | PR 0 | todo | G01 | Cursor CLI | [governance/G02-raci.md](governance/G02-raci.md) |
 | G03 | Onboarding + support | 2 | two-way | governance | PR 0 | todo | G02, D01 | Cursor CLI | [governance/G03-onboarding-support.md](governance/G03-onboarding-support.md) |
@@ -166,16 +166,16 @@ flowchart LR
 | B02 | Weekly spend overview | 3 | one-way | observability | PR 0 | todo | B01, F04, C03 | Builder | [observability/B02-weekly-spend-overview.md](observability/B02-weekly-spend-overview.md) |
 | B03a | Value vs cost (per workflow) | 3 | one-way | observability | W3 | todo | B02 | Builder | [observability/B03a-value-vs-cost.md](observability/B03a-value-vs-cost.md) |
 | F01b | PR review auto on push | 3 | one-way | agent-factory | W3 | todo | F01, POL22, POL03 | Builder | [agent-factory/F01b-pr-review-auto-on-push.md](agent-factory/F01b-pr-review-auto-on-push.md) |
-| F02 | CI failure investigator | 3 | one-way | agent-factory | W3 | todo | C03, C04, C06, O01, O02, O03, X01, R04, F00 | Builder | [agent-factory/F02-ci-doctor.md](agent-factory/F02-ci-doctor.md) |
-| F03 | Daily repo status report | 3 | one-way | agent-factory | W3 | todo | C03, C04, C06, O01, O02, O03, X01, R01, F00 | Builder | [agent-factory/F03-repo-status.md](agent-factory/F03-repo-status.md) |
-| F04 | Cost tracker and AIC audit | 3 | one-way | agent-factory | W3 | todo | C03, C04, C06, O01, O02, O03, X01, B02, F00 | Builder | [agent-factory/F04-cost-tracker.md](agent-factory/F04-cost-tracker.md) |
+| F02 | CI failure investigator | 3 | two-way | agent-factory | W3 | todo | C03, C04, C06, O01, O02, O03, R04 | Builder | [agent-factory/F02-ci-doctor.md](agent-factory/F02-ci-doctor.md) |
+| F03 | Daily repo status report | 3 | two-way | agent-factory | W3 | todo | C03, C04, C06, O01, O02, O03, R01 | Builder | [agent-factory/F03-repo-status.md](agent-factory/F03-repo-status.md) |
+| F04 | Cost tracker and AIC audit | 3 | two-way | agent-factory | W3 | todo | C03, C04, C06, O01, O02, O03, B02 | Builder | [agent-factory/F04-cost-tracker.md](agent-factory/F04-cost-tracker.md) |
 | F05 | Malicious code and agentic threat scan | 3 | one-way | agent-factory | W3 | todo | C03, C04, C06, O01, O02, O03, X01, S03, F00 | Builder | [agent-factory/F05-malicious-code-scan.md](agent-factory/F05-malicious-code-scan.md) |
-| F06 | Daily issue triage batch | 3 | one-way | agent-factory | W3 | todo | C03, C04, C06, O01, O02, O03, X01, R02, F00 | Builder | [agent-factory/F06-daily-issue-triage.md](agent-factory/F06-daily-issue-triage.md) |
-| F07 | Documentation updater | 3 | one-way | agent-factory | W3 | todo | C03, C04, C06, O01, O02, O03, X01, C05, F00 | Builder | [agent-factory/F07-doc-updater.md](agent-factory/F07-doc-updater.md) |
+| F06 | Daily issue triage batch | 3 | two-way | agent-factory | W3 | todo | C03, C04, C06, O01, O02, O03, R02 | Builder | [agent-factory/F06-daily-issue-triage.md](agent-factory/F06-daily-issue-triage.md) |
+| F07 | Documentation updater | 3 | two-way | agent-factory | W3 | todo | C03, C04, C06, O01, O02, O03, C05 | Builder | [agent-factory/F07-doc-updater.md](agent-factory/F07-doc-updater.md) |
 | F11 | CI optimization coach | 3 | one-way | agent-factory | W3 | todo | C03, C04, C06, O01, O02, O03, X01, F02, F00 | Builder | [agent-factory/F11-ci-coach.md](agent-factory/F11-ci-coach.md) |
-| F13 | Grumpy critical reviewer | 3 | one-way | agent-factory | W3 | todo | C03, C04, C06, O01, O02, O03, X01, F01, F00 | Builder | [agent-factory/F13-grumpy-reviewer.md](agent-factory/F13-grumpy-reviewer.md) |
+| F13 | Grumpy critical reviewer | 3 | two-way | agent-factory | W3 | todo | C03, C04, C06, O01, O02, O03, F01 | Builder | [agent-factory/F13-grumpy-reviewer.md](agent-factory/F13-grumpy-reviewer.md) |
 | F14 | Documentation link checker | 3 | one-way | agent-factory | W3 | todo | C03, C04, C06, O01, O02, O03, X01, F07, F00 | Builder | [agent-factory/F14-link-checker.md](agent-factory/F14-link-checker.md) |
-| F15 | Markdown linter | 3 | one-way | agent-factory | W3 | todo | C03, C04, C06, O01, O02, O03, X01, POL16, F00 | Builder | [agent-factory/F15-markdown-linter.md](agent-factory/F15-markdown-linter.md) |
+| F15 | Markdown linter | 3 | two-way | agent-factory | W3 | todo | C03, C04, C06, O01, O02, O03, POL16 | Builder | [agent-factory/F15-markdown-linter.md](agent-factory/F15-markdown-linter.md) |
 | F17 | Workflow optimizer (/q) | 3 | one-way | agent-factory | W3 | todo | C03, C04, C06, O01, O02, O03, X01, POL01-POL18, F00 | Builder | [agent-factory/F17-q.md](agent-factory/F17-q.md) |
 | F72 | Issue triage with repro | 3 | one-way | agent-factory | W3 | todo | C03, C04, O01, O02, O03, R02, X01, F00 | Builder | [agent-factory/F72-issue-triage-repro.md](agent-factory/F72-issue-triage-repro.md) |
 | F74 | Findings buffer | 3 | one-way | agent-factory | W3 | todo | C03, C04, O01, O02, O03, R01, X01 | Builder | [agent-factory/F74-findings-buffer.md](agent-factory/F74-findings-buffer.md) |
@@ -195,8 +195,9 @@ flowchart LR
 | R05a | Event guards: untrusted payload, fail-closed filters, dedupe | 3 | two-way | triggers | W3 | todo | R05, M01, AO08 | Builder | [triggers/R05a-event-guards.md](triggers/R05a-event-guards.md) |
 | LP02a | Lint: two workflows sharing a trigger and filter | 3 | two-way | loops | W3 | todo | LP02, POL25 | Builder | [loops/LP02a-duplicate-trigger-lint.md](loops/LP02a-duplicate-trigger-lint.md) |
 | SM01 | Smoke scenario format and folder per feature | 3 | two-way | smoke | W3 | done | none | Builder | [done/SM01.md](done/SM01.md) |
-| SM01b | check-smoke carry (Cursor 5657706637 on PR #11) | 3 | two-way | smoke | W3 | todo | SM01a | Builder | [smoke/SM01b.md](smoke/SM01b.md) |
-| SM01c | check-smoke carry (PR #20 round 1 lows) | 3 | two-way | smoke | W3 | todo | SM01a | Builder | [smoke/SM01c.md](smoke/SM01c.md) |
+| SM01b | check-smoke carry (Cursor 5657706637 on PR #11) | 3 | two-way | smoke | W3 | done | SM01a | Builder | [done/SM01b.md](done/SM01b.md) |
+| SM01c | check-smoke carry (PR #20 round 1 lows and Cursor 5723663360) | 3 | two-way | smoke | W3 | done | SM01a | Builder | [done/SM01c.md](done/SM01c.md) |
+| SM01d | check-smoke carry (PR #24 Tester 2 lows) | 3 | two-way | smoke | W3 | todo | SM01b | Builder | [smoke/SM01d.md](smoke/SM01d.md) |
 | SM02 | Scenario generator at PR time | 3 | one-way | smoke | W3 | todo | SM01, BH08, P14 | Builder | [smoke/SM02.md](smoke/SM02.md) |
 | SM03 | Post-deploy smoke runner for tst and acc (no AI) | 3 | one-way | smoke | W3 | todo | SM01, SM04, SM05, SM07 | Builder | [smoke/SM03.md](smoke/SM03.md) |
 | SM04 | Smoke token: GitHub OIDC to Entra to APIM validate-jwt to backend | 3 | one-way | smoke | W3 | todo | SM07 | Builder | [smoke/SM04.md](smoke/SM04.md) |
@@ -273,7 +274,7 @@ flowchart LR
 | C08 | Runtime profiles (Docker now, microVM later) | 6 | two-way | core | W6 | todo | C03, S04 | Builder | [core/C08-runtime-profiles.md](core/C08-runtime-profiles.md) |
 | C09 | Self-hosted and ARC runners (org-ready doc) | 6 | two-way | core | W6 | todo | C08, S04 | Builder | [core/C09-self-hosted-arc-runners.md](core/C09-self-hosted-arc-runners.md) |
 | C10 | Copilot BYOK Azure OpenAI (later) | 6 | two-way | core | W6 | todo | C07, M04 | Builder | [core/C10-copilot-byok-azure-openai.md](core/C10-copilot-byok-azure-openai.md) |
-| F09 | AI release notes | 6 | one-way | agent-factory | W6 | todo | C03, C04, C06, O01, O02, O03, X01, L01, F00 | Builder | [agent-factory/F09-release-notes.md](agent-factory/F09-release-notes.md) |
+| F09 | AI release notes | 6 | two-way | agent-factory | W6 | todo | C03, C04, C06, O01, O02, O03, L01 | Builder | [agent-factory/F09-release-notes.md](agent-factory/F09-release-notes.md) |
 | F10 | Repository maintainer assist | 6 | one-way | agent-factory | W6 | todo | C03, C04, C06, O01, O02, O03, X01, F06, F07, F00 | Builder | [agent-factory/F10-repo-assist.md](agent-factory/F10-repo-assist.md) |
 | F12 | Code simplifier | 6 | one-way | agent-factory | W6 | todo | C03, C04, C06, O01, O02, O03, X01, F01, F00 | Builder | [agent-factory/F12-code-simplifier.md](agent-factory/F12-code-simplifier.md) |
 | F18 | Test improver | 6 | one-way | agent-factory | W6 | todo | C03, C04, C06, O01, O02, O03, X01, X04, F00 | Builder | [agent-factory/F18-test-improver.md](agent-factory/F18-test-improver.md) |
@@ -429,11 +430,11 @@ Empty until Sven tests block 1; new PBIs get the next free id per area.
 
 ## Block 2
 
-**PBIs:** BH09, C13, HX03, TPL02, C12a (v3.12, docs only so far), VF01 verify (done, #10), WF01 shared workflow file lister (todo), VF02 verify (docs only so far), S00-S06, O01-O03, R01-R03, L01, D01, G01-G03, X07 benchmark harness, AO03 kill switch (guard for `/stop`), LP02 guards (POL10 actor check, concurrency), F01 staged smoke, G00a proof run.
+**PBIs:** BH09, C13, HX03, TPL02, C12a (v3.12, docs only so far), C12b skills in the main workflow plus POL31 (done, #26), VF01 verify (done, #10), WF01 shared workflow file lister (todo), VF02 verify (docs only so far), S00-S06, O01-O03, R01-R03, L01, D01, G01-G03, X07 benchmark harness, AO03 kill switch (guard for `/stop`), LP02 guards (POL10 actor check, concurrency), F01 offline build (`scripts/verify.sh`), G00a proof run.
 
-**What Sven can test:** Tag v0.1; `gh aw add` F01 into trial repo; staged run shows safe-output preview, no writes.
+**What Sven can test:** Tag v0.1; offline `scripts/verify.sh` log for F01. Named ask (Sven exact yes): `gh aw add` F01 into the trial repo and a staged run that shows the safe-output preview, no writes.
 
-**Exit criteria:** v0.1 tag; trial staged run green; threat detection on; audit clean.
+**Exit criteria:** v0.1 tag; offline `scripts/verify.sh` 0 failures; threat detection on. The trial staged run and its audit are a named ask (Sven exact yes).
 
 **Named asks (first PBI in block that needs them):** Q3 (COPILOT_GITHUB_TOKEN PAT, masked), Q7 (tags for L01), Q11 (X07 per-run budget, yes per run).
 
@@ -446,11 +447,11 @@ Empty until Sven tests block 2; new PBIs get the next free id per area.
 
 ## Block 3
 
-**PBIs:** BH01, P12a, F01a, BH08, BH03 (doc), LP00b, HX05, R05a, LP02a (v3.12, docs only so far), SM01 and SM01a smoke checks done; SM02-SM07 and SM01b smoke (docs only so far), F02-F07, F11, F13-F15, F17, F72, F74, F01 live, F01b gated, B01, B02, B03a, Y01, R04, M05 step 1 (report-only on 1 repo), P05 board, P12 planning, P13 grilling, AO01 retro, AO02 scorecards. Each NOW workflow gets 5 or more X07 cases and a passing score in its DoD.
+**PBIs:** BH01, P12a, F01a, BH08, BH03 (doc), LP00b, HX05, R05a, LP02a (v3.12, docs only so far), SM01, SM01a, SM01b and SM01c smoke checks done; SM02-SM07 smoke (docs only so far), F02-F07, F11, F13-F15, F17, F72, F74, F01 live, F01b gated, B01, B02, B03a, Y01, R04, M05 step 1 (report-only on 1 repo), P05 board, P12 planning, P13 grilling, AO01 retro, AO02 scorecards. Each NOW workflow gets 5 or more X07 cases in its DoD. The passing X07 score is in the DoD for F05, F10, F11, F12, F14 and F16 to F75, and a named ask (live X07 run, Sven exact yes) for the offline PBIs (F01 to F04, F06, F07, F09, F13, F15).
 
-**What Sven can test:** NOW workflows in trial repo; F01 manual only; cost dashboard.
+**What Sven can test:** offline `scripts/verify.sh` log for F02, F03, F04, F06, F07, F09, F13 and F15; F01 manual only (`workflow_dispatch`); cost dashboard. Named ask (Sven exact yes): `gh aw add` those workflows into the trial repo and staged runs. F05, F10, F11, F12, F14 and F16 to F75 still need the X01 trial run and `gh aw audit` as proof.
 
-**Exit criteria:** B03a value vs cost row per workflow (kill rule: 2 blocks below cost = disable). Bar H per workflow: 3 audited runs, measured AIC cost, noop pre-check proven. F01 pr-review runs manual only (`workflow_dispatch` + `/pr-review`), no push trigger; auto on push ([F01b](agent-factory/F01b-pr-review-auto-on-push.md)) waits on its 3 audited runs plus Sven's yes. Every agentPacks pin is a [C12](done/C12-agentpacks-import-contract.md) v1.1 tag (replaces `@34e1dec`). [PR #2](https://github.com/svennijhuis/agentic-workflows/pull/2) closed unmerged after PR 0, with a comment linking the replacing PBIs (C01, POL01, POL02, POL21, POL22, C12, F01, L02).
+**Exit criteria:** B03a value vs cost row per workflow (kill rule: 2 blocks below cost = disable). Bar H per offline workflow (F01 to F04, F06, F07, F09, F13, F15): offline `scripts/verify.sh` 0 failures and noop pre-check proven in the build DoD; 3 audited runs, measured AIC cost and the X07 score are a named ask (Sven exact yes, token spend). F05, F10, F11, F12, F14 and F16 to F75 keep the X01 trial and 3 `gh aw audit` runs as their proof. F01 pr-review runs `workflow_dispatch` only, no push trigger; `/pr-review` slash is a named ask (row in `policies/POL25.yml` `sven_yes` first); auto on push ([F01b](agent-factory/F01b-pr-review-auto-on-push.md)) waits on its 3 audited runs plus Sven's yes. Every agentPacks pin is a [C12](done/C12-agentpacks-import-contract.md) v1.1 tag (replaces `@34e1dec`). [PR #2](https://github.com/svennijhuis/agentic-workflows/pull/2) closed unmerged after PR 0, with a comment linking the replacing PBIs (C01, POL01, POL02, POL21, POL22, C12, F01, L02).
 
 **Named asks (first PBI in block that needs them):** F01b yes optional; cost cap confirmation; M05 rollout step 1 yes; M05_READ_TOKEN; BOARD_TOKEN (P05).
 

@@ -119,9 +119,9 @@ flowchart LR
   C --> D[verify.sh 0 failures]
 ```
 ## Todo (carried, not built here)
-SM01b (`../smoke/SM01b.md` when on main) only exists on PR #18 and is not on main yet, so the low findings from PR #15 sit here until #18 merges; whoever merges second moves them to SM01b.
+SM01b is done in [SM01b](SM01b.md) (PR #24); the PR #15 low below is not a check-smoke item and stays here.
 - [ ] Cursor 5657764107 f5 low and Cursor 5658018053 f5 low (PBI template, ARC08): `docs/pbi/docs/TPL02-template-backfill.md` L26, the G05 DoD item lists ten Technical design fields and omits `Module boundary`. G05 already has that line above the Definition of Done, and a rewrite that adds exactly the ten listed fields would drop the line `check-pbi-template.sh` requires. Fix: move `Module boundary` into the section below the DoD and list it with the other fields (eleven).
-- [ ] PR #20 round 1 lows (not built in round 1): [SM01c](../smoke/SM01c.md) (Tester [6535761517](https://github.com/svennijhuis/agentic-workflows/pull/20#issuecomment-6535761517), Reviewer [6535832889](https://github.com/svennijhuis/agentic-workflows/pull/20#issuecomment-6535832889)): Cursor f4 in-file duplicate id also reported as across files; encoded `%67hp_` prefix in path; `?password` with no `=`; `status: 0200`.
+- [x] PR #20 round 1 lows: done in [SM01c](SM01c.md) (PR #24)
 ## Named asks for Sven
 none
 ## Cost
