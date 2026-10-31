@@ -4,10 +4,17 @@
 - Wave: W3
 - Block: 3
 - Lane: Builder
-- Depends on: C03, C04, C06, O01, O02, O03, X01, POL16, F00
+- Depends on: C03, C04, C06, O01, O02, O03, POL16
 - proof: gh aw compile --dir workflows --strict workflows/f15.md; gh aw audit <run-id> (Block exit runs)
 - door: one-way
 - one-way gate: Sven's exact yes required (named ask in its block). Rollback: disable workflow via workflow_dispatch off or remove schedule trigger
+- triage: build (Block 3 workflow)
+- feedback: gh aw compile --dir workflows --strict, offline `scripts/verify.sh`
+- harness: gh-aw, engine copilot via shared/defaults.md (when built)
+- review-input: diff + this PBI + DoD (+ linked spec) + PR description, never builder session logs (PA6)
+- kind: skill
+- Source: PA8 (pre-link PBI from PR #4, origin in its Sources) https://github.com/svennijhuis/agentic-workflows/pull/4 https://github.com/githubnext/agentics/tree/main/workflows/markdown-linter.md
+- Module boundary: `workflows/markdown-linter.md` + its lock + `workflows/shared/` is the copy unit; agentPacks imports stay behind the POL01 pin
 ## Goal
 Run markdown lint (Super Linter style); file issue with findings.
 ## Context
@@ -25,7 +32,7 @@ Engine: `copilot` with `COPILOT_GITHUB_TOKEN` (personal PAT). No `copilot-reques
 2. Set staged/report-only outputs; wire `workflow_dispatch` as the only live trigger initially.
 3. Add deterministic pre-check step returning `noop` when there is nothing to do.
 4. Run `scripts/verify.sh` on PR SHA; compile with pinned gh-aw version.
-5. Trial on X01 repo; capture first 3 `gh aw audit` AIC measurements in Evidence.
+5. Offline proof only: `scripts/verify.sh` (compile --strict --actionlint, lock drift, `--no-emit` fixture). X01 live trial and AIC audit are a named ask (Sven exact yes), not in this DoD.
 6. After Sven explicit yes, enable secondary triggers (schedule, `workflow_run`, slash) one at a time.
 
 ## Definition of Done
@@ -40,7 +47,8 @@ Engine: `copilot` with `COPILOT_GITHUB_TOKEN` (personal PAT). No `copilot-reques
 - [ ] Network allowlist and tool/MCP/bash allowlists (POL06, POL07); no wildcard network
 - [ ] `on.roles` and skip-bots configured (POL10)
 - [ ] Issue/PR bodies follow `shared/reporting.md` footer format (POL16)
-- [ ] Trial run on X01 test repo with verify log on exact SHA (Q0: local `scripts/verify.sh` until Actions billing fixed)
+- [ ] Offline proof: `scripts/verify.sh` log on exact SHA, 0 failures (no X01 trial, no token spend)
+- [ ] `workflow_dispatch` only, plus a "copy this" note: the md, lock and `shared/` files an org copies, standalone, no secrets
 - [ ] `gh aw audit` on first 3 runs; measured AIC recorded in this PBI Evidence section (B02)
 - [ ] [X07](../testing/X07-workflow-benchmark.md) benchmark: 5 or more fixed cases with known answers in `docs/benchmarks/<workflow>.md`, score at or above baseline (Bar H)
 ## Evidence
