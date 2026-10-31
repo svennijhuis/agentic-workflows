@@ -4,7 +4,7 @@
 - Wave: W3
 - Block: 2, 3
 - Lane: Builder
-- Depends on: C03, C04, C05, C06, C12, O01, O02, O03, POL21, POL22
+- Depends on: C03, C04, C05, C06, C12, C12b, O01, O02, O03, POL21, POL22
 - proof: gh aw compile --dir workflows --strict workflows/pr-review.md; gh aw audit <run-id> (Block exit runs)
 - door: one-way
 - one-way gate: Sven's exact yes required (named ask in its block). Rollback: disable pr-review workflow in catalog and trial repo
