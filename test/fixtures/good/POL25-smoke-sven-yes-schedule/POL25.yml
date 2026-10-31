@@ -1,0 +1,5 @@
+settings: [roles, skip-bots, skip-roles]
+sven_yes:
+  - workflow: smoke-yes-schedule
+    date: "2026-01-01"
+    quote: "fixture quote, not a real yes"

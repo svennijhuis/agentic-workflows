@@ -43,8 +43,10 @@ companion() { # PATH: true for X.lock.yml or X.card.yml with X.md beside it
 }
 
 expect() { # CHECK ID WANT PATH WHAT: run CHECK on PATH, hit unless it exits WANT
-  local c=$1 id=$2 want=$3 x=${4%/} what=$5 rc
-  bash "$c" "$x" >/dev/null 2>&1; rc=$?
+  local c=$1 id=$2 want=$3 x=${4%/} what=$5 rc env=()
+  [ -d "$x" ] && [ -f "$x/rollout.yml" ] && env+=(POL_ROLLOUT="$x/rollout.yml")
+  [ -d "$x" ] && [ -f "$x/POL25.yml" ] && env+=(POL25_CFG="$x/POL25.yml")
+  env "${env[@]}" bash "$c" "$x" >/dev/null 2>&1; rc=$?
   [ "$rc" -eq "$want" ] && return 0
   if [ "$want" -eq 1 ] && [ "$rc" -eq 0 ]; then hit "$(rel "$x")" 1 POL23 "$id passes $what $(basename "$x") (tautological)"
   elif [ "$want" -eq 1 ]; then hit "$(rel "$x")" 1 POL23 "$id exits $rc on $what $(basename "$x"), must be 1"
