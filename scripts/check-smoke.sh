@@ -27,6 +27,15 @@ path_relative_violation() {
   return 1
 }
 
+dec_ws_clean() { # after one decode: exit 0 only when the path part has no unicode whitespace (NBSP, U+2028, ...)
+  # and the query has none other than a plain space; any other exit (including a python error) is a hit (fail closed)
+  python3 -c 'import sys
+v = sys.argv[1]
+p, _, q = v.partition("?")
+bad = lambda s: any(c.isspace() or c in "\u00a0\u200b\ufeff" for c in s)
+sys.exit(1 if bad(p) or bad(q.replace(" ", "")) else 0)' "$1" 2>/dev/null
+}
+
 dec_path_token_hit() {
   python3 -c 'import re, sys
 v = sys.argv[1]
@@ -95,7 +104,11 @@ check_path_query() {
   # sentinel x keeps a trailing decoded newline (command substitution strips trailing newlines)
   dec=$(url_decode_once "$path" && printf x) || { hit "$f" "$line" "path percent-encoding is not decodable (fail closed)"; return; }
   dec=${dec%x}
-  if path_relative_violation "$dec"; then
+  if path_relative_violation "${dec%%\?*}"; then
+    hit "$f" "$line" "$relmsg"
+    return
+  fi
+  if [[ "$dec" == *"\\"* ]] || ! dec_ws_clean "$dec"; then
     hit "$f" "$line" "$relmsg"
     return
   fi
@@ -147,12 +160,13 @@ PY
 
 scan_unicode_token_scalars() {
   local f=$1 seen=$2 rows v
-  if ! rows=$(yq -r '.. | select(tag == "!!str" or tag == "!!int" or tag == "!!float" or tag == "!!bool") | [line, (tostring)] | @tsv' "$f" 2>/dev/null); then
+  # JSON records, not @tsv: a scalar with a newline or U+2028 stays one record
+  if ! rows=$(yq -o=json -I=0 '[.. | select(tag == "!!str" or tag == "!!int" or tag == "!!float" or tag == "!!bool") | [line, (tostring)]]' "$f" 2>/dev/null); then
     hit "$f" 1 "unicode token scan do not read (fail closed)"
     return
   fi
   if ! v=$(ROWS="$rows" SEEN="$seen" python3 - <<'PY'
-import os, re, sys
+import json, os, re, sys
 SEEN = set(os.environ.get("SEEN", "").split())
 SEP = re.compile(r"[\u000b\u000c\u0085\u2028\u2029]")
 PRE = re.compile(r"(?i)(^|[^A-Za-z0-9])(gh[pousr]_|github_pat_|glpat-|sk_live_|sk_test_|rk_live_|rk_test_|xox[abpr]-|xoxe-|AKIA[0-9A-Z]{16}|sk-[A-Za-z0-9]{20,})")
@@ -176,17 +190,12 @@ def hit_val(val: str) -> bool:
             return True
     return False
 
-for raw in os.environ.get("ROWS", "").split("\n"):
-    if not raw.strip():
+for rec in json.loads(os.environ.get("ROWS", "") or "[]"):
+    line, val = str(rec[0]), str(rec[1])
+    if line in ("", "null", "None") or line in SEEN:
         continue
-    parts = raw.split("\t", 1)
-    if len(parts) != 2:
-        continue
-    line, val = parts
-    if line in ("", "null") or line in SEEN:
-        continue
-    if "\n" in val or "\r" in val:
-        continue
+    # strip CR and LF first, then the same separator normalization as hit_val
+    val = val.replace("\r", "").replace("\n", "")
     if not SEP.search(val) and "\u00a0" not in val:
         continue
     if hit_val(val):
@@ -222,31 +231,38 @@ def comment_token_hit(tail: str) -> bool:
         or tail.lstrip().startswith("eyJ")
     )
 
+def opens_value(line: str, i: int) -> bool:
+    # a quote opens a YAML string only where a value starts: line start, after `:` or `- `, or a flow start
+    before = line[:i].rstrip()
+    return before == "" or before[-1] in ":-[{,?"
+
 def comment_tail(line: str) -> str:
+    # full-line and indented comments count too; the tail after # is scanned with the same token rules
     in_s = in_d = False
     esc = False
-    for i, c in enumerate(line):
+    i = 0
+    while i < len(line):
+        c = line[i]
         if esc:
             esc = False
-            continue
-        if in_s:
+        elif in_s:
             if c == "\\":
                 esc = True
             elif c == '"':
                 in_s = False
-            continue
-        if in_d:
+        elif in_d:
             if c == "'":
-                in_d = False
-            continue
-        if c == '"':
+                if line[i + 1 : i + 2] == "'":
+                    i += 1  # '' is one escaped quote inside single quotes
+                else:
+                    in_d = False
+        elif c == '"' and opens_value(line, i):
             in_s = True
-        elif c == "'":
+        elif c == "'" and opens_value(line, i):
             in_d = True
-        elif c == "#":
-            if not line[:i].strip():
-                return ""
+        elif c == "#" and (i == 0 or line[i - 1] in " \t"):
             return line[i + 1 :]
+        i += 1
     return ""
 
 with open(path, encoding="utf-8") as fh:
