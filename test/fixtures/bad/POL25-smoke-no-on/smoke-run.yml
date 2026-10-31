@@ -1,0 +1,9 @@
+# Bad POL25 case: no on: key on a listed yml (SM05b round 1, Cursor 5719797898 f1).
+name: smoke-run
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo fixture
