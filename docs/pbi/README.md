@@ -23,9 +23,9 @@ Workflow PBIs must meet Bar H (plan v3 + gist A7):
 - Threat detection on
 - `on.roles` plus skip-bots
 - Fixed issue/PR format (`shared/reporting.md`)
-- Trial-repo run on X01
-- Audit of first 3 runs
-- Measured cost per run in PBI Evidence
+- Offline proof in the build DoD: `scripts/verify.sh` 0 failures on the exact SHA (`gh aw compile --strict`, lock drift, `--no-emit` fixture); no run, no token spend
+- `workflow_dispatch` only (POL25); any other trigger is a named ask with a row in `policies/POL25.yml` `sven_yes` first
+- Named ask, not build DoD (Sven exact yes, it spends tokens): trial-repo run on X01, audit of the first 3 runs, measured cost per run in PBI Evidence
 - **Workflow fetches its own context with tools and imports; the prompt never pastes repo content** (gist A7)
 - Benchmark score at or above baseline ([X07](testing/X07-workflow-benchmark.md): 5 or more fixed cases per workflow in `docs/benchmarks/<workflow>.md`). A lower score blocks [L01](release/L01-v1-moving-v1-changelog.md), [L02](release/L02-update-vs-upgrade-safe-update.md) and [AO05](agent-ops/AO05-change-management.md); [C03](done/C03-shared-defaults.md) and [B03a](observability/B03a-value-vs-cost.md) use the score
 
@@ -130,7 +130,7 @@ flowchart LR
 | AO03 | Kill switch | 2 | two-way | agent-ops | W2 | todo | POL10 | Builder | [agent-ops/AO03-kill-switch.md](agent-ops/AO03-kill-switch.md) |
 | D01 | Quick start and consumer guide | 2 | two-way | docs | W2 | todo | D00, C04, L01, X01, G00a | Cursor CLI | [docs/D01-quick-start-consumer-guide.md](docs/D01-quick-start-consumer-guide.md) |
 | D03 | Governance overview | 2 | two-way | docs | W5 | todo | G01, G02, D00 | Cursor CLI | [docs/D03-governance-overview.md](docs/D03-governance-overview.md) |
-| F01 | PR review (replaces squad-review) | 2, 3 | one-way | agent-factory | W3 | todo | C03, C04, C05, C06, C12, O01, O02, O03, X01, F00, POL21, POL22 | Builder | [agent-factory/F01-pr-review.md](agent-factory/F01-pr-review.md) |
+| F01 | PR review (replaces squad-review) | 2, 3 | one-way | agent-factory | W3 | todo | C03, C04, C05, C06, C12, C12b, O01, O02, O03, POL21, POL22 | Builder | [agent-factory/F01-pr-review.md](agent-factory/F01-pr-review.md) |
 | G01 | Rollout ladder + human review | 2 | two-way | governance | PR 0 | todo | O02, POL03 | Cursor CLI | [governance/G01-rollout-ladder-human-review.md](governance/G01-rollout-ladder-human-review.md) |
 | G02 | RACI | 2 | two-way | governance | PR 0 | todo | G01 | Cursor CLI | [governance/G02-raci.md](governance/G02-raci.md) |
 | G03 | Onboarding + support | 2 | two-way | governance | PR 0 | todo | G02, D01 | Cursor CLI | [governance/G03-onboarding-support.md](governance/G03-onboarding-support.md) |
@@ -154,6 +154,7 @@ flowchart LR
 | HX03 | Harness-neutral prompts | 2 | two-way | harness | W2 | todo | ARC07, HX02, C12 | Builder | [harness/HX03-harness-neutral-prompts.md](harness/HX03-harness-neutral-prompts.md) |
 | TPL02 | Backfill template fields on the existing PBIs | 2 | two-way | docs | W2 | todo | TPL01 | Cursor CLI | [docs/TPL02-template-backfill.md](docs/TPL02-template-backfill.md) |
 | C12a | agentPacks release tag, then re-add plugins: to squad-review | 2 | two-way | core | W2 | todo | C12, agentPacks PBI 04 (first release) | Builder | [core/C12a-agentpacks-tag-plugins-repin.md](core/C12a-agentpacks-tag-plugins-repin.md) |
+| C12b | skills: in the main workflow, not in a shared fragment (POL31) | 2 | two-way | core | W3 | todo | C12, C05, POL01 | Builder | [core/C12b-skills-in-main-workflow.md](core/C12b-skills-in-main-workflow.md) |
 | VF01 | One verify entry point: scripts/verify.sh for CI, local gate and every agent | 2 | two-way | verify | W2 | done | C01, POL02, POL17, POL23, X06, C14 | Builder | [done/VF01.md](done/VF01.md) |
 | VF02 | Verify workflow template for consumer repos (API and frontend) | 2 | one-way | verify | W2 | todo | VF01, POL01, POL03, C12, G00a, X06b | Builder | [verify/VF02.md](verify/VF02.md) |
 | VF02a | VF02 part: POL01 yml whole-file walk, parse error, yml roots | 2 | two-way | verify | W2 | done | none | Builder | [done/VF02a-pol01-extension.md](done/VF02a-pol01-extension.md) |
@@ -165,16 +166,16 @@ flowchart LR
 | B02 | Weekly spend overview | 3 | one-way | observability | PR 0 | todo | B01, F04, C03 | Builder | [observability/B02-weekly-spend-overview.md](observability/B02-weekly-spend-overview.md) |
 | B03a | Value vs cost (per workflow) | 3 | one-way | observability | W3 | todo | B02 | Builder | [observability/B03a-value-vs-cost.md](observability/B03a-value-vs-cost.md) |
 | F01b | PR review auto on push | 3 | one-way | agent-factory | W3 | todo | F01, POL22, POL03 | Builder | [agent-factory/F01b-pr-review-auto-on-push.md](agent-factory/F01b-pr-review-auto-on-push.md) |
-| F02 | CI failure investigator | 3 | one-way | agent-factory | W3 | todo | C03, C04, C06, O01, O02, O03, X01, R04, F00 | Builder | [agent-factory/F02-ci-doctor.md](agent-factory/F02-ci-doctor.md) |
-| F03 | Daily repo status report | 3 | one-way | agent-factory | W3 | todo | C03, C04, C06, O01, O02, O03, X01, R01, F00 | Builder | [agent-factory/F03-repo-status.md](agent-factory/F03-repo-status.md) |
-| F04 | Cost tracker and AIC audit | 3 | one-way | agent-factory | W3 | todo | C03, C04, C06, O01, O02, O03, X01, B02, F00 | Builder | [agent-factory/F04-cost-tracker.md](agent-factory/F04-cost-tracker.md) |
+| F02 | CI failure investigator | 3 | one-way | agent-factory | W3 | todo | C03, C04, C06, O01, O02, O03, R04 | Builder | [agent-factory/F02-ci-doctor.md](agent-factory/F02-ci-doctor.md) |
+| F03 | Daily repo status report | 3 | one-way | agent-factory | W3 | todo | C03, C04, C06, O01, O02, O03, R01 | Builder | [agent-factory/F03-repo-status.md](agent-factory/F03-repo-status.md) |
+| F04 | Cost tracker and AIC audit | 3 | one-way | agent-factory | W3 | todo | C03, C04, C06, O01, O02, O03, B02 | Builder | [agent-factory/F04-cost-tracker.md](agent-factory/F04-cost-tracker.md) |
 | F05 | Malicious code and agentic threat scan | 3 | one-way | agent-factory | W3 | todo | C03, C04, C06, O01, O02, O03, X01, S03, F00 | Builder | [agent-factory/F05-malicious-code-scan.md](agent-factory/F05-malicious-code-scan.md) |
-| F06 | Daily issue triage batch | 3 | one-way | agent-factory | W3 | todo | C03, C04, C06, O01, O02, O03, X01, R02, F00 | Builder | [agent-factory/F06-daily-issue-triage.md](agent-factory/F06-daily-issue-triage.md) |
-| F07 | Documentation updater | 3 | one-way | agent-factory | W3 | todo | C03, C04, C06, O01, O02, O03, X01, C05, F00 | Builder | [agent-factory/F07-doc-updater.md](agent-factory/F07-doc-updater.md) |
+| F06 | Daily issue triage batch | 3 | one-way | agent-factory | W3 | todo | C03, C04, C06, O01, O02, O03, R02 | Builder | [agent-factory/F06-daily-issue-triage.md](agent-factory/F06-daily-issue-triage.md) |
+| F07 | Documentation updater | 3 | one-way | agent-factory | W3 | todo | C03, C04, C06, O01, O02, O03, C05 | Builder | [agent-factory/F07-doc-updater.md](agent-factory/F07-doc-updater.md) |
 | F11 | CI optimization coach | 3 | one-way | agent-factory | W3 | todo | C03, C04, C06, O01, O02, O03, X01, F02, F00 | Builder | [agent-factory/F11-ci-coach.md](agent-factory/F11-ci-coach.md) |
-| F13 | Grumpy critical reviewer | 3 | one-way | agent-factory | W3 | todo | C03, C04, C06, O01, O02, O03, X01, F01, F00 | Builder | [agent-factory/F13-grumpy-reviewer.md](agent-factory/F13-grumpy-reviewer.md) |
+| F13 | Grumpy critical reviewer | 3 | one-way | agent-factory | W3 | todo | C03, C04, C06, O01, O02, O03, F01 | Builder | [agent-factory/F13-grumpy-reviewer.md](agent-factory/F13-grumpy-reviewer.md) |
 | F14 | Documentation link checker | 3 | one-way | agent-factory | W3 | todo | C03, C04, C06, O01, O02, O03, X01, F07, F00 | Builder | [agent-factory/F14-link-checker.md](agent-factory/F14-link-checker.md) |
-| F15 | Markdown linter | 3 | one-way | agent-factory | W3 | todo | C03, C04, C06, O01, O02, O03, X01, POL16, F00 | Builder | [agent-factory/F15-markdown-linter.md](agent-factory/F15-markdown-linter.md) |
+| F15 | Markdown linter | 3 | one-way | agent-factory | W3 | todo | C03, C04, C06, O01, O02, O03, POL16 | Builder | [agent-factory/F15-markdown-linter.md](agent-factory/F15-markdown-linter.md) |
 | F17 | Workflow optimizer (/q) | 3 | one-way | agent-factory | W3 | todo | C03, C04, C06, O01, O02, O03, X01, POL01-POL18, F00 | Builder | [agent-factory/F17-q.md](agent-factory/F17-q.md) |
 | F72 | Issue triage with repro | 3 | one-way | agent-factory | W3 | todo | C03, C04, O01, O02, O03, R02, X01, F00 | Builder | [agent-factory/F72-issue-triage-repro.md](agent-factory/F72-issue-triage-repro.md) |
 | F74 | Findings buffer | 3 | one-way | agent-factory | W3 | todo | C03, C04, O01, O02, O03, R01, X01 | Builder | [agent-factory/F74-findings-buffer.md](agent-factory/F74-findings-buffer.md) |
@@ -270,7 +271,7 @@ flowchart LR
 | C08 | Runtime profiles (Docker now, microVM later) | 6 | two-way | core | W6 | todo | C03, S04 | Builder | [core/C08-runtime-profiles.md](core/C08-runtime-profiles.md) |
 | C09 | Self-hosted and ARC runners (org-ready doc) | 6 | two-way | core | W6 | todo | C08, S04 | Builder | [core/C09-self-hosted-arc-runners.md](core/C09-self-hosted-arc-runners.md) |
 | C10 | Copilot BYOK Azure OpenAI (later) | 6 | two-way | core | W6 | todo | C07, M04 | Builder | [core/C10-copilot-byok-azure-openai.md](core/C10-copilot-byok-azure-openai.md) |
-| F09 | AI release notes | 6 | one-way | agent-factory | W6 | todo | C03, C04, C06, O01, O02, O03, X01, L01, F00 | Builder | [agent-factory/F09-release-notes.md](agent-factory/F09-release-notes.md) |
+| F09 | AI release notes | 6 | one-way | agent-factory | W6 | todo | C03, C04, C06, O01, O02, O03, L01 | Builder | [agent-factory/F09-release-notes.md](agent-factory/F09-release-notes.md) |
 | F10 | Repository maintainer assist | 6 | one-way | agent-factory | W6 | todo | C03, C04, C06, O01, O02, O03, X01, F06, F07, F00 | Builder | [agent-factory/F10-repo-assist.md](agent-factory/F10-repo-assist.md) |
 | F12 | Code simplifier | 6 | one-way | agent-factory | W6 | todo | C03, C04, C06, O01, O02, O03, X01, F01, F00 | Builder | [agent-factory/F12-code-simplifier.md](agent-factory/F12-code-simplifier.md) |
 | F18 | Test improver | 6 | one-way | agent-factory | W6 | todo | C03, C04, C06, O01, O02, O03, X01, X04, F00 | Builder | [agent-factory/F18-test-improver.md](agent-factory/F18-test-improver.md) |
@@ -426,11 +427,11 @@ Empty until Sven tests block 1; new PBIs get the next free id per area.
 
 ## Block 2
 
-**PBIs:** BH09, C13, HX03, TPL02, C12a (v3.12, docs only so far), VF01 verify (done, #10), WF01 shared workflow file lister (todo), VF02 verify (docs only so far), S00-S06, O01-O03, R01-R03, L01, D01, G01-G03, X07 benchmark harness, AO03 kill switch (guard for `/stop`), LP02 guards (POL10 actor check, concurrency), F01 staged smoke, G00a proof run.
+**PBIs:** BH09, C13, HX03, TPL02, C12a (v3.12, docs only so far), C12b skills in the main workflow plus POL31 (todo, before F01), VF01 verify (done, #10), WF01 shared workflow file lister (todo), VF02 verify (docs only so far), S00-S06, O01-O03, R01-R03, L01, D01, G01-G03, X07 benchmark harness, AO03 kill switch (guard for `/stop`), LP02 guards (POL10 actor check, concurrency), F01 offline build (`scripts/verify.sh`), G00a proof run.
 
-**What Sven can test:** Tag v0.1; `gh aw add` F01 into trial repo; staged run shows safe-output preview, no writes.
+**What Sven can test:** Tag v0.1; offline `scripts/verify.sh` log for F01. Named ask (Sven exact yes): `gh aw add` F01 into the trial repo and a staged run that shows the safe-output preview, no writes.
 
-**Exit criteria:** v0.1 tag; trial staged run green; threat detection on; audit clean.
+**Exit criteria:** v0.1 tag; offline `scripts/verify.sh` 0 failures; threat detection on. The trial staged run and its audit are a named ask (Sven exact yes).
 
 **Named asks (first PBI in block that needs them):** Q3 (COPILOT_GITHUB_TOKEN PAT, masked), Q7 (tags for L01), Q11 (X07 per-run budget, yes per run).
 
@@ -447,7 +448,7 @@ Empty until Sven tests block 2; new PBIs get the next free id per area.
 
 **What Sven can test:** NOW workflows in trial repo; F01 manual only; cost dashboard.
 
-**Exit criteria:** B03a value vs cost row per workflow (kill rule: 2 blocks below cost = disable). Bar H per workflow: 3 audited runs, measured AIC cost, noop pre-check proven. F01 pr-review runs manual only (`workflow_dispatch` + `/pr-review`), no push trigger; auto on push ([F01b](agent-factory/F01b-pr-review-auto-on-push.md)) waits on its 3 audited runs plus Sven's yes. Every agentPacks pin is a [C12](done/C12-agentpacks-import-contract.md) v1.1 tag (replaces `@34e1dec`). [PR #2](https://github.com/svennijhuis/agentic-workflows/pull/2) closed unmerged after PR 0, with a comment linking the replacing PBIs (C01, POL01, POL02, POL21, POL22, C12, F01, L02).
+**Exit criteria:** B03a value vs cost row per workflow (kill rule: 2 blocks below cost = disable). Bar H per workflow: offline `scripts/verify.sh` 0 failures and noop pre-check proven in the build DoD; 3 audited runs and measured AIC cost are a named ask (Sven exact yes, token spend). F01 pr-review runs `workflow_dispatch` only, no push trigger; `/pr-review` slash is a named ask (row in `policies/POL25.yml` `sven_yes` first); auto on push ([F01b](agent-factory/F01b-pr-review-auto-on-push.md)) waits on its 3 audited runs plus Sven's yes. Every agentPacks pin is a [C12](done/C12-agentpacks-import-contract.md) v1.1 tag (replaces `@34e1dec`). [PR #2](https://github.com/svennijhuis/agentic-workflows/pull/2) closed unmerged after PR 0, with a comment linking the replacing PBIs (C01, POL01, POL02, POL21, POL22, C12, F01, L02).
 
 **Named asks (first PBI in block that needs them):** F01b yes optional; cost cap confirmation; M05 rollout step 1 yes; M05_READ_TOKEN; BOARD_TOKEN (P05).
 
