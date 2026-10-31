@@ -16,12 +16,19 @@ url_decode_once() {
 # shellcheck disable=SC2016
 KEYS='.. | select(tag == "!!map") | . as $m | $m | keys | group_by(.) | .[] | select(length > 1) | .[0] | [($m | line), .] | @tsv'
 # shellcheck disable=SC2016
-TOKENS='.. | select(tag == "!!str" or tag == "!!int" or tag == "!!float" or tag == "!!bool") | select(
+TOKEN_MATCH='select(
   (tostring | test("(?i)(^|[^A-Za-z0-9])(gh[pousr]_|github_pat_|glpat-|sk_live_|sk_test_|rk_live_|rk_test_|xox[abpr]-|xoxe-|AKIA[0-9A-Z]{16}|sk-[A-Za-z0-9]{20,})"))
+  or (tostring | sub("[\r\n]"; ""; "g") | test("(?i)(^|[^A-Za-z0-9])(gh[pousr]_|github_pat_|glpat-|sk_live_|sk_test_|rk_live_|rk_test_|xox[abpr]-|xoxe-|AKIA[0-9A-Z]{16}|sk-[A-Za-z0-9]{20,})"))
   or (tostring | test("(?i)(^|[^A-Za-z0-9])(bearer|basic|token)[[:space:]]+[A-Za-z0-9_.-]+"))
+  or (tostring | sub("[\r\n]"; ""; "g") | test("(?i)(^|[^A-Za-z0-9])(bearer|basic|token)[[:space:]]+[A-Za-z0-9_.-]+"))
   or (tostring | test("[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]{10,}"))
+  or (tostring | sub("[\r\n]"; ""; "g") | test("[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]{10,}"))
   or (tostring | test("^eyJ"))
-) | [line, "token-shaped value (no tokens in scenario files)"] | @tsv'
+  or (tostring | sub("[\r\n]"; ""; "g") | test("^eyJ"))
+)'
+TOKENS='.. | select(tag == "!!str" or tag == "!!int" or tag == "!!float" or tag == "!!bool") | '"$TOKEN_MATCH"' | [line, "token-shaped value (no tokens in scenario files)"] | @tsv'
+# shellcheck disable=SC2016
+TOKEN_KEYS='.. | select(tag == "!!map") | keys | .[] | '"$TOKEN_MATCH"' | [line, "token-shaped value (no tokens in scenario files)"] | @tsv'
 # shellcheck disable=SC2016
 HDRS='.scenarios[]? | select(tag == "!!map") | .headers | select(tag == "!!map") | keys | .[] | [line, .] | @tsv'
 # shellcheck disable=SC2016
@@ -51,7 +58,7 @@ check_path_query() {
     hit "$f" "$line" "path still contains percent-encoding after one decode"
     return
   fi
-  if ! reason=$(QUERY_ALLOW="$QUERY_KEY_ALLOW" python3 - "$path" <<'PY'
+  if ! reason=$(QUERY_ALLOW="$QUERY_KEY_ALLOW" python3 - "$dec" <<'PY'
 import re, os, sys, urllib.parse
 path = sys.argv[1]
 allow = os.environ.get("QUERY_ALLOW", "limit")
@@ -91,6 +98,10 @@ check_file() {
   while IFS=$'\t' read -r line _msg; do
     [ -n "$line" ] && hit "$f" "$line" "token-shaped value (no tokens in scenario files)"
   done <<<"$v"
+  if ! v=$(yq -r "$TOKEN_KEYS" "$f" 2>/dev/null); then hit "$f" 1 "token rules do not read (fail closed)"; return; fi
+  while IFS=$'\t' read -r line _msg; do
+    [ -n "$line" ] && hit "$f" "$line" "token-shaped value (no tokens in scenario files)"
+  done <<<"$v"
   if ! v=$(yq -r "$HDRS" "$f" 2>/dev/null); then hit "$f" 1 "headers do not read"; return; fi
   while IFS=$'\t' read -r line h; do
     [ -n "$line" ] || continue
@@ -112,7 +123,7 @@ check_file() {
     [[ "$method" =~ ^[A-Za-z]+$ ]] || hit "$f" "$line" "method missing or not a word"
     check_path_query "$f" "$line" "$path"
     if [[ -n "$id" ]] && [[ -n "${GLOBAL_IDS[$id]+x}" ]]; then hit "$f" "$line" "duplicate id '$id' across files"; fi
-    GLOBAL_IDS[$id]=1
+    if [[ -n "$id" ]]; then GLOBAL_IDS[$id]=1; fi
     if [[ -n "$id" ]] && grep -Fxq "$id" <<<"$ids"; then hit "$f" "$line" "duplicate id '$id'"; fi
     ids="${ids}${id}"$'\n'
     if [[ ! "$path" =~ ^/ ]] || [[ "$path" =~ ^// ]] || [[ "$path" == *"\\"* ]] || [[ "$path" =~ [[:space:]] ]]; then
@@ -127,7 +138,7 @@ check_file() {
       hit "$f" "$line" "expect.status must be an HTTP status (100 to 599)"
     elif ! is_dec_int "$status"; then
       hit "$f" "$line" "expect.status must be a plain decimal integer"
-    elif [ "$stnum" -lt 100 ] || [ "$stnum" -gt 599 ]; then
+    elif ! { [ "$stnum" -ge 100 ] 2>/dev/null && [ "$stnum" -le 599 ] 2>/dev/null; }; then
       hit "$f" "$line" "expect.status must be an HTTP status (100 to 599)"
     fi
     case "$htag" in '!!null'|'!!map') ;; *) hit "$f" "$line" "headers must be a map" ;; esac

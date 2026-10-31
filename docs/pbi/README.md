@@ -195,6 +195,7 @@ flowchart LR
 | LP02a | Lint: two workflows sharing a trigger and filter | 3 | two-way | loops | W3 | todo | LP02, POL25 | Builder | [loops/LP02a-duplicate-trigger-lint.md](loops/LP02a-duplicate-trigger-lint.md) |
 | SM01 | Smoke scenario format and folder per feature | 3 | two-way | smoke | W3 | done | none | Builder | [done/SM01.md](done/SM01.md) |
 | SM01b | check-smoke carry (Cursor 5657706637 on PR #11) | 3 | two-way | smoke | W3 | todo | SM01a | Builder | [smoke/SM01b.md](smoke/SM01b.md) |
+| SM01c | check-smoke carry (PR #20 round 1 lows) | 3 | two-way | smoke | W3 | todo | SM01a | Builder | [smoke/SM01c.md](smoke/SM01c.md) |
 | SM02 | Scenario generator at PR time | 3 | one-way | smoke | W3 | todo | SM01, BH08, P14 | Builder | [smoke/SM02.md](smoke/SM02.md) |
 | SM03 | Post-deploy smoke runner for tst and acc (no AI) | 3 | one-way | smoke | W3 | todo | SM01, SM04, SM05, SM07 | Builder | [smoke/SM03.md](smoke/SM03.md) |
 | SM04 | Smoke token: GitHub OIDC to Entra to APIM validate-jwt to backend | 3 | one-way | smoke | W3 | todo | SM07 | Builder | [smoke/SM04.md](smoke/SM04.md) |
