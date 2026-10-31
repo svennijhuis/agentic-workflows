@@ -9,13 +9,16 @@
 #   4 triggers through on_triggers (allowlist workflow_dispatch, workflow_call)
 #   5 jobs non-empty map; permissions shape; id-token value must be exactly the string write when the key is present
 #   6 OIDC environment on each job that can mint id-token: write
-#   7 token hygiene on each minting job: every azure/login step pinned @v2 with vars.* ids and no secrets.* in with:;
-#     every az account get-access-token is VAR=$(...) with --scope "$SMOKE_API_SCOPE", each VAR masked before any read;
-#     no print or substring read of a token, per command on the line; no shell trace (run, shell:, defaults);
-#     no ACTIONS_STEP_DEBUG or ACTIONS_RUNNER_DEBUG true, 1, $true (any case) or an expression; later steps never print
-#     SMOKE_TOKEN or exported token names, dump env, printenv, or cat GITHUB_ENV; yq read errors are hits
+#   7 token hygiene on each minting job: every azure/login step pinned @v2 with vars.* ids and no secrets context
+#     (secrets.X, secrets['X'], toJSON(secrets)) in with: or step env; every az account get-access-token is one simple
+#     VAR=$(...) with --scope "$SMOKE_API_SCOPE" and no pipe, redirect or & inside; only ::add-mask:: of that VAR may
+#     follow the capture; after the mask the only read is the GITHUB_ENV export; the token step has no heredoc, eval,
+#     ${!indirect}, shell function or env dump; SMOKE_API_SCOPE never set in a run and env only from vars.SMOKE_API_SCOPE;
+#     no shell trace (run, shell:, defaults); no ACTIONS_STEP_DEBUG or ACTIONS_RUNNER_DEBUG true, 1, $true (any case)
+#     or an expression; later steps never print SMOKE_TOKEN or exported token names, dump env (bare set, env, printenv),
+#     or cat GITHUB_ENV; yq read errors are hits
 set -uo pipefail
-case "${1:-}" in -h|--help) sed -n '2,17p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;; esac
+case "${1:-}" in -h|--help) sed -n '2,20p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;; esac
 command -v yq >/dev/null 2>&1 || { echo "scripts/check-smoke-auth.sh:1 VERIFY needs-human missing: yq"; exit 2; }
 # shellcheck source=lib/on-triggers.sh
 . "$(dirname "$0")/lib/on-triggers.sh"
@@ -26,6 +29,10 @@ WANT='smoke-${{ inputs.env }}'
 WANT_CID='${{ vars.AZURE_CLIENT_ID }}'
 # shellcheck disable=SC2016
 WANT_TID='${{ vars.AZURE_TENANT_ID }}'
+# shellcheck disable=SC2016
+WANT_SCOPE='${{ vars.SMOKE_API_SCOPE }}'
+# shellcheck disable=SC2016 # yq regex: secrets.X, secrets['X'], toJSON(secrets)
+SECRETS_RE='(?i)secrets[[:space:]]*[.[]|tojson\([[:space:]]*secrets'
 hit() { echo "$1:$2 SMOKEAUTH $3"; N=$((N + 1)); } # FILE LINE MESSAGE
 
 # Duplicate keys within one map (not across sibling maps on the same line)
@@ -123,11 +130,15 @@ debug_env_true() { # VALUE: true, 1 or $true in any case, or any expression (fai
   [ "$v" = true ] || [ "$v" = 1 ] || [ "$v" = '$true' ]
 }
 
-env_debug_hit() { # FILE LINE WHERE YQ_PATH: env must be a map or absent; debug keys must be off
+env_debug_hit() { # FILE LINE WHERE YQ_PATH: env must be a map or absent; debug keys off; SMOKE_API_SCOPE only from vars
   local f=$1 line=$2 where=$3 p=$4 t k v
   t=$(J=${J:-} SL=${SL:-} yq "$p | tag" "$f" 2>/dev/null) || { hit "$f" "$line" "$where env does not read"; return 0; }
   [ "$t" = '!!null' ] && return 1
   [ "$t" = '!!map' ] || { hit "$f" "$line" "$where env must be a map (got ${t#!!})"; return 0; }
+  if ! v=$(J=${J:-} SL=${SL:-} yq -r "$p | to_entries | .[] | select(.key == \"SMOKE_API_SCOPE\") | .value | tostring" "$f" 2>/dev/null); then
+    hit "$f" "$line" "$where env does not read"; return 0
+  fi
+  if [ -n "$v" ] && [ "$v" != "$WANT_SCOPE" ]; then hit "$f" "$line" "$where env SMOKE_API_SCOPE must be $WANT_SCOPE (no literal scope)"; return 0; fi
   for k in ACTIONS_STEP_DEBUG ACTIONS_RUNNER_DEBUG; do
     v=$(J=${J:-} SL=${SL:-} K=$k yq -r "$p | .[strenv(K)] // \"\"" "$f" 2>/dev/null) || { hit "$f" "$line" "$where env does not read"; return 0; }
     if [ -n "$v" ] && debug_env_true "$v"; then hit "$f" "$line" "$where must not set $k"; return 0; fi
@@ -145,7 +156,8 @@ run_has_debug_trace() {
     || grep -qE '(^|[[:space:]])(ba)?sh[[:space:]]+(-[A-Za-z]+[[:space:]]+)*-[A-Za-z]*x' <<<"$1"
 }
 
-# One shell command per output row as LINENO<TAB>COMMAND, split on ; && || | & (fail closed: no quote awareness)
+# One shell command per output row as LINENO<TAB>COMMAND, split on ; && || | & (no quote awareness: fail closed,
+# because in the token step every fragment that reads the token and is not the GITHUB_ENV export is a hit)
 split_cmds() {
   local n=0 line
   while IFS= read -r line; do
@@ -157,6 +169,15 @@ split_cmds() {
 reads_var() { grep -qE "\\\$${2}([^A-Za-z0-9_]|\$)|\\\$\\{[#!]?${2}([^A-Za-z0-9_]|\$)" <<<"$1"; }
 partial_read() { grep -qE "\\\$\\{${2}[:#%/^,@\\[]" <<<"$1"; }
 prints_cmd() { grep -qE '(^|[[:space:]])(echo|printf|cat|tee|curl|wget|printenv)([[:space:]]|$)' <<<"$1"; }
+env_dump_cmd() { # COMMAND: env, printenv, export -p, declare -p or -x, or bare set (set -e only sets a flag)
+  grep -qE '^[[:space:]]*(env|printenv|export[[:space:]]+-p|declare[[:space:]]+-[px])([[:space:]]+-[A-Za-z0-9]+)*[[:space:]]*(>.*)?$' <<<"$1" \
+    || grep -qE '^[[:space:]]*set[[:space:]]*(>.*)?$' <<<"$1" \
+    || grep -qE '(^|[[:space:]])printenv([[:space:]]|$)' <<<"$1"
+}
+sets_scope() { # RUN: assigns, exports, reads into or unsets SMOKE_API_SCOPE (also an echo into GITHUB_ENV)
+  grep -qE '(^|[^A-Za-z0-9_$])SMOKE_API_SCOPE\+?=' <<<"$1" \
+    || grep -qE '(^|[^A-Za-z0-9_])(export|declare|typeset|local|readonly|read|unset|printf[[:space:]]+-v)([[:space:]]+[^;&|]*)?[[:space:]]SMOKE_API_SCOPE([^A-Za-z0-9_]|$)' <<<"$1"
+}
 
 # Token step scan. Prints `LINE<TAB>MESSAGE` for the first problem, or `EXPORT<TAB>NAME` rows for GITHUB_ENV exports.
 scan_token_run() {
@@ -165,12 +186,40 @@ scan_token_run() {
   local -a order=()
   while IFS=$'\t' read -r n c; do
     [[ $c =~ ^[[:space:]]*$ || $c =~ ^[[:space:]]*# ]] && continue
+    if [[ $c == *'<<'* ]]; then printf '%s\t%s\n' "$n" "heredoc or here-string not allowed in the token step"; return; fi
+    if [[ $c =~ (^|[^A-Za-z0-9_])eval([^A-Za-z0-9_]|$) ]]; then printf '%s\t%s\n' "$n" "eval not allowed in the token step"; return; fi
+    # shellcheck disable=SC2016
+    if [[ $c == *'${!'* ]]; then printf '%s\t%s\n' "$n" "indirect expansion \${!...} not allowed in the token step"; return; fi
+    if [[ $c =~ ^[[:space:]]*(function[[:space:]]+[A-Za-z_]|[A-Za-z_][A-Za-z0-9_-]*[[:space:]]*\(\)) ]]; then
+      printf '%s\t%s\n' "$n" "shell function not allowed in the token step"; return
+    fi
+    if env_dump_cmd "$c"; then printf '%s\t%s\n' "$n" "token step must not dump the environment"; return; fi
+    if [[ $c =~ ^[[:space:]]*echo[[:space:]]+\"::add-mask::\$\{?($NAME_RE)\}?\"[[:space:]]*$ ]] \
+      || [[ $c =~ ^[[:space:]]*echo[[:space:]]+::add-mask::\$\{?($NAME_RE)\}?[[:space:]]*$ ]]; then
+      v=${BASH_REMATCH[1]}; hasmask=1
+      if [ -z "${cap[$v]:-}" ]; then
+        for name in "${order[@]}"; do
+          [ -n "${masked[$name]:-}" ] || { printf '%s\t%s\n' "$n" "::add-mask:: must mask the captured token variable $name"; return; }
+        done
+        premask[$v]=1; continue
+      fi
+      [ "${capln[$v]}" = "$n" ] && { printf '%s\t%s\n' "$n" "::add-mask:: must run after the token is captured (own line)"; return; }
+      masked[$v]=1; continue
+    fi
+    for v in "${order[@]}"; do
+      [ -n "${masked[$v]:-}" ] && continue
+      if reads_var "$c" "$v"; then printf '%s\t%s\n' "$n" "token used before ::add-mask::"; return; fi
+      printf '%s\t%s\n' "$n" "only ::add-mask:: of $v may follow the token capture"; return
+    done
     if [[ $c =~ get-access-token ]]; then
       if ! [[ $c =~ ^[[:space:]]*($NAME_RE)=\$\(az[[:space:]]+account[[:space:]]+get-access-token([[:space:]]|\)|$) ]]; then
         printf '%s\t%s\n' "$n" "az account get-access-token must assign stdout to a shell variable (VAR=\$(az ...))"; return
       fi
       v=${BASH_REMATCH[1]}
       scope=$(sed -E 's/[[:space:]]#.*$//' <<<"$c")
+      if ! [[ $scope =~ ^[[:space:]]*$NAME_RE=\$\(az[[:space:]]+account[[:space:]]+get-access-token[^\|\&\<\>\;\(\)\`]*\)[[:space:]]*$ ]]; then
+        printf '%s\t%s\n' "$n" "token capture must be one simple VAR=\$(az account get-access-token ...) with no pipe, redirect or &"; return
+      fi
       # shellcheck disable=SC2016
       if [ "$(grep -oE -- '--scope' <<<"$scope" | wc -l)" -ne 1 ] || grep -qE -- '--resource([[:space:]=]|$)' <<<"$scope" \
         || ! grep -qE -- '--scope[[:space:]]+("\$\{?SMOKE_API_SCOPE\}?"|\$\{?SMOKE_API_SCOPE\}?|"\$\{\{[[:space:]]*(env|vars)\.SMOKE_API_SCOPE[[:space:]]*\}\}")([[:space:]]|\)|$)' <<<"$scope"; then
@@ -181,22 +230,15 @@ scan_token_run() {
       cap[$v]=1; capln[$v]=$n; unset 'masked[$v]'
       continue
     fi
-    if [[ $c =~ ^[[:space:]]*echo[[:space:]]+\"::add-mask::\$\{?($NAME_RE)\}?\"[[:space:]]*$ ]] \
-      || [[ $c =~ ^[[:space:]]*echo[[:space:]]+::add-mask::\$\{?($NAME_RE)\}?[[:space:]]*$ ]]; then
-      v=${BASH_REMATCH[1]}; hasmask=1
-      if [ -z "${cap[$v]:-}" ]; then premask[$v]=1; continue; fi
-      [ "${capln[$v]}" = "$n" ] && { printf '%s\t%s\n' "$n" "::add-mask:: must run after the token is captured (own line)"; return; }
-      masked[$v]=1; continue
-    fi
     [[ $c =~ add-mask ]] && hasmask=1
     for v in "${order[@]}"; do
       reads_var "$c" "$v" || continue
-      if [ -z "${masked[$v]:-}" ]; then printf '%s\t%s\n' "$n" "token used before ::add-mask::"; return; fi
       if partial_read "$c" "$v"; then printf '%s\t%s\n' "$n" "token substring read (add-mask redacts only the full value)"; return; fi
       if [[ $c =~ ^[[:space:]]*echo[[:space:]]+\"?($NAME_RE)=\$\{?$v\}?\"?[[:space:]]*\>\>[[:space:]]*\"?\$\{?GITHUB_ENV\}?\"?[[:space:]]*$ ]]; then
         name=${BASH_REMATCH[1]}; printf 'EXPORT\t%s\n' "$name"; continue
       fi
       if prints_cmd "$c"; then printf '%s\t%s\n' "$n" "token must not be echoed or printed"; return; fi
+      printf '%s\t%s\n' "$n" "token must not be read after ::add-mask:: except the GITHUB_ENV export"; return
     done
   done < <(split_cmds "$run")
   [ "${#order[@]}" -gt 0 ] || { printf '1\t%s\n' "token step must capture az account get-access-token into a shell variable"; return; }
@@ -212,8 +254,7 @@ later_step_leak() { # RUN NAMES...: prints a message for the first leak of an ex
   local run=$1 n c x; shift
   while IFS=$'\t' read -r n c; do
     [[ $c =~ ^[[:space:]]*$ || $c =~ ^[[:space:]]*# ]] && continue
-    if grep -qE '^[[:space:]]*(env|printenv|export[[:space:]]+-p|declare[[:space:]]+-[px]|set)([[:space:]]+-[A-Za-z0-9]+)*[[:space:]]*(>.*)?$' <<<"$c" \
-      || grep -qE '(^|[[:space:]])printenv([[:space:]]|$)' <<<"$c"; then
+    if env_dump_cmd "$c"; then
       echo "smoke job must not dump the environment after the token step"; return 0
     fi
     if grep -qE '(^|[[:space:]])(cat|less|more|head|tail|cp|base64)[[:space:]].*\$\{?GITHUB_ENV' <<<"$c" || grep -qF '/environ' <<<"$c"; then
@@ -249,10 +290,14 @@ check_logins() {
     if [ "$tid" != "$WANT_TID" ]; then hit "$f" "$ll" "azure/login tenant-id must be $WANT_TID"; return; fi
     if [ "$allow" != true ]; then hit "$f" "$ll" "azure/login must set allow-no-subscriptions: true"; return; fi
     if grep -q 'secrets\.' <<<"$sub"; then hit "$f" "$ll" "azure/login must not use subscription-id from secrets"; return; fi
-    if ! sk=$(step_q "$job" "$ll" '.with | to_entries | .[] | select((.value | tostring) | test("secrets\.")) | .key' "$f"); then
+    if ! sk=$(SR=$SECRETS_RE step_q "$job" "$ll" '.with | to_entries | .[] | select((.value | tostring) | test(strenv(SR))) | .key' "$f"); then
       hit "$f" "$ll" "azure/login with: does not read"; return
     fi
-    if [ -n "$sk" ]; then hit "$f" "$ll" "azure/login must not take secrets.* in with: ($(head -n1 <<<"$sk"))"; return; fi
+    if [ -n "$sk" ]; then hit "$f" "$ll" "azure/login must not take a secrets context in with: ($(head -n1 <<<"$sk"))"; return; fi
+    if ! sk=$(SR=$SECRETS_RE step_q "$job" "$ll" '(.env // {}) | to_entries | .[] | select((.value | tostring) | test(strenv(SR))) | .key' "$f"); then
+      hit "$f" "$ll" "azure/login env does not read"; return
+    fi
+    if [ -n "$sk" ]; then hit "$f" "$ll" "azure/login must not take a secrets context in step env ($(head -n1 <<<"$sk"))"; return; fi
   done <<<"$lines"
 }
 
@@ -287,6 +332,7 @@ check_mint_job_steps() {
     if shell_has_xtrace "$sh"; then hit "$f" "$sl" "step must not enable shell debug trace (shell: -x or xtrace)"; return; fi
     run=$(step_q "$job" "$sl" '.run // ""' "$f")
     if run_has_debug_trace "$run"; then hit "$f" "$sl" "step must not enable shell debug trace (set -x)"; return; fi
+    if sets_scope "$run"; then hit "$f" "$sl" "step must not set SMOKE_API_SCOPE (scope comes from $WANT_SCOPE)"; return; fi
     if grep -q 'get-access-token' <<<"$run"; then
       got_token=1
       check_token_run_step "$f" "$sl" "$run"; [ "$N" -eq 0 ] || return

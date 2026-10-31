@@ -53,7 +53,7 @@ flowchart LR
 - [loops/](loops/00-overview.md): [LP00](loops/LP00-improvement-loop.md) improvement loop (incl. LP00 v2 cross-repo self-fix), [LP01](loops/LP01-delivery-loop.md) delivery loop (P05 board, P12 planning, P13 grilling, P14 pick-up at WIP 1), [LP02](loops/LP02-event-map.md) event map (automatic events, human triggers incl. slash commands and `/stop`, guards, rollout, doors).
 - [architecture/](architecture/00-overview.md): ARC01-ARC06 (context, topology, identity, safe-output flow incl. cross-repo, release, org switch). G00 owns these pages.
 - [agent-ops/](agent-ops/00-overview.md): AO01-AO14, sourced (S1-S11). AO01 retro and AO02 scorecards in B3, AO03 kill switch in B2 (guard dependency for `/stop`), the rest in B5. AO10 absorbs F75.
-- [smoke/](smoke/README.md): SM01-SM08, SM01a and SM01b post-deploy API smoke on tst and acc (Block 3; SM01, SM01a and SM04b checks done, the rest docs only). Build order (split check 2026-10-26): SM08 rows live in the build PBIs SM01, SM04a, SM04b, SM05a, SM05b, SM05c and SM07a, and SM08 closes once those have merged; SM07 (Sven's manual step, switched off), then SM01, SM01b (lane 2 after SM01a), SM05, SM04, SM03, SM06, SM02 (agentic, last). Nothing enabled until Sven's yes.
+- [smoke/](smoke/README.md): SM01-SM08, SM01a and SM01b post-deploy API smoke on tst and acc (Block 3; SM01, SM01a, SM04b and SM04c checks done, the rest docs only). Build order (split check 2026-10-26): SM08 rows live in the build PBIs SM01, SM04a, SM04b, SM05a, SM05b, SM05c and SM07a, and SM08 closes once those have merged; SM07 (Sven's manual step, switched off), then SM01, SM01b (lane 2 after SM01a), SM05, SM04, SM03, SM06, SM02 (agentic, last). Nothing enabled until Sven's yes.
 - Folds: F76 log insights is in [M05](monitoring/M05-github-log-watcher.md), F77 issue to PR is in [P04](multi-repo/P04-research-plan-assign-copilot.md). The human go label is `agent-ok`. C01 is `scripts/verify.sh` only.
 
 ```mermaid
@@ -201,7 +201,7 @@ flowchart LR
 | SM04 | Smoke token: GitHub OIDC to Entra to APIM validate-jwt to backend | 3 | one-way | smoke | W3 | todo | SM07 | Builder | [smoke/SM04.md](smoke/SM04.md) |
 | SM04a | SM04 part: check-smoke-auth.sh parse, triggers and OIDC environment rule | 3 | two-way | smoke | W3 | done | VF01 | Builder | [done/SM04a-auth-check.md](done/SM04a-auth-check.md) |
 | SM04b | SM04 part: check-smoke-auth.sh token hygiene and PR #17 lows | 3 | two-way | smoke | W3 | done | SM04a | Builder | [done/SM04b-token-hygiene.md](done/SM04b-token-hygiene.md) |
-| SM04c | check-smoke-auth.sh hardening follow-ups (PR #22 Tester 2 lows) | 3 | two-way | smoke | W3 | todo | SM04b | Builder | [smoke/SM04c.md](smoke/SM04c.md) |
+| SM04c | check-smoke-auth.sh hardening follow-ups (PR #22 lows, Cursor 5724845468) | 3 | two-way | smoke | W3 | done | SM04b | Builder | [done/SM04c-hardening.md](done/SM04c-hardening.md) |
 | SM05 | POL03 + POL25 allow workflow_call for the smoke runner only | 3 | two-way | smoke | W3 | todo | POL25, POL03, POL23, scripts/lib/on-triggers.sh | Builder | [smoke/SM05.md](smoke/SM05.md) |
 | SM05a | SM05 part: deterministic_triggers lib, POL03 workflow_call allowlist, case folders | 3 | two-way | smoke | W3 | done | VF01 | Builder | [done/SM05a-det-triggers-pol03.md](done/SM05a-det-triggers-pol03.md) |
 | SM05b | SM05 part: POL25 deterministic_triggers allowlist, det-triggers steps 6 to 8 and 10 | 3 | two-way | smoke | W3 | done | SM05a | Builder | [done/SM05b-det-triggers-pol25.md](done/SM05b-det-triggers-pol25.md) |
