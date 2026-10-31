@@ -20,18 +20,18 @@ Ship `pr-review.md` as Copilot report-only PR review with C12 v1.1 agentPacks pi
 Upstream reference: [automated-pr-review](https://github.github.com/gh-aw/gallery/automated-pr-review/). Replaces [PR #2](https://github.com/svennijhuis/agentic-workflows/pull/2) pr-review pin `@34e1dec`. **Trigger:** `workflow_dispatch` only (POL25, `sven_yes` empty). The `/pr-review` slash command is a named ask for a later Sven yes, recorded in `policies/POL25.yml` `sven_yes` before it exists. No `pull_request` or `push` trigger. This PBI is offline proof only; the X01 staged smoke and live manual runs are named asks. Auto on push is [F01b](F01b-pr-review-auto-on-push.md), gated separately.
 Engine: `copilot` with `COPILOT_GITHUB_TOKEN` (personal fine-grained PAT). `copilot-requests: none` (POL21). Review output COMMENT only (POL22).
 ## Steps
-1. Add `workflows/pr-review.md`; import `shared/defaults.md`, `shared/security.md`, and C12-pinned agentPacks review bundle.
+1. Add `workflows/pr-review.md`; import `shared/defaults.md`, `shared/security.md`, and the C12-pinned agentPacks review command (`imports:` pin). Put the same `skills:` pin that C12b put on `workflows/squad-review.md` in the `workflows/pr-review.md` frontmatter (gh-aw drops `skills:` from an imported fragment, C12b), so the squad skill keeps installing.
 2. Set caps per C03 (suggested 50 / 200 daily, unverified) in workflow frontmatter (POL02).
 3. Staged/report-only outputs first (POL03); deterministic pre-check noop when empty diff.
 4. Trigger: `workflow_dispatch` only. `/pr-review` slash and auto on push (F01b) are named asks, not in this PBI.
 5. Run `scripts/verify.sh` on PR SHA; compile with pinned gh-aw extension v0.93.4.
 6. Offline proof only: `scripts/verify.sh` (compile --strict --actionlint, lock drift, `--no-emit` fixture). X01 staged smoke, the 3 audited manual runs and measured AIC are a named ask (Sven exact yes), not in this DoD.
-7. On merge: remove `squad-review.md` and list every removed file in PR description (settled decision).
-8. Write the "copy this" note at `docs/reference/pr-review.md`: the md, its lock and the `workflows/shared/` files an org copies, standalone, no secrets.
+7. On merge: remove `squad-review.md` only after `workflows/pr-review.md` carries that `skills:` pin and its lock manifest lists the squad skill; list every removed file in PR description (settled decision).
+8. Write the "copy this" note at `docs/reference/pr-review.md`: the md, its lock and the `workflows/shared/` files an org copies, standalone, no secrets. Say that the `skills:` pin lives in `pr-review.md` frontmatter, so the skill comes with the md, not with a shared fragment.
 ## Definition of Done
 - [ ] Fetches own context with tools and imports (Bar H, gist A7); prompt never pastes repo content
 - [ ] `workflows/pr-review.md` imports `shared/defaults.md` (engine copilot, admission)
-- [ ] C12 v1.1 agentPacks `imports:` and `plugins:` pins (tag or tagged-commit SHA, not main)
+- [ ] C12 v1.1 agentPacks `skills:` list in `workflows/pr-review.md` frontmatter (same pin as C12b, moved from `squad-review.md` before it is removed) plus the review command as an `imports:` pin (tag or tagged-commit SHA, not main)
 - [ ] Pinned `gh aw` compiler version; no `@main`, no `@marketplace` branch imports
 - [ ] `max-ai-credits`, `max-daily-ai-credits`, `max-turns`, `timeout-minutes` in workflow frontmatter (POL02)
 - [ ] `copilot-requests: none` (POL21)
@@ -45,7 +45,7 @@ Engine: `copilot` with `COPILOT_GITHUB_TOKEN` (personal fine-grained PAT). `copi
 - [ ] `on.roles` and skip-bots (POL10)
 - [ ] Issue/PR bodies use `shared/reporting.md` footer (POL16)
 - [ ] No slash, `pull_request` or `push` trigger in this PBI (slash and F01b are named asks)
-- [ ] [X07](../testing/X07-workflow-benchmark.md) benchmark: 5 or more fixed cases with known answers in `docs/benchmarks/<workflow>.md`, score at or above baseline (Bar H)
+- [ ] [X07](../testing/X07-workflow-benchmark.md) benchmark cases: 5 or more fixed cases with known answers written in `docs/benchmarks/<workflow>.md`, docs only, no run; the X07 score is a named ask
 ## Evidence
 (commands, verify log on SHA)
 ## Flow
@@ -66,6 +66,7 @@ sequenceDiagram
 - Q7 (agentPacks tag pin); Q3 (PAT); squad-review removal file list on merge
 - X01 staged smoke, then 3 audited manual runs with measured AIC in Evidence (B02, Bar H live part): Sven exact yes, it spends tokens
 - `/pr-review` slash command trigger: Sven exact yes, row in `policies/POL25.yml` `sven_yes` first
+- X07 benchmark score at or above baseline (Bar H): each score is a live [X07](../testing/X07-workflow-benchmark.md) run on the X01 repo (`door: one-way`), Sven exact yes per run, it spends tokens
 ## Cost
 M tier, ~30-50 AIC per review (unverified)
 ## Sources

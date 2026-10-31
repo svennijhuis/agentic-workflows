@@ -49,9 +49,9 @@ Engine: `copilot` with `COPILOT_GITHUB_TOKEN` (personal PAT). No `copilot-reques
 - [ ] Issue/PR bodies follow `shared/reporting.md` footer format (POL16)
 - [ ] Offline proof: `scripts/verify.sh` log on exact SHA, 0 failures (no X01 trial, no token spend)
 - [ ] `workflow_dispatch` only, plus the "copy this" note at `docs/reference/cost-tracker.md` (step 7): the md, lock and `shared/` files an org copies, standalone, no secrets
-- [ ] [X07](../testing/X07-workflow-benchmark.md) benchmark: 5 or more fixed cases with known answers in `docs/benchmarks/<workflow>.md`, score at or above baseline (Bar H)
+- [ ] [X07](../testing/X07-workflow-benchmark.md) benchmark cases: 5 or more fixed cases with known answers written in `docs/benchmarks/<workflow>.md`, docs only, no run; the X07 score is a named ask
 ## Evidence
-(commands, logs, verify log on SHA, run links)
+(commands, verify log on SHA)
 ## Flow
 ```mermaid
 sequenceDiagram
@@ -70,6 +70,7 @@ sequenceDiagram
 ## Named asks for Sven
 - X01 live trial plus `gh aw audit` on the first 3 runs with measured AIC in Evidence (B02, Bar H live part): Sven exact yes, it spends tokens
 - A `workflow_run` hook after other AW runs: Sven exact yes per trigger, row in `policies/POL25.yml` `sven_yes` first
+- X07 benchmark score at or above baseline (Bar H): each score is a live [X07](../testing/X07-workflow-benchmark.md) run on the X01 repo (`door: one-way`), Sven exact yes per run, it spends tokens
 ## Cost
 S tier, ~5-15 AIC per audit (unverified)
 ## Sources

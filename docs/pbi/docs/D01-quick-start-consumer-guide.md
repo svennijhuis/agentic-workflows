@@ -4,7 +4,7 @@
 - Wave: W2
 - Block: 2
 - Lane: Cursor CLI
-- Depends on: D00, C04, L01, X01, G00a
+- Depends on: D00, C04, L01, X01, G00a, F01
 - proof: test -f docs/pbi/docs/D01-quick-start-consumer-guide.md && grep -q '## Definition of Done' docs/pbi/docs/D01-quick-start-consumer-guide.md
 - door: two-way
 - triage: build
