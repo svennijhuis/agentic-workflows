@@ -13,7 +13,7 @@
 - review-input: diff + this PBI + DoD (+ linked spec) + PR description, never builder session logs (PA6)
 - kind: skill
 - Source: PA8 (pre-link PBI from PR #4, origin in its Sources) https://github.com/svennijhuis/agentic-workflows/pull/4 https://github.com/githubnext/agentics/tree/main/workflows/cost-tracker.md
-- Module boundary: `workflows/cost-tracker.md` + its lock + `workflows/shared/` is the copy unit; agentPacks imports stay behind the POL01 pin
+- Module boundary: `workflows/cost-tracker.md`, its lock and `workflows/shared/` are the copy unit; no agentPacks import in this PBI
 ## Goal
 After runs, read firewall/token usage and append AIC audit to issue or comment.
 ## Context
@@ -28,11 +28,12 @@ Engine: `copilot` with `COPILOT_GITHUB_TOKEN` (personal PAT). No `copilot-reques
 
 ## Steps
 1. Add `workflows/cost-tracker.md` from upstream pattern; import `shared/defaults.md` and `shared/security.md`.
-2. Set staged/report-only outputs; wire `workflow_dispatch` as the only live trigger initially.
+2. Set staged/report-only outputs; wire `workflow_dispatch` as the only live trigger.
 3. Add deterministic pre-check step returning `noop` when there is nothing to do.
 4. Run `scripts/verify.sh` on PR SHA; compile with pinned gh-aw version.
 5. Offline proof only: `scripts/verify.sh` (compile --strict --actionlint, lock drift, `--no-emit` fixture). X01 live trial and AIC audit are a named ask (Sven exact yes), not in this DoD.
 6. No other trigger in this PBI. A `workflow_run` hook after other AW runs is a named ask (Sven exact yes, row in `policies/POL25.yml` `sven_yes` first), built in a later PBI.
+7. Write the "copy this" note at `docs/reference/cost-tracker.md`: the md, its lock and the `workflows/shared/` files an org copies, standalone, no secrets.
 
 ## Definition of Done
 - [ ] Fetches own context with tools and imports (Bar H, gist A7); prompt never pastes repo content
@@ -47,7 +48,7 @@ Engine: `copilot` with `COPILOT_GITHUB_TOKEN` (personal PAT). No `copilot-reques
 - [ ] `on.roles` and skip-bots configured (POL10)
 - [ ] Issue/PR bodies follow `shared/reporting.md` footer format (POL16)
 - [ ] Offline proof: `scripts/verify.sh` log on exact SHA, 0 failures (no X01 trial, no token spend)
-- [ ] `workflow_dispatch` only, plus a "copy this" note: the md, lock and `shared/` files an org copies, standalone, no secrets
+- [ ] `workflow_dispatch` only, plus the "copy this" note at `docs/reference/cost-tracker.md` (step 7): the md, lock and `shared/` files an org copies, standalone, no secrets
 - [ ] [X07](../testing/X07-workflow-benchmark.md) benchmark: 5 or more fixed cases with known answers in `docs/benchmarks/<workflow>.md`, score at or above baseline (Bar H)
 ## Evidence
 (commands, logs, verify log on SHA, run links)

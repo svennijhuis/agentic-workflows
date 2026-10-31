@@ -27,6 +27,7 @@ Engine: `copilot` with `COPILOT_GITHUB_TOKEN` (personal fine-grained PAT). `copi
 5. Run `scripts/verify.sh` on PR SHA; compile with pinned gh-aw extension v0.93.4.
 6. Offline proof only: `scripts/verify.sh` (compile --strict --actionlint, lock drift, `--no-emit` fixture). X01 staged smoke, the 3 audited manual runs and measured AIC are a named ask (Sven exact yes), not in this DoD.
 7. On merge: remove `squad-review.md` and list every removed file in PR description (settled decision).
+8. Write the "copy this" note at `docs/reference/pr-review.md`: the md, its lock and the `workflows/shared/` files an org copies, standalone, no secrets.
 ## Definition of Done
 - [ ] Fetches own context with tools and imports (Bar H, gist A7); prompt never pastes repo content
 - [ ] `workflows/pr-review.md` imports `shared/defaults.md` (engine copilot, admission)
@@ -37,7 +38,7 @@ Engine: `copilot` with `COPILOT_GITHUB_TOKEN` (personal fine-grained PAT). `copi
 - [ ] `submit-pull-request-review` COMMENT only (POL22)
 - [ ] Deterministic pre-check; writes `noop` when nothing to do (0 AIC)
 - [ ] Offline proof: `scripts/verify.sh` log on exact SHA, 0 failures; Block 2 X01 smoke is a named ask, not in this DoD
-- [ ] `workflow_dispatch` only, plus a "copy this" note in `docs/reference/pr-review.md` (md, lock, `shared/` files an org copies), standalone, no secrets, D01 quick start links it
+- [ ] `workflow_dispatch` only, plus the "copy this" note in `docs/reference/pr-review.md` (step 8: md, lock, `shared/` files an org copies), standalone, no secrets. The D01 quick start link to it is a D01 DoD row, not this PBI
 - [ ] Dedupe via title, `group-by-day`, `close-older-issues`, expiry (O03)
 - [ ] `min-integrity: approved` and threat detection on (POL05, POL13)
 - [ ] Network allowlist and tool/MCP/bash allowlists (POL06, POL07)

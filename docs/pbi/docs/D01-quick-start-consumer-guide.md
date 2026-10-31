@@ -28,6 +28,7 @@ Extends docs/CONSUMING.md into full Diataxis tutorial + how-to. Uses personal `s
 - [ ] Every command copy-paste valid
 - [ ] Pins tag not branch; no @marketplace import
 - [ ] Documents Q0 local verify if CI blocked
+- [ ] Links the F01 "copy this" note `docs/reference/pr-review.md` once F01 has merged (moved here from F01 DoD, Cursor 5724894407 f5)
 ## Evidence
 (links to published Diataxis paths, review notes)
 ## Flow
