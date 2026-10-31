@@ -19,6 +19,8 @@ concurrency:
   group: squad-review-${{ github.event.inputs.pr }}
   cancel-in-progress: true
   job-discriminator: ${{ github.run_id }}
+skills:
+  - svennijhuis/agentPacks/plugins/squad/skills/squad@34e1dec3535baa1d77cb441ea8c98498dc9b3684
 imports:
   - shared/defaults.md
   - shared/security.md

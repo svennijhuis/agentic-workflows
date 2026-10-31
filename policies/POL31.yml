@@ -1,0 +1,8 @@
+id: POL31
+title: 'No skills: in a shared fragment'
+rule: 'A workflows/shared/ fragment (any *.md under workflows/shared/, README.md excluded) has no skills: key in its frontmatter; skills: lives in the consumer workflow. Frontmatter that cannot be read, has no closing ---, does not parse or is not a map is a parse error hit (fail closed, never a skip). No args scans the repo workflows/shared/; a path arg scans every workflows/shared/ found below it. One file:line POL31 line per hit, exit 1 on any hit.'
+why: 'gh-aw reads skills: only from the main workflow and silently drops it from an imported fragment, so a skill pinned in workflows/shared/ never installs (C12b).'
+check: policies/checks/POL31.sh
+bad_fixture: test/fixtures/bad/POL31/
+good_fixture: test/fixtures/good/POL31/
+pbi: docs/pbi/done/C12b-skills-in-main-workflow.md
