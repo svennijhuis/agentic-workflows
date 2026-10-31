@@ -108,6 +108,8 @@ sm05b_one_hit policies/checks/POL25.sh test/fixtures/bad/POL25-smoke-sven-yes-qu
 
 echo "# POL31 shared skills (C12b: each bad case exits exactly 1 with one hit, the good fixture exits 0 with no output)"
 sm05b_one_hit policies/checks/POL31.sh test/fixtures/bad/POL31/shared-skills
+sm05b_one_hit policies/checks/POL31.sh test/fixtures/bad/POL31/shared-skills-crlf
+sm05b_one_hit policies/checks/POL31.sh test/fixtures/bad/POL31/shared-skills-trailing-space
 sm05b_one_hit policies/checks/POL31.sh test/fixtures/bad/POL31/parse-error
 h=$(bash policies/checks/POL31.sh test/fixtures/good/POL31/); rc=$?; { [ "$rc" -eq 0 ] && [ -z "$h" ]; } || fail "test/fixtures/good/POL31:1 POL31 good fixture does not exit 0 with no output (rc $rc)"
 

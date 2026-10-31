@@ -73,6 +73,9 @@ Offline only (gh-aw v0.93.4 local compile, no run, no trial, no token spend). Fu
 - `POL31.sh test/fixtures/bad/POL31/`: rc 1 (2 hits); `POL31.sh test/fixtures/good/POL31/`: rc 0, no output; repo mode rc 0.
 - POL01 on `workflows/squad-review.md` rc 0; `policies/POL01.yml` allowlist still has `plugins/squad/skills/squad` (no change).
 - POL31 scans every non-README `*.md` under `workflows/shared/` (subfolders too), a superset of `workflows/shared/*.md`.
+
+- Fix (Tester 2 FAIL 6550672966): POL31 normalizes CRLF and trailing spaces on `---` lines before reading, as gh-aw v0.93.4 reads both. New bad fixtures `shared-skills-crlf` and `shared-skills-trailing-space`, each exactly 1 hit in `scripts/verify.sh`.
+
 ## Flow
 ```mermaid
 flowchart LR

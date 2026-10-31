@@ -6,6 +6,7 @@
 #   only when it sits under a workflows/shared/ folder. README.md files are docs, not fragments.
 #   A file that starts with --- is read as frontmatter. A skills key is one hit. Frontmatter that cannot be
 #   read, has no closing ---, does not parse or is not a map is one parse error hit (fail closed, never a skip).
+#   CRLF line endings and trailing spaces on a --- line are normalized first, as gh-aw reads those too.
 # shellcheck source=lib.sh
 . "$(dirname "$0")/lib.sh"
 
@@ -19,7 +20,15 @@ shared_files() { # ROOT: *.md under every workflows/shared/ below ROOT (README.m
 }
 
 check_file() { # FILE
-  local f=$1 r first close kind l; r=$(rel "$f")
+  local r; r=$(rel "$1")
+  if [ ! -r "$1" ]; then hit "$r" 1 POL31 "parse error"; return; fi
+  # gh-aw also reads CRLF files and a --- line with trailing spaces, so normalize both before reading.
+  local f; f=$(mktemp); sed -e 's/\r$//' -e 's/^---[[:space:]]*$/---/' "$1" > "$f"
+  check_norm "$f" "$r"; rm -f "$f"
+}
+
+check_norm() { # NORMALIZED_FILE REL
+  local f=$1 r=$2 first close kind l
   if ! first=$(head -n 1 "$f" 2>/dev/null); then hit "$r" 1 POL31 "parse error"; return; fi
   [ "$first" = "---" ] || return 0
   close=$(awk 'NR > 1 && $0 == "---" {print NR; exit}' "$f")
