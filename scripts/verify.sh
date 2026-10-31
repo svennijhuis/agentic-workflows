@@ -74,7 +74,7 @@ produce actionlint gate_actionlint
 echo "# shellcheck"
 produce shellcheck gate_shellcheck
 
-echo "# smoke auth check (SM04a: each good exits 0, each bad exits exactly 1 with one hit)"
+echo "# smoke auth check (SM04a+SM04b: each good exits 0, each bad exits exactly 1 with one hit)"
 A=test/fixtures/smoke-auth
 shopt -s nullglob; G=("$A"/good*.yml); B=("$A"/bad-*.yml); shopt -u nullglob
 [ "${#G[@]}" -gt 0 ] || fail "$A:1 SMOKEAUTH no good smoke auth fixture"
@@ -82,7 +82,7 @@ shopt -s nullglob; G=("$A"/good*.yml); B=("$A"/bad-*.yml); shopt -u nullglob
 for g in "${G[@]}"; do bash scripts/check-smoke-auth.sh "$g" >/dev/null || fail "$g:1 SMOKEAUTH good smoke auth fixture fails"; done
 for b in "${B[@]}"; do
   h=$(bash scripts/check-smoke-auth.sh "$b"); rc=$?
-  { [ "$rc" -eq 1 ] && [ "$(grep -c . <<<"$h")" -eq 1 ]; } || fail "$b:1 SMOKEAUTH bad smoke auth fixture does not exit 1 with exactly one hit (rc $rc)"
+  { [ "$rc" -eq 1 ] && [ "$(grep -c . <<<"$h")" -eq 1 ] && grep -qE '^[^:]+:[0-9]+ ' <<<"$h"; } || fail "$b:1 SMOKEAUTH bad smoke auth fixture does not exit 1 with exactly one hit (rc $rc)"
 done
 
 echo "# SM05b round 1 (each bad exits exactly 1 with one hit)"
