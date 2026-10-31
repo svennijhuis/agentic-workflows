@@ -96,3 +96,4 @@ none (offline only, two-way)
 ## Sources
 - https://github.com/github/gh-aw/blob/main/docs/src/content/docs/reference/frontmatter.md
 - [agentic-workflows PR #4](https://github.com/svennijhuis/agentic-workflows/pull/4)
+- Fix (PO, Cursor review on 9376f9e): spaces or tabs before `---` count as fence; merge keys are exploded before the skills check (`shared-skills-merge-key`, `shared-skills-merge-inline`); a null or `~` frontmatter is a parse error (`null-frontmatter`) while comments only stays clean (good `comments-only.md`). Leading space fixture `shared-skills-leading-space`. Each bad case 1 hit in `scripts/verify.sh`.
