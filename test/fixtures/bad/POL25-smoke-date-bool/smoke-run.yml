@@ -1,0 +1,11 @@
+# Bad POL25 case: yes.date is bool, runner is dispatch-only (SM05b round 1, Cursor 5719797898 f3).
+name: smoke-run
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo fixture

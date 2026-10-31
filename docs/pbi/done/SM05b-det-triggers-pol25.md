@@ -6,7 +6,7 @@
 - Block: 3
 - Lane: Builder
 - Depends on: [SM05a](SM05a-det-triggers-pol03.md) (merged); part of [SM05](../smoke/SM05.md)
-- proof: `./scripts/verify.sh` ends with `0 failures`; POL23 runs the 2 good `test/fixtures/good/POL25-smoke-*/` cases (each exits 0), keeps `good/POL25.md` and `good/POL25-ci.yml` green, and runs every `test/fixtures/bad/POL25-smoke-*` case (each exits exactly 1); step 6 adds `good/POL03-smoke-date-unquoted/`; steps 7 and 8 add six POL03 and six POL25 metadata bad folders plus `bad/POL03-smoke-trigger-blank/`; step 10 updates [SM05](../smoke/SM05.md) Context
+- proof: `./scripts/verify.sh` ends with `0 failures`; POL23 runs the 2 good `test/fixtures/good/POL25-smoke-*/` cases (each exits 0), keeps `good/POL25.md` and `good/POL25-ci.yml` green, and runs every `test/fixtures/bad/POL25-smoke-*` case (each exits exactly 1); step 6 adds `good/POL03-smoke-date-unquoted/`; steps 7 and 8 add three POL03 and three POL25 metadata bad folders plus `bad/POL03-smoke-trigger-blank/`; PR #21 round 1 adds `bad/POL25-smoke-no-on/`, `bad/POL25-smoke-rollout-broken-no-on/`, metadata-after-name and yes.date bool or list bad folders; step 10 updates [SM05](../smoke/SM05.md) Context
 - door: two-way
 - triage: build (second of three SM05 parts, Strategy split check 2026-10-26)
 - feedback: `./scripts/verify.sh`: POL25 passes the good smoke cases and exits 1 on each bad case listed in the DoD; POL03 step 6 to 8 fixtures behave the same under POL03 (proof)
