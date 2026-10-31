@@ -136,6 +136,9 @@ echo "# smoke scenarios (SM01: each good exits 0, each bad exits exactly 1, ever
 S=test/fixtures/smoke
 for g in "$S"/good*.yml; do bash scripts/check-smoke.sh "$g" >/dev/null || fail "$g:1 SMOKE good smoke fixture fails"; done
 for b in "$S"/bad-*.yml; do bash scripts/check-smoke.sh "$b" >/dev/null; [ $? -eq 1 ] || fail "$b:1 SMOKE bad smoke fixture does not exit 1 (tautological)"; done
+shopt -s nullglob; BY=("$S"/bad-*.yaml); shopt -u nullglob
+for b in "${BY[@]}"; do bash scripts/check-smoke.sh "$b" >/dev/null; [ $? -eq 1 ] || fail "$b:1 SMOKE bad smoke fixture does not exit 1 (tautological)"; done
+bash scripts/check-smoke.sh "$S/bad-dup-id-cross/a.yml" "$S/bad-dup-id-cross/b.yml" >/dev/null; [ $? -eq 1 ] || fail "$S/bad-dup-id-cross:1 SMOKE cross-file duplicate id fixture does not exit 1"
 for s in smoke/*/scenarios.yml smoke/*/scenarios.yaml; do [ -e "$s" ] && produce check-smoke.sh bash scripts/check-smoke.sh "$s"; done
 
 echo "# PR template (G02a owner, architecture summary, questions for owner)"
