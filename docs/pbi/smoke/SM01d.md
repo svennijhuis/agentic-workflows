@@ -25,7 +25,7 @@ Close the low findings Tester 2 left on PR #24, without weakening any smoke gate
 | 4 | `Authorization: Token FAKE` gives 2 hits | one hit per scalar for the scheme rules (`bad-auth-token-scheme.yml` exits 1 with 1 hit) |
 | 5 | Cursor 5724841554 f2 high: newline plus U+2028 between `Bearer` and the value exits 0 | strip mixed newline and unicode separators before the scheme match (`bad-auth-newline-u2028.yml`) |
 | 6 | Cursor 5724841554 f3 medium: a full-line comment `# ghp_FAKE...` exits 0 | run the token rules on full-line comments too (`bad-comment-full-line.yml`) |
-| 7 | Cursor 5724841554 f4 medium: lowercase `token` in a comment tail exits 0 | case-insensitive scheme match in comments, allow only `token refresh` (`bad-comment-tail-lower-token.yml`, `good-token-refresh.yml` stays 0) |
+| 7 | Cursor 5724841554 f4 medium: lowercase `token` in a comment tail exited 0 | done in PR #24 (Tester 2 6548986713): `token` scheme match is case insensitive everywhere, only `token refresh` allowed (`bad-token-scheme-lower.yml`, `bad-token-scheme-upper.yml`, `good-token-refresh.yml` stays 0) |
 | 8 | Cursor 5724841554 f5 medium: `%C2%A0` (NBSP) in the path exits 0 | treat a decoded NBSP as whitespace in the path (`bad-path-dec-nbsp.yml`) |
 | 9 | Cursor 5724841554 f6 low: SM01b proof count says 17 new bad fixtures, real count 16 | fix the count in `docs/pbi/done/SM01b.md` (docs only) |
 ## Steps
@@ -33,7 +33,7 @@ Close the low findings Tester 2 left on PR #24, without weakening any smoke gate
 2. Add the fixtures; the verify one-hit loop picks them up.
 3. Run `./scripts/verify.sh`; both PBI checks print nothing.
 ## Definition of Done
-- [ ] Rows 1, 2, 4, 5, 6, 7 and 8 each have a bad fixture that exits 1 with 1 hit.
+- [ ] Rows 1, 2, 4, 5, 6 and 8 each have a bad fixture that exits 1 with 1 hit.
 - [ ] Row 3 has a good fixture that exits 0.
 - [ ] Every existing smoke fixture keeps its exit code and hit count.
 - [ ] `./scripts/verify.sh` ends with `0 failures`; no `scripts/check-*.sh` gate weakened.

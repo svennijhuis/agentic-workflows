@@ -33,7 +33,7 @@ v = sys.argv[1]
 sep = re.compile(r"[\u000b\u000c\u0085\u2028\u2029]")
 pre = r"(?i)(^|[^A-Za-z0-9])(gh[pousr]_|github_pat_|glpat-|sk_live_|sk_test_|rk_live_|rk_test_|xox[abpr]-|xoxe-|AKIA[0-9A-Z]{16}|sk-[A-Za-z0-9]{20,})"
 sch = r"(?i)(^|[^A-Za-z0-9])(bearer|basic)[\s\u00a0]+[A-Za-z0-9_.-]+"
-tok = r"(^|[^A-Za-z0-9])Token[\s\u00a0]+[A-Za-z0-9_.-]+"
+tok = r"(?i)(^|[^A-Za-z0-9])token[\s\u00a0]+(?!refresh(?![A-Za-z0-9_.-]))[A-Za-z0-9_.-]+"
 jwt = r"[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]{10,}"
 for v2 in (sep.sub("", v), sep.sub(" ", v)):
     if re.search(pre, v2) or re.search(sch, v2) or re.search(tok, v2) or re.search(jwt, v2) or v2.startswith("eyJ"):
@@ -49,8 +49,8 @@ TOKEN_MATCH='select(
   or (tostring | sub("[\r\n]"; ""; "g") | test("(?i)(^|[^A-Za-z0-9])(gh[pousr]_|github_pat_|glpat-|sk_live_|sk_test_|rk_live_|rk_test_|xox[abpr]-|xoxe-|AKIA[0-9A-Z]{16}|sk-[A-Za-z0-9]{20,})"))
   or (tostring | test("(?i)(^|[^A-Za-z0-9])(bearer|basic)[[:space:]]+[A-Za-z0-9_.-]+"))
   or (tostring | sub("[\r\n]"; ""; "g") | test("(?i)(^|[^A-Za-z0-9])(bearer|basic)[[:space:]]+[A-Za-z0-9_.-]+"))
-  or (tostring | test("(^|[^A-Za-z0-9])Token[[:space:]]+[A-Za-z0-9_.-]+"))
-  or (tostring | sub("[\r\n]"; ""; "g") | test("(^|[^A-Za-z0-9])Token[[:space:]]+[A-Za-z0-9_.-]+"))
+  or (tostring | sub("(?i)(^|[^A-Za-z0-9])token[[:space:]]+refresh($|[^A-Za-z0-9_.-])"; " "; "g") | test("(?i)(^|[^A-Za-z0-9])token[[:space:]]+[A-Za-z0-9_.-]+"))
+  or (tostring | sub("[\r\n]"; ""; "g") | sub("(?i)(^|[^A-Za-z0-9])token[[:space:]]+refresh($|[^A-Za-z0-9_.-])"; " "; "g") | test("(?i)(^|[^A-Za-z0-9])token[[:space:]]+[A-Za-z0-9_.-]+"))
   or (tostring | test("[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]{10,}"))
   or (tostring | sub("[\r\n]"; ""; "g") | test("[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]{10,}"))
   or (tostring | test("^eyJ"))
@@ -157,7 +157,7 @@ SEEN = set(os.environ.get("SEEN", "").split())
 SEP = re.compile(r"[\u000b\u000c\u0085\u2028\u2029]")
 PRE = re.compile(r"(?i)(^|[^A-Za-z0-9])(gh[pousr]_|github_pat_|glpat-|sk_live_|sk_test_|rk_live_|rk_test_|xox[abpr]-|xoxe-|AKIA[0-9A-Z]{16}|sk-[A-Za-z0-9]{20,})")
 SCH = re.compile(r"(?i)(^|[^A-Za-z0-9])(bearer|basic)[\s\u00a0]+[A-Za-z0-9_.-]+")
-TOK = re.compile(r"(^|[^A-Za-z0-9])Token[\s\u00a0]+[A-Za-z0-9_.-]+")
+TOK = re.compile(r"(?i)(^|[^A-Za-z0-9])token[\s\u00a0]+(?!refresh(?![A-Za-z0-9_.-]))[A-Za-z0-9_.-]+")
 JWT = re.compile(r"[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]{10,}")
 
 def norm(s: str) -> str:
@@ -210,7 +210,7 @@ path = sys.argv[1]
 pem = re.compile(r"-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----")
 PRE = re.compile(r"(?i)(^|[^A-Za-z0-9])(gh[pousr]_|github_pat_|glpat-|sk_live_|sk_test_|rk_live_|rk_test_|xox[abpr]-|xoxe-|AKIA[0-9A-Z]{16}|sk-[A-Za-z0-9]{20,})")
 SCH = re.compile(r"(?i)(^|[^A-Za-z0-9])(bearer|basic)[ \t\u00a0]+[A-Za-z0-9_.-]+")
-TOK = re.compile(r"(^|[^A-Za-z0-9])Token[ \t\u00a0]+[A-Za-z0-9_.-]+")
+TOK = re.compile(r"(?i)(^|[^A-Za-z0-9])token[ \t\u00a0]+(?!refresh(?![A-Za-z0-9_.-]))[A-Za-z0-9_.-]+")
 JWT = re.compile(r"[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]{10,}")
 
 def comment_token_hit(tail: str) -> bool:
