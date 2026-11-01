@@ -45,8 +45,7 @@ Fix the file at that path. Re-run `make verify` until the last line is `0 failur
 ## Exit codes
 
 - `0`: green, last line `0 failures`.
-- `1`: failed. Each finding is a `file:line RULE message` line. Fix it and re-run.
-- `2`: needs-human. gh-aw is missing or not at the pin in `.github/aw.json`. Run `make install`, then re-run.
+- non-zero: failed. Each finding is a `file:line RULE message` line. Fix it and re-run. A missing gh-aw, or one not at the pin in `.github/aw.json`, fails `make compile`: run `make install`, then re-run.
 
 ## One policy check
 
