@@ -4,13 +4,13 @@
 - Wave: PR 0
 - Block: 2
 - Lane: Cursor CLI
-- Depends on: C03, POL09
-- proof: ./scripts/verify.sh
+- Depends on: C03
+- proof: make verify
 - door: two-way
 ## Goal
 Standardize workflow_dispatch as the first trigger for every workflow, then document fuzzy schedules and cooldown only after explicit Sven approval.
 ## Context
-M03 hourly cron stays off until Sven yes and measured cost. Fuzzy schedule spreads load. Cooldown and concurrency come from shared/defaults.md and POL09.
+M03 hourly cron stays off until Sven yes and measured cost. Fuzzy schedule spreads load. Cooldown and concurrency come from shared/defaults.md and workflow frontmatter caps.
 ## Steps
 1. Require workflow_dispatch on all catalog workflows with safe inputs.
 2. Document fuzzy schedule syntax for future M03/F03 schedules.
@@ -19,7 +19,7 @@ M03 hourly cron stays off until Sven yes and measured cost. Fuzzy schedule sprea
 ## Definition of Done
 - [ ] Every workflow PBI lists primary trigger: dispatch first.
 - [ ] Schedule additions require Sven yes recorded in Evidence.
-- [ ] POL09 rate limits documented with examples.
+- [ ] Rate limits and concurrency documented with examples in shared/defaults.md.
 ## Evidence
 (commands, logs, verify log on SHA, run links)
 ## Flow

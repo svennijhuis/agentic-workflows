@@ -4,13 +4,13 @@
 - Wave: PR 0
 - Block: 2
 - Lane: Cursor CLI
-- Depends on: R01, O03
-- proof: ./scripts/verify.sh
+- Depends on: R01
+- proof: make verify
 - door: two-way
 ## Goal
 Document issue and label triggers with skip-if-match and skip-if-no-match guards for IssueOps and triage workflows.
 ## Context
-Issue triggers can loop if misconfigured. skip-if-match prevents re-entry. LabelOps patterns apply to F06 later. on.roles and skip-bots required (POL10).
+Issue triggers can loop if misconfigured. skip-if-match prevents re-entry. LabelOps patterns apply to F06 later. on.roles and skip-bots required in workflow frontmatter.
 ## Steps
 1. Document issue opened/edited/labeled trigger shapes.
 2. Require skip-if-match for bot-authored issues and workflow footers.
@@ -19,7 +19,7 @@ Issue triggers can loop if misconfigured. skip-if-match prevents re-entry. Label
 ## Definition of Done
 - [ ] F06 PBI references R02 trigger template.
 - [ ] Loop prevention checklist in X02 dry-run doc.
-- [ ] POL10 on.roles documented for issue triggers.
+- [ ] on.roles documented for issue triggers in workflow frontmatter.
 ## Evidence
 (commands, logs, verify log on SHA, run links)
 ## Flow

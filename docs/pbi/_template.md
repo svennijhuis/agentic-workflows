@@ -1,8 +1,8 @@
 # PBI template (copy for every new PBI)
 
-Every PBI file uses this layout. `## Technical design` is **required**: all eleven fields must be filled. Builder does not start a PBI while any field is empty, and an empty field is a **Reviewer FAIL** on the PBI PR. `scripts/verify.sh` (C01) and the PR 0 gate check that the section exists and has no empty field on Block 1 PBIs and on every new PBI.
+Every PBI file uses this layout. `## Technical design` is **required**: all eleven fields must be filled. Builder does not start a PBI while any field is empty, and an empty field is a **Reviewer FAIL** on the PBI PR. `make verify` (C01) is the repo gate on workflow and policy changes; Reviewer checks that the section exists and has no empty field on every new PBI.
 
-**Shared fields (TPL01, PA8, same 5 as agentPacks):** `triage`, `feedback`, `harness`, `review-input`, `kind: skill|script`, plus `Source: D<n>` (or `PA<n>`) and the URL. `feedback:` is the feedback loop: the exact test, check or type check that tells the agent it is done (ARC08). `Module boundary:` names the small interface and the deep part behind it (ARC08). `scripts/check-pbi-template.sh` fails a new or changed PBI that misses one or leaves it empty; existing PBIs get them in [TPL02](docs/TPL02-template-backfill.md).
+**Shared fields (TPL01, PA8, same 5 as agentPacks):** `triage`, `feedback`, `harness`, `review-input`, `kind: skill|script`, plus `Source: D<n>` (or `PA<n>`) and the URL. `feedback:` is the feedback loop: the exact test, check or type check that tells the agent it is done (ARC08). `Module boundary:` names the small interface and the deep part behind it (ARC08). Reviewers fail a new or changed PBI that misses one or leaves it empty; existing PBIs get them in [TPL02](docs/TPL02-template-backfill.md).
 
 Mermaid goes only in fenced `mermaid` code blocks, never as inline sequence text. One-way PBIs add the `one-way gate` line with Sven's yes and a rollback note (gist A1).
 

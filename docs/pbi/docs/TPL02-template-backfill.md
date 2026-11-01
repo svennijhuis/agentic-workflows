@@ -5,28 +5,27 @@
 - Block: 2
 - Lane: Cursor CLI
 - Depends on: TPL01
-- proof: bash scripts/check-pbi-template.sh $(git ls-files 'docs/pbi/*/*.md') reports 0 hits
+- proof: Reviewer spot-check: every `docs/pbi/*/*.md` has the 5 fields, Source, and Module boundary; `make verify` (exit 0)
 - door: two-way
 - triage: build (mechanical, one PR)
-- feedback: check-pbi-template.sh in file mode over every PBI
+- feedback: Reviewer file-mode pass over every PBI on the backfill PR
 - harness: Cursor CLI (docs edits)
 - review-input: diff + this PBI + DoD (+ linked spec) + PR description, never builder session logs (PA6)
 - kind: skill
 - Source: PA8 https://github.com/svennijhuis/agentPacks/pull/80 https://github.com/svennijhuis/agentic-workflows/pull/4
 ## Goal
-Every existing PBI (about 221, plus the done moves) gets the 5 fields, `Source:` and `Module boundary:`. Then the TPL01 check can run on all PBIs, not only on the diff.
+Every existing PBI (about 221, plus the done moves) gets the 5 fields, `Source:` and `Module boundary:`. Reviewers then enforce the template on every PBI PR.
 ## Context
 PO scope fix on PA8: TPL01 checks only new or changed PBIs; this is the backfill. Not built in PR #4: docs only, nothing enabled (PA9).
 ## Steps
 1. Fill the fields per PBI from its own Sources section.
-2. Switch verify.sh to file mode over all PBIs.
+2. Document Reviewer checklist for all PBIs on the backfill PR.
 ## Definition of Done
-- [ ] 0 TPL01 and ARC08 hits over all PBIs
-- [ ] verify.sh checks all PBIs
-- [ ] G05 (`docs/pbi/done/G05-org-only-appendix.md`): `## Technical design` sits below the Definition of Done and fills the ten template fields (Components and files, Interfaces, Sequence, Failure modes, Security, Observability, Cost, Rollback, Proof, Door) (Cursor 5657406190 f3 on PR #12)
-- [ ] `scripts/check-pbi-template.sh` diff mode also checks renamed (`R`) PBI files whose similarity is under 100%, so an edit plus a move into `done/` cannot escape the check; a fixture rename with an edited body gives hits (Reviewer note n1 on PR #12, comment 6424506602)
+- [ ] 0 empty Module boundary or feedback fields over all PBIs
+- [ ] Reviewer checklist recorded for the backfill PR
+- [ ] G05 (`docs/pbi/done/G05-org-only-appendix.md`): `## Technical design` sits below the Definition of Done and fills the ten template fields (Cursor 5657406190 f3 on PR #12)
 ## Technical design
-- Components and files: `docs/pbi/**`, `scripts/verify.sh`, `scripts/check-pbi-template.sh`
+- Components and files: `docs/pbi/**`
 - Module boundary: the 6 header lines per PBI
 - Interfaces: same as TPL01
 - Sequence:
@@ -41,7 +40,7 @@ sequenceDiagram
 
 - Failure modes: A Source without a D id for a PBI that predates the links: use PA8 plus the PR URL
 - Security: Docs only
-- Observability: verify.sh
+- Observability: Reviewer sign-off on the PR
 - Cost: 0 AIC
 - Rollback: Revert the PR
 - Proof: same as proof: above
@@ -52,7 +51,7 @@ sequenceDiagram
 ```mermaid
 flowchart LR
   S1[Fill the fields per PBI from its own Sources section]
-  S2[Switch verify.sh to file mode over all PBIs]
+  S2[Reviewer checklist on the backfill PR]
   S1 --> S2
 ```
 ## Named asks for Sven

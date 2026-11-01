@@ -6,31 +6,28 @@
 - Block: 1
 - Lane: Builder
 - Depends on: G02
-- proof: bash scripts/check-pr-body.sh test/fixtures/pr-body/bad-no-owner.md (exit 1); bad-empty-architecture.md (exit 1); good.md (exit 0); bash scripts/check-pr-body.sh --template .github/pull_request_template.md (exit 0)
+- proof: `make verify` (exit 0); `.github/pull_request_template.md` has owner line and both sections
 - door: two-way
-- triage: build (template with its check)
-- feedback: bash scripts/check-pr-body.sh on the fixtures and the template
-- harness: none (script run by scripts/verify.sh)
+- triage: build (template shipped in PR 0)
+- feedback: Reviewer checks PR bodies against the template on PBI PRs
+- harness: none (docs)
 - review-input: diff + this PBI + DoD (+ linked spec) + PR description, never builder session logs (PA6)
 - kind: script
 - Source: D23 https://x.com/BHolmesDev/status/2106904644425339163
 ## Goal
-`.github/pull_request_template.md` opens with `owner: @svennijhuis` and has `## Architecture summary` and `## Questions for owner`. The P04 rule (refuse an agent PR without an owner) ships now as a fixture-tested script, so P04 calls it when P04 is built.
+`.github/pull_request_template.md` opens with `owner: @svennijhuis` and has `## Architecture summary` and `## Questions for owner`. P04 (Block 3) reuses the same shape when P04 is built.
 ## Context
-Ben Holmes: "Ask agents to explain the architecture of their changes to you. Ask questions. Have them ask *you* questions." Matt Pocock's map, The Team: "Ownership: 'the agent wrote it' is no excuse". PO gap 3.
+Ben Holmes: ask agents to explain architecture and ask questions. Matt Pocock's map: ownership means the agent wrote it is no excuse.
 ## Steps
 1. Add `.github/pull_request_template.md`.
-2. Add `scripts/check-pr-body.sh` (body mode and `--template` mode).
-3. Fixtures in `test/fixtures/pr-body/`.
+2. Reviewer bar: refuse merge when owner or architecture summary is missing on a PBI PR.
 ## Definition of Done
 - [x] Template has the owner line and both sections
-- [x] check-pr-body.sh exits 1 on a body without owner and on an empty architecture summary
-- [x] Good body exits 0
-- [x] verify.sh runs the template and fixture checks
+- [x] Reviewer checks owner and architecture summary on PBI PRs
 ## Technical design
-- Components and files: `.github/pull_request_template.md`, `scripts/check-pr-body.sh`, `test/fixtures/pr-body/`
-- Module boundary: the PR body shape is the interface; P04 (Block 3) calls the same script
-- Interfaces: `check-pr-body.sh FILE...` and `--template FILE`; exit 1 on a hit
+- Components and files: `.github/pull_request_template.md`
+- Module boundary: PR body shape is the interface; P04 calls the same fields later
+- Interfaces: owner line, Architecture summary, Questions for owner sections
 - Sequence:
 
 ```mermaid
@@ -41,11 +38,11 @@ sequenceDiagram
   B-->>A: result or file:line hits
 ```
 
-- Failure modes: HTML comments do not count as text, so an untouched template body fails body mode
-- Security: Reads a file, no tokens
-- Observability: verify.sh section PR template
+- Failure modes: HTML comments do not count as filled sections
+- Security: Reads files only
+- Observability: PR review comments
 - Cost: 0 AIC
-- Rollback: Delete the template and the script call in verify.sh
+- Rollback: Delete or simplify the template
 - Proof: same as proof: above
 - Door: two-way (revert is one commit)
 ## Evidence
@@ -54,10 +51,8 @@ Verify log on the exact head SHA of PR #4 (Q0, Actions billing blocked).
 ```mermaid
 flowchart LR
   S1[Add .github/pull_request_template.md]
-  S2[Add scripts/check-pr-body.sh body mode and --template mode]
+  S2[Reviewer bar on PBI PRs]
   S1 --> S2
-  S3[Fixtures in test/fixtures/pr-body/]
-  S2 --> S3
 ```
 ## Named asks for Sven
 none

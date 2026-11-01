@@ -5,7 +5,7 @@
 - Block: 5
 - Lane: Builder
 - Depends on: L02, L04
-- proof: ./scripts/verify.sh
+- proof: make verify
 - door: one-way
 - one-way gate: Sven's exact yes required (named ask in its block). Rollback: disable workflow updater workflow
 ## Goal
@@ -14,7 +14,7 @@ Optional automation to propose PRs that bump workflow pins across consumer repos
 Personal account: no auto-merge. Updater opens draft PRs on test repo first.
 ## Steps
 1. Design dispatch workflow to run gh aw update and open PR.
-2. Cap PR outputs at 1, draft default (O04).
+2. Cap PR outputs at 1, draft default (staged safe-outputs, max 1 PR).
 3. Require Sven review on every updater PR.
 ## Definition of Done
 - [ ] Bar H when workflow exists.

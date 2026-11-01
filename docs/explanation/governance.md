@@ -19,7 +19,7 @@ Operational rules for the catalog. Format is easy; ownership and pins are not.
 
 ## Version pins
 
-Production: exact tags (`@v1.0.0`) or audit SHAs ([POL01](../../policies/POL01.yml)). `@main` is never for production; POL01 rejects it. Moving `@v1` is optional after Block 2 tags land.
+Production: exact tags (`@v1.0.0`) or audit SHAs. Never a branch ref in production. Moving `@v1` is optional after Block 2 tags land.
 
 Release: tag `vX.Y.Z`, document in [CHANGELOG](../../CHANGELOG.md) and [pins](../reference/pins.md).
 
@@ -36,10 +36,10 @@ Precedence: workflow frontmatter, then repo, org, enterprise, compiler fallback.
 
 ## Safe rollout
 
-Staged or report-only first ([POL03](../../policies/POL03.yml)). Pilot one repo. Enable writes with low `max:`. Disable via environment protection or removing dispatch until fixed.
+Staged or report-only first (frontmatter `safe-outputs`). Pilot one repo. Enable writes with low `max:`. Disable via environment protection or removing dispatch until fixed.
 
 Rollout ladder file: [`governance/rollout.yml`](../../governance/rollout.yml) (Block 2+).
 
 ## Cost
 
-Per-workflow caps in frontmatter ([POL02](../../policies/POL02.yml)). Measure AIC in trial and production ([B03a](../pbi/observability/B03a-value-vs-cost.md)).
+Per-workflow caps in frontmatter. Measure AIC in trial and production ([B03a](../pbi/observability/B03a-value-vs-cost.md)).

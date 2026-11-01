@@ -4,17 +4,17 @@
 - Wave: W6
 - Block: 6
 - Lane: Builder
-- Depends on: S04, POL07
-- proof: ./scripts/verify.sh && gh aw compile --dir workflows --strict
+- Depends on: S04
+- proof: make verify && gh aw compile --dir workflows --strict
 - door: two-way
 ## Goal
 If browser automation is added to a workflow, define Playwright CLI allowlist, network hosts, and sandbox constraints.
 ## Context
-Part of gh-aw defense in depth for svennijhuis/agentic-workflows. Complements policies POL01 through POL18 and Bar H workflow requirements.
+Part of gh-aw defense in depth for svennijhuis/agentic-workflows. Complements workflow frontmatter security (minimal permissions, safe-outputs, timeouts) and Bar H workflow requirements.
 ## Steps
 1. Draft policy for browser tool usage (none in W1 NOW set).
 2. Require explicit Sven approval before any Playwright workflow ships.
-3. Map to POL07 bash and tool allowlists.
+3. Map to bash and tool allowlists in workflow frontmatter.
 ## Definition of Done
 - [ ] Playwright policy doc exists (disabled by default)
 - [ ] No Playwright workflow in catalog without approval

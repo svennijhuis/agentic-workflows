@@ -5,12 +5,12 @@
 - Block: 3
 - Lane: Cursor CLI
 - Depends on: R01, R02
-- proof: ./scripts/verify.sh
+- proof: make verify
 - door: two-way
 ## Goal
 Document workflow_run and deployment_status triggers for CI Doctor and deployment incident patterns.
 ## Context
-F02 ci-doctor uses workflow_run on failed CI. deployment_status supports release/incident monitors. High event volume requires dedupe (O03) and filters.
+F02 ci-doctor uses workflow_run on failed CI. deployment_status supports release/incident monitors. High event volume requires dedupe keys and filters in frontmatter.
 ## Steps
 1. Specify workflow_run filters (conclusion failure, branch main).
 2. Document deployment_status for future incident workflow.
@@ -19,7 +19,7 @@ F02 ci-doctor uses workflow_run on failed CI. deployment_status supports release
 ## Definition of Done
 - [ ] F02 trigger section matches R04 template.
 - [ ] Event storms mitigated with skip-if-match and cooldown.
-- [ ] No pull_request_target unsafe patterns (POL14).
+- [ ] No pull_request_target unsafe patterns in frontmatter
 ## Evidence
 (commands, logs, verify log on SHA, run links)
 ## Flow

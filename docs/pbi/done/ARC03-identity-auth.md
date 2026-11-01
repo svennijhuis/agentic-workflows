@@ -44,14 +44,14 @@ sequenceDiagram
 
 - Failure modes: missing secret fails run at start with name only; wrong PAT scope fails API call without leaking token.
 - Security: PATs fine-grained, allowlisted repos; M05 read job cannot assign; P04 cannot read Actions logs across repos.
-- Observability: run log names missing secret; never prints secret values (POL04, POL20).
+- Observability: run log names missing secret; never prints secret values (secret names only in repo files).
 - Cost: 0 AIC for doc; token proof runs gated per block.
 - Rollback: revoke PAT in GitHub settings; revert doc row.
 - Proof: secret names listed in runbooks match table; GitHub renders table and diagram.
 - Door: two-way for doc; one-way for Sven setting each secret (named asks in M05, P04, C04).
 ## Evidence
 
-Shipped in PR #4 (Block 1). Gate: `./scripts/verify.sh` log on the exact head SHA, posted as a PR comment (Q0, Actions billing blocked).
+Shipped in PR #4 (Block 1). Gate: `make verify` log on the exact head SHA, posted as a PR comment (Q0, Actions billing blocked).
 (`gh secret list` names only screenshot; C04 PR link)
 ## Flow
 ```mermaid
@@ -76,7 +76,7 @@ sequenceDiagram
 |---|---|---|---|---|
 | COPILOT_GITHUB_TOKEN (fine-grained PAT) | repo secret, set by Sven | call Copilot engine | write repo | now (B2) |
 | GITHUB_TOKEN (job) | agent job | read repo | write (read-only in agent job) | now |
-| safe-output job token | safe-output jobs only | issues, comments, PRs within `max` | merge (POL14) | now |
+| safe-output job token | safe-output jobs only | issues, comments, PRs within `max` | merge (agents never merge) | now |
 | M05_READ_TOKEN (fine-grained PAT) | repo secret in agentic-workflows, set by Sven | Actions read, Contents read, Issues write on allowlisted svennijhuis repos only | assign Copilot, contents write, PR write, repos outside allowlist | B4, one-way |
 | P04_ASSIGN_TOKEN (fine-grained PAT) | repo secret in agentic-workflows, set by Sven | Issues write, Metadata read on allowlisted repos only | Actions read, Contents read, PR create by our workflow | B5, one-way |
 | BOARD_TOKEN (fine-grained PAT; classic only if the first P05 run shows fine-grained cannot reach a user board, Sven decides) | secret set by Sven; deterministic jobs only (P05 sync script, P14 poll pre-step) | Projects read and write on the svennijhuis user board only | any repo contents, issues or PR write; use in an agent job | B3, one-way |

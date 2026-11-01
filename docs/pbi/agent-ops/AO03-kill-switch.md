@@ -4,7 +4,7 @@
 - Wave: W2
 - Block: 2
 - Lane: Builder
-- Depends on: POL10
+- Depends on: C03
 - proof: Set global kill repo variable; trigger any agent workflow; run completes with 0 AIC noop before agent step
 - door: two-way
 ## Goal
@@ -42,7 +42,7 @@ sequenceDiagram
 ```
 
 - Failure modes: var missing treated as off; mis-typed workflow id falls back to global only.
-- Security: only admin/write can set vars or run `/stop` (POL10).
+- Security: only admin/write can set vars or run `/stop` (`on.roles` on the stop workflow).
 - Observability: log line `kill-switch: noop` on block.
 - Cost: 0 AIC when noop; `/stop` job 0 AIC.
 - Rollback: set `AW_KILL_ALL=false`; clear per-workflow vars.

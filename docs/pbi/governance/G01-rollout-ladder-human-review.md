@@ -4,7 +4,7 @@
 - Wave: PR 0
 - Block: 2
 - Lane: Cursor CLI
-- Depends on: O02, POL03
+- Depends on: X02
 - proof: test -f docs/pbi/governance/G01-rollout-ladder-human-review.md && grep -q '## Definition of Done' docs/pbi/governance/G01-rollout-ladder-human-review.md
 - door: two-way
 ## Goal

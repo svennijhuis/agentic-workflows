@@ -4,8 +4,8 @@
 - Wave: W2
 - Block: 2
 - Lane: Builder
-- Depends on: X01, X06, O02
-- proof: ./scripts/benchmark-workflows.sh --dry-run && test -f docs/benchmarks/README.md && ./scripts/verify.sh
+- Depends on: X01, X06
+- proof: ./scripts/benchmark-workflows.sh --dry-run && test -f docs/benchmarks/README.md && make verify
 - door: one-way
 - one-way gate: Sven's exact yes required per benchmark run (named ask Q11). Rollback: revert the docs/benchmarks/<wf>.md row and the harness commit; runs stop because each run needs a fresh yes
 - triage: spec (spend)
@@ -17,7 +17,6 @@
 ## Goal
 Ship the only benchmark PBI: a harness that scores NOW workflows on fixed cases in the [X01](X01-test-repo-trialops.md) test repo with known ground truth. This is not a cost-compare workflow; it measures found, false alarms, misses, turns, time, and AIC per run and stores results beside a baseline row in `docs/benchmarks/<workflow>.md`.
 ## Context
-Plan v3.7 makes X07 the regression gate for [L01](../release/L01-v1-moving-v1-changelog.md), [L02](../release/L02-update-vs-upgrade-safe-update.md), and [AO05](../agent-ops/AO05-change-management.md). [C03](../done/C03-shared-defaults.md) and [B03a](../observability/B03a-value-vs-cost.md) use the same case set to compare models and prompts per AIC. [AO08](../agent-ops/AO08-red-team-set.md) adds red-team cases; [AO13](../agent-ops/AO13-calibrated-judge.md) scores judgment cases; [AO10](../agent-ops/AO10-sampled-human-review.md) supplies human labels for ground truth. Harness uses [O02](../safe-outputs/O02-staged-mode.md) staged paths until promoted. Each Block 3 NOW workflow needs at least 5 cases (plan v3.7 B3).
 ## Steps
 1. Add `scripts/benchmark-workflows.sh` and seed the X01 repo: PRs with planted bugs, issues with a known correct label, failing CI runs with a known cause.
 2. Per run, record one score row: found, false alarms, misses, turns, time, AIC; append to `docs/benchmarks/<workflow>.md` next to the baseline row.
@@ -33,7 +32,7 @@ Plan v3.7 makes X07 the regression gate for [L01](../release/L01-v1-moving-v1-ch
 - [ ] door one-way; Sven's exact yes per benchmark run (not per block)
 - [ ] Mermaid flow present
 ## Technical design
-- Components and files: `scripts/benchmark-workflows.sh`, `docs/benchmarks/<workflow>.md` per NOW workflow, `workflows/benchmark.md` (dispatch and slash), X01 seeded fixtures under `test/fixtures/benchmark/`
+- Components and files: `scripts/benchmark-workflows.sh`, `docs/benchmarks/<workflow>.md` per NOW workflow, `workflows/benchmark.md` (dispatch and slash), X01 seeded benchmark cases under `docs/benchmarks/`
 - Module boundary: fixed cases per workflow are the interface; the runner is behind it
 - Interfaces: workflow frontmatter caps per C03; import `shared/defaults.md`; inputs for workflow id and case subset; safe-output report rows to benchmark markdown; exit 1 when score below baseline
 - Sequence:

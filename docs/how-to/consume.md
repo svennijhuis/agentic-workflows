@@ -65,7 +65,7 @@ gh extensions upgrade github/gh-aw
 
 ## Channels and deprecation
 
-- **Stable**: exact tags `vX.Y.Z` in production ([POL01](../../policies/POL01.yml)).
+- **Stable**: exact tags `vX.Y.Z` in production.
 - **Moving major**: `@v1` only if you run `gh aw update` on a cadence (Block 2+).
 - **Deprecation**: window and comms in [G06](../pbi/governance/G06-correctionops-feedback-loop.md) (later).
 - **Support path**: [G03](../pbi/governance/G03-onboarding-support.md) (Block 2).

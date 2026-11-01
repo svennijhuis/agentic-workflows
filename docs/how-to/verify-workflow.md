@@ -7,55 +7,46 @@ Local gate for this catalog. Same path for Builder, Tester, and agents.
 From the repo root:
 
 ```bash
-./scripts/verify.sh
+make verify
 ```
 
-`scripts/verify.sh` checks tools against `.github/aw.json` (the top-level `gh-aw` pin and the `tools:` map for actionlint, gitleaks, yq and shellcheck; git, gh and jq must exist), copies the working tree into a temp repo and there compiles `workflows/` with `--strict --actionlint` and diffs the locks (the real tree is never written), lints Actions YAML, runs shellcheck on scripts, exercises import-schema fixtures, runs every `policies/checks/POLnn.sh`, and runs the POL23 meta check.
+This runs `bash scripts/verify.sh`, which:
 
-Exit codes are in the header of `scripts/verify.sh` and in [C01](../pbi/done/C01-verify-script.md):
+1. **`# make compile`**: `make compile` (`gh aw compile --strict` on `workflows/` and on `.github/workflows` when it holds agentic `.md` files). Fails if lock files drift (recompile and commit `.lock.yml`).
+2. **`# POL25 repo`**: repo-wide agentic dispatch check.
+3. **`# POL25 fixtures`**: bad cases exit 1 with one hit; good cases exit 0 with no output.
+4. **`# POL31 repo`**: no `skills:` in shared fragments.
+5. **`# POL31 fixtures`**: same contract as POL25 fixtures.
+
+Exit codes:
 
 - `0` pass: last line `0 failures`.
-- `1` fail: one line per issue as `file:line RULE message`.
-- `2` needs-human: the gate could not run, so the result is inconclusive. The line reads `file:line VERIFY needs-human <reason>`. A tool is missing or at the wrong version, or a producer exited non-zero with no finding. A human installs the pin from `.github/aw.json` `tools:` (version, url, sha256) or fixes the crashed producer, then re-runs. Never treat exit 2 as a pass.
+- `1` fail: one line per issue as `file:line RULE message`. A missing gh-aw, or one not at the pin in `.github/aw.json`, also fails `make compile` (run `make install`).
 
-## One check on one file
+## One check on one path
 
 ```bash
-bash policies/checks/POLnn.sh test/fixtures/bad/POLnn.md   # expect exit 1
-bash policies/checks/POLnn.sh test/fixtures/good/POLnn.md # expect exit 0
+bash policies/checks/POL25.sh
+bash policies/checks/POL25.sh test/fixtures/bad/POL25-no-on/smoke-run.yml   # expect exit 1
+bash policies/checks/POL31.sh test/fixtures/good/POL31/workflows/squad-review.md # expect exit 0
 ```
 
-Some checks use a folder (`test/fixtures/bad/POL17/`, `bad/POL27/`, `bad/POL28/`, `bad/POL29/`). Each immediate child of a bad folder is one case and must exit exactly 1 on its own (POL23).
+Fixture folders live under `test/fixtures/bad/POL25-*`, `test/fixtures/good/POL25-*`, and `test/fixtures/{bad,good}/POL31/`.
 
 ## Q0: Actions billing blocked
 
-Attach the full `./scripts/verify.sh` log for the exact PR commit SHA as a PR comment. Do not treat missing CI as a pass.
+Attach the full `make verify` log for the exact PR commit SHA as a PR comment. Do not treat missing CI as a pass.
 
 ## Trial command (print only)
 
 Do not run in Block 1. Spend AIC only with Sven's exact yes per workflow.
 
 ```bash
-# gh aw trial --repo <X01-trial-repo> --workflow <workflow-name>
-```
-
-## Flow
-
-```mermaid
-sequenceDiagram
-  participant Agent as coding agent
-  participant S as verify script/skill
-  participant X as X01 test repo
-  Agent->>S: run verification skill
-  S->>S: scripts/verify.sh
-  opt Sven yes for trial
-    S->>X: gh aw trial dry run
-    X-->>Agent: run URL + output
-  end
+# gh aw trial --repo <trial-repo> --workflow <workflow-name>
 ```
 
 ## See also
 
 - Skill: [.github/skills/verify-aw/SKILL.md](../../.github/skills/verify-aw/SKILL.md)
 - [AGENTS.md](../../AGENTS.md)
-- PBI: [docs/pbi/done/X06-verification-skill.md](../pbi/done/X06-verification-skill.md)
+- CI: [`.github/workflows/verify.yml`](../../.github/workflows/verify.yml)

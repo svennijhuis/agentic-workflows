@@ -4,18 +4,18 @@
 - Wave: PR 0
 - Block: 5
 - Lane: Builder
-- Depends on: C06, POL01
-- proof: ./scripts/verify.sh && gh extension list | grep gh-aw
+- Depends on: C06
+- proof: make verify && gh extension list | grep gh-aw
 - door: one-way
 - one-way gate: Sven's exact yes required (named ask in its block). Rollback: revert gh-aw pin commit and recompile
 ## Goal
 Pin gh aw CLI version in .github/aw.json and document upgrade cadence with checksum verification.
 ## Context
-POL01 requires pinned versions. Tool pin must match workflow import pins.
+`.github/aw.json` pins gh-aw; compile --strict requires pinned imports. Tool pin must match workflow import pins.
 ## Steps
 1. Document aw.json action and compiler pins.
 2. Define monthly upstream check (L07) for new gh-aw releases.
-3. scripts/verify.sh verifies pin consistency.
+3. make verify runs compile --strict plus POL25 and POL31.
 ## Definition of Done
 - [ ] Pin recorded in repo config (Builder).
 - [ ] Upgrade runbook references L02 safe update.
@@ -24,7 +24,7 @@ POL01 requires pinned versions. Tool pin must match workflow import pins.
 ## Flow
 ```mermaid
 sequenceDiagram
-  participant G as scripts/verify.sh
+  participant G as make verify
   participant AW as .github/aw.json
   participant CLI as gh aw compile
   G->>AW: read pins

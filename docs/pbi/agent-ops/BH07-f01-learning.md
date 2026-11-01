@@ -23,7 +23,7 @@ Warp review post: a daily agent reads reviewed PRs, synthesizes human feedback o
 2. Cap 1 PR per week.
 ## Definition of Done
 - [ ] Cap fixture
-- [ ] No agent merge (POL14)
+- [ ] No agent merge (human merges only)
 - [ ] Every Bar H line from [README.md](../README.md#bar-h-every-workflow-pbi) when the workflow ships
 ## Technical design
 - Components and files: LP00 step, F01 prompt

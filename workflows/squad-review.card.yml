@@ -1,4 +1,4 @@
-# Agent card (HX02, POL24). What runs where for squad-review. Secret NAMES only, never a value.
+# Agent card (HX02). What runs where for squad-review. Secret NAMES only, never a value.
 # The card is checked against the frontmatter (engine, tools) and the lock manifest (mcp, secrets).
 workflow: squad-review
 interface: GitHub Actions workflow_dispatch with input pr (manual, from the Actions tab or gh aw run)

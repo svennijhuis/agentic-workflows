@@ -13,7 +13,7 @@ flowchart TB
     V1 --> V2 --> V3
     CTX[Context not control imports C05 G00a C12]
     TW[Two way vs one way door field on PBIs]
-    V3 --> PR[PR path F01 verify.sh Tester]
+    V3 --> PR[PR path F01 make verify Tester]
     CTX --> PR
     TW --> PR
   end
@@ -23,10 +23,9 @@ flowchart TB
     DOOR --> SAMPLE
   end
   subgraph LP00[LP00 improvement]
-    LINT[Repeated mistake becomes POL check A5 POL23]
-    TAUT[Kill tautological checks POL23 X03]
+    LINT[Repeated mistake becomes findings PBI A5]
     MEAS[Measure skill impact B03a B03]
-    LINT --> TAUT --> MEAS
+    LINT --> MEAS
   end
   PR --> SAMPLE
   SAMPLE -->|revert or repeat FAIL| LINT
@@ -38,10 +37,8 @@ flowchart TB
 | Verification is the key skill | LP01 | [row 1](gist-review.md), A1 `proof:` and A2 X06 first | [done/X06-verification-skill.md](done/X06-verification-skill.md), [done/C01-verify-script.md](done/C01-verify-script.md) |
 | Self verify, score, hill climbing | LP01 | [row 2](gist-review.md), A3 one line verify output | [done/C01-verify-script.md](done/C01-verify-script.md), [testing/X07-workflow-benchmark.md](testing/X07-workflow-benchmark.md) |
 | Own verification skill per app | LP01 | [row 3](gist-review.md), A2 | [done/X06-verification-skill.md](done/X06-verification-skill.md) |
-| Repeated mistake becomes a lint | LP00 | [row 8](gist-review.md), A5 findings rule | [done/POL23-no-tautological-checks.md](done/POL23-no-tautological-checks.md), [README.md](README.md) (findings rule) |
 | Context not control | LP01 | [row 13](gist-review.md), A7 Bar H | [done/C05-imports-import-schema.md](done/C05-imports-import-schema.md), [done/G00a-consumer-strategy.md](done/G00a-consumer-strategy.md), [done/C12-agentpacks-import-contract.md](done/C12-agentpacks-import-contract.md) |
 | Two way vs one way doors | LP02 | [row 23](gist-review.md), A1 `door:` | [_template.md](_template.md), [README.md](README.md) |
-| Kill tautological tests | LP00 | [row 26](gist-review.md), A4 | [done/POL23-no-tautological-checks.md](done/POL23-no-tautological-checks.md), [done/X03-gate-fixtures.md](done/X03-gate-fixtures.md) |
 | Sample review, fix env on repeats | LP02 | [row 20](gist-review.md), A5 | [agent-ops/AO10-sampled-human-review.md](agent-ops/AO10-sampled-human-review.md) |
 | Measure skill impact | LP00 | [row 31](gist-review.md), A6 | [observability/B03a-value-vs-cost.md](observability/B03a-value-vs-cost.md), [observability/B03-outcomes-impact.md](observability/B03-outcomes-impact.md) |
 
@@ -70,7 +67,7 @@ flowchart TB
       K2[Decisions written down: decisions, ARC01 to ARC06]
     end
     subgraph PR[Practices]
-      P1[Sceptical review: F01a, POL23]
+      P1[Sceptical review: F01a, make verify]
       P2[Maintenance without blame: LP00b]
     end
   end

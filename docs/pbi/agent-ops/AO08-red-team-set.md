@@ -50,7 +50,7 @@ sequenceDiagram
 ```
 
 - Failure modes: detection miss fails case; fix workflow or detection config before merge.
-- Security: bait strings are synthetic; no real secrets in repo (POL04).
+- Security: bait strings are synthetic; no real secrets in repo (gitleaks in CI).
 - Observability: benchmark row tags `red-team` case id.
 - Cost: X07 tier per case batch (Sven yes).
 - Rollback: disable red-team slice in harness config.

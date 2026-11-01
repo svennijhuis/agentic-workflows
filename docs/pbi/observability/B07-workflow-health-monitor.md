@@ -5,7 +5,7 @@
 - Block: 5
 - Lane: Builder
 - Depends on: B01, M01
-- proof: ./scripts/verify.sh
+- proof: make verify
 - door: one-way
 - one-way gate: Sven's exact yes required (named ask in its block). Rollback: disable health monitor workflow
 ## Goal
@@ -13,9 +13,9 @@ Document a catalog health workflow that detects failing compiles, stale lock fil
 ## Context
 Complements M01 exception watcher (Azure) with GitHub-side catalog health. Dispatch-only until proven.
 ## Steps
-1. Define health signals: compile --strict, lock freshness (POL17), recent run failures.
+1. Define health signals: compile --strict, compile --strict clean, recent run failures.
 2. Safe-output issue to catalog repo with dedupe.
-3. Integrate with scripts/verify.sh results when Q0 blocks Actions.
+3. Integrate with make verify when Q0 blocks Actions.
 ## Definition of Done
 - [ ] Bar H items satisfied when workflow lands (Builder).
 - [ ] workflow_dispatch first; schedule only after Sven yes.
@@ -27,7 +27,7 @@ Complements M01 exception watcher (Azure) with GitHub-side catalog health. Dispa
 sequenceDiagram
   participant D as dispatch
   participant H as health monitor wf
-  participant G as scripts/verify.sh
+  participant G as make verify
   participant SO as safe-outputs
   D->>H: manual run
   H->>G: compile strict on SHA

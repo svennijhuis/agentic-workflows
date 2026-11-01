@@ -9,7 +9,7 @@
 - proof: gh aw compile --dir workflows --strict && ./scripts/verify.sh
 - door: two-way
 ## Goal
-Standardize remote and local imports: pinned tag or SHA only (POL01), `import-schema` typed parameters, inlined imports cache under `.github/aw/imports/`, and shared formatting/reporting fragments from agentics conventions.
+Standardize remote and local imports: pinned tag or SHA only (`gh aw compile --strict`), `import-schema` typed parameters, inlined imports cache under `.github/aw/imports/`, and shared formatting/reporting fragments from agentics conventions.
 ## Context
 Consumers install via `gh aw add svennijhuis/agentic-workflows/<wf>@vX.Y.Z`. Lock files record exact import SHAs. squad-review today uses `@marketplace` branch ref; removal tracked under Q7 and F01. agentPacks pins follow [C12 agentpacks import contract](C12-agentpacks-import-contract.md) v1.1.
 ### Import cache (Block 2 trial)
@@ -19,11 +19,11 @@ Consumers either commit `.github/aw/imports/` after compile or set `inlined-impo
 2. Migrate workflows off branch refs and marketplace imports to tags or SHAs.
 3. Add `import-schema` blocks for parameterized shared pieces (e.g. Azure read-only MCP).
 4. Ensure `shared/reporting.md` and formatting helpers match fixed issue/PR format (Bar H).
-5. Link C12 allowlist and pin rules in `aw.yml` and POL01 checks.
+5. Link C12 allowlist and pin rules in `aw.yml` and compile strict.
 6. Run Block 2 trial: import cache or inlined-imports on X01 with evidence in C12 and G00a proof.
 ## Definition of Done
 - [ ] No workflow uses `@main` or floating branch refs in production paths
-- [ ] `.lock.yml` committed and fresh (POL17)
+- [ ] `.lock.yml` committed and fresh after compile
 - [ ] import-schema documented with at least one worked example
 - [ ] Packet flow (a) central distribution documented in CONSUMING
 ## Technical design
@@ -50,7 +50,7 @@ sequenceDiagram
 - Door: two-way (files)
 ## Evidence
 
-Shipped in PR #4 (Block 1). Gate: `./scripts/verify.sh` log on the exact head SHA, posted as a PR comment (Q0, Actions billing blocked).
+Shipped in PR #4 (Block 1). Gate: `make verify` log on the exact head SHA, posted as a PR comment (Q0, Actions billing blocked).
 (commands, logs, verify log on SHA, run links)
 ## Flow
 ```mermaid

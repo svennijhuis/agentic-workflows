@@ -4,7 +4,7 @@
 - Wave: W4
 - Block: 4
 - Lane: Builder
-- Depends on: C03, C04, M02, O03, S00
+- Depends on: C03, C04, M02, S00
 - proof: gh aw compile --dir workflows --strict; gh aw audit <run-id> (M01 trial run)
 - door: one-way
 - one-way gate: Sven's exact yes required (named ask in its block). Rollback: disable exception watcher workflow
@@ -39,9 +39,9 @@ Implements MonitorOps + DeterministicOps. Agent runs only when exceptions.json i
 - [ ] Tool, bash, and MCP allowlists; `on.roles` and skip-bots configured
 - [ ] Issue/PR format matches `shared/reporting.md`
 - [ ] Trial run on X01 test repo; `gh aw audit` on first 3 runs; measured AIC recorded in Evidence
-- [ ] `scripts/verify.sh` pass on workflow SHA while Actions billing blocked (Q0)
+- [ ] `make verify` pass on workflow SHA while Actions billing blocked (Q0)
 ## Evidence
-(commands, `scripts/verify.sh` log on SHA, `gh aw` run links, audit output)
+(commands, `make verify` log on SHA, `gh aw` run links, audit output)
 ## Flow
 ```mermaid
 sequenceDiagram

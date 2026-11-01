@@ -1,24 +1,18 @@
 # safe-outputs: overview
 
-**Purpose:** Output catalog, staged mode, dedupe, PR outputs.
+**Purpose:** Workflow frontmatter rules for safe outputs: staged mode, dedupe, caps, and cross-repo writes. `gh aw compile --strict` enforces the shape; repo gate is `make verify` (POL25 dispatch-only, POL31 no skills in shared fragments).
 
-## PBIs
+## Rules (in workflow frontmatter, not separate policy PBIs)
 
-- [O01: O01-output-catalog-limits](O01-output-catalog-limits.md)
-- [O02: O02-staged-mode](O02-staged-mode.md)
-- [O03: O03-dedupe-expiry-footers-noise](O03-dedupe-expiry-footers-noise.md)
-- [O04: O04-pr-outputs-triggering-ci](O04-pr-outputs-triggering-ci.md)
-- [O05: O05-cross-repo](O05-cross-repo.md) (Block 4, blocker for M05 step 2)
-- [O06: O06-custom-outputs-mcp-scripts](O06-custom-outputs-mcp-scripts.md)
+- Every output has a `max` cap; prefer `staged: true` until Sven promotes a write path.
+- Dedupe keys, expiry, and footers live in each workflow and in `shared/reporting.md`.
+- Cross-repo issue or comment writes need explicit `target-repo` / allowlists in frontmatter and minimal `permissions`.
 
 ## Dependency sketch
 
 ```mermaid
 flowchart TD
-  O01[O01] --> O02[O02]
-  O02[O02] --> O03[O03]
-  O03[O03] --> O04[O04]
-  O04[O04] --> O05[O05]
-  O05[O05] --> O06[O06]
-  O06[O06]
+  ST[staged outputs] --> CAP[max caps per output]
+  CAP --> DD[dedupe and reporting format]
+  DD --> XR[cross-repo allowlists when needed]
 ```

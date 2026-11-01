@@ -4,11 +4,11 @@
 
 ## Block 1 behaviour
 
-- Trigger: `workflow_dispatch` only (no auto PR triggers until Sven enables them).
-- Staged / report-only posture per [POL03](../../policies/POL03.yml).
-- Caps in workflow frontmatter ([POL02](../../policies/POL02.yml)).
-- Committed `squad-review.lock.yml` in the catalog ([POL17](../../policies/POL17.yml)).
-- `copilot-requests: none` ([POL21](../../policies/POL21.yml)).
+- Trigger: `workflow_dispatch` only ([POL25](../../policies/POL25.yml)).
+- Staged / report-only posture (frontmatter `safe-outputs`).
+- Caps in workflow frontmatter.
+- Committed `squad-review.lock.yml` in the catalog (`make compile`).
+- `copilot-requests: none` until org billing switch.
 - agentPacks via `skills:` in `squad-review.md` frontmatter and a `commands/` import at a pinned SHA; not `plugins:` at a main SHA ([agentpacks contract](agentpacks-contract.md)). `skills:` lives in this consumer workflow, not in `workflows/shared/` (gh-aw drops it from imports; C12b, [POL31](../../policies/POL31.yml)).
 
 Shared wiring: [`workflows/shared/agentpacks.md`](../../workflows/shared/agentpacks.md), [`defaults.md`](../../workflows/shared/defaults.md), [`security.md`](../../workflows/shared/security.md).
@@ -30,7 +30,7 @@ Run from the Actions tab (`workflow_dispatch`). Set `COPILOT_GITHUB_TOKEN` per [
 
 ## Change review behaviour
 
-Edit agentPacks, release a C12 tag, bump pin in this catalog, recompile, run `./scripts/verify.sh`. Do not fork the command text here.
+Edit agentPacks, release a C12 tag, bump pin in this catalog, recompile, run `make verify`. Do not fork the command text here.
 
 ## Removal
 

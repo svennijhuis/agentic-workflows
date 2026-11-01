@@ -52,11 +52,11 @@ In a **consumer** repo after `gh aw add`:
 .github/workflows/squad-review.lock.yml   # generated; Actions runs this
 ```
 
-In **this catalog**, each installable workflow keeps a committed `.lock.yml` next to the `.md`. `./scripts/verify.sh` compiles with `--strict` and fails if locks drift ([POL17](../../policies/POL17.yml)).
+In **this catalog**, each installable workflow keeps a committed `.lock.yml` next to the `.md`. `make compile` runs `gh aw compile --strict` and `make verify` fails if locks drift.
 
 ## Runtime security
 
-Agent job stays read-only. Writes use `safe-outputs:` in a separate job. Cross-repo needs `target-repo`, allowlists, and scoped tokens ([auth](../reference/auth.md)).
+Agent job stays read-only. Writes use `safe-outputs:` in a separate job. Cross-repo needs `target-repo`, allowlists, and scoped tokens ([auth](../reference/auth.md)). Declared in frontmatter; enforced by strict compile.
 
 ## Package manifest
 
@@ -64,7 +64,7 @@ Agent job stays read-only. Writes use `safe-outputs:` in a separate job. Cross-r
 
 ## Org defaults
 
-`GH_AW_DEFAULT_*` variables can set budgets org-wide. Example: [`governance/defaults.example.yml`](../../governance/defaults.example.yml). Personal account uses repo vars and per-workflow caps ([POL02](../../policies/POL02.yml)).
+`GH_AW_DEFAULT_*` variables can set budgets org-wide. Example: [`governance/defaults.example.yml`](../../governance/defaults.example.yml). Personal account uses repo vars and per-workflow caps in frontmatter.
 
 ## Guides
 

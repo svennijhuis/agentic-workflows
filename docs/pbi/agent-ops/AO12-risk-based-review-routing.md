@@ -9,9 +9,9 @@
 - door: one-way
 - one-way gate: Sven's exact yes required (named ask in its block). Rollback: disable routing workflow and default F01 to full review
 ## Goal
-F01 reads change risk (paths, size, POL hits) and picks light or full review, saving AIC on low-risk PRs (S8 uReview style).
+F01 reads change risk (paths, size, sensitive paths) and picks light or full review, saving AIC on low-risk PRs (S8 uReview style).
 ## Context
-Integrates with existing F01 pr-review. High risk paths match ARC04 `shared/risk-classes.md` themes. Never APPROVE or merge (POL22, POL14).
+Integrates with existing F01 pr-review. High risk paths match ARC04 `shared/risk-classes.md` themes. Never APPROVE or merge; review COMMENT only via safe-outputs.
 ## Steps
 1. Extend F01 or add `ao12-risk-route.md` pre-step scoring PR diff.
 2. Map score to light (short comment) vs full (deep) prompt branch.
@@ -31,7 +31,7 @@ Integrates with existing F01 pr-review. High risk paths match ARC04 `shared/risk
 - [ ] `./scripts/verify.sh` pass on workflow SHA
 - [ ] X07 benchmark score at or above baseline (5+ cases)
 - [ ] Light vs full routing documented with path rules
-- [ ] POL22 COMMENT only on reviews
+- [ ] Review COMMENT only on reviews (no APPROVE or merge)
 ## Technical design
 - Components and files: `workflows/ao12-risk-route.md` or F01 branch; risk table shared with M05 classes.
 - Interfaces: GitHub PR files API; output review COMMENT via safe-output.
@@ -43,7 +43,7 @@ sequenceDiagram
   participant R as risk scorer
   participant F as F01 review agent
   participant GH as GitHub review
-  PR->>R: paths size POL hits
+  PR->>R: paths size sensitive paths
   R->>F: light or full prompt
   F->>GH: COMMENT review
 ```

@@ -14,7 +14,7 @@ owner: @svennijhuis
 
 ## Proof
 
-<!-- Command and result on the exact head SHA, for example ./scripts/verify.sh ending in "0 failures". -->
+<!-- Command and result on the exact head SHA, for example make verify ending in "0 failures". -->
 
 ## Door
 

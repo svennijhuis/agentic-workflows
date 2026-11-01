@@ -4,8 +4,8 @@
 - Wave: PR 0
 - Block: 6
 - Lane: Cursor CLI
-- Depends on: S01, POL06
-- proof: ./scripts/verify.sh
+- Depends on: S01
+- proof: make verify
 - door: one-way
 - one-way gate: Sven's exact yes required (named ask in its block). Rollback: remove Tavily secret from repo settings
 ## Goal

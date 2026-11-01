@@ -6,11 +6,11 @@
 - Block: 5
 - Lane: Cursor CLI
 - Depends on: G00, C02
-- proof: ./scripts/verify.sh
+- proof: `make verify` (exit 0)
 - door: one-way
 - one-way gate: Sven's exact yes required (named ask in its block). Rollback: do not apply org switch steps
 - triage: spec (org switch checklist, docs only; the switch itself waits on Sven's yes)
-- feedback: ./scripts/verify.sh (check-pbi-docs links) plus mermaid render of both governance/ORG-ONLY.md diagrams
+- feedback: `make verify` plus mermaid render of both governance/ORG-ONLY.md diagrams
 - harness: none (docs)
 - review-input: diff + this PBI + DoD (+ linked spec) + PR description, never builder session logs
 - kind: skill
@@ -21,8 +21,8 @@ Checklist only: what changes when moving from personal `svennijhuis` to a GitHub
 Nothing else changes at switch: same `workflows/`, `shared/`, `policies/`, `docs/pbi/`, `aw.yml`, import pins, `scripts/verify.sh`, and consumer `gh aw add` paths except the owner string. This PBI is not a general governance appendix.
 ## Steps
 1. Publish `governance/ORG-ONLY.md` with only these sections:
-   - **Central Copilot billing**: enables `copilot-requests` org billing path (personal account keeps `copilot-requests: none`, POL21).
-   - **Rulesets**: branch protection, required verify checks, POL19 no force push enforcement at org level.
+   - **Central Copilot billing**: enables `copilot-requests` org billing path (personal account keeps `copilot-requests: none`).
+   - **Rulesets**: branch protection, required verify checks, no force push enforcement at org level.
    - **Org secrets**: provider triggers (R06), shared tokens without per-repo PAT sprawl.
    - **Teams**: CODEOWNERS, repo visibility (Q2).
    - **GHES**: enterprise host options and compiler enterprise controls (reference only until needed).

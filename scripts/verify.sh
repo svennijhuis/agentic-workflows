@@ -18,8 +18,10 @@ run() {
 }
 
 echo "# make compile"
+locks() { find workflows .github/workflows -name '*.lock.yml' -type f -exec sha256sum {} + 2>/dev/null | sort; }
+before=$(locks)
 make --no-print-directory compile || fail "Makefile:1 COMPILE make compile failed"
-git diff --quiet -- workflows .github/workflows || fail "workflows:1 COMPILE lock files changed after compile (commit the recompiled .lock.yml)"
+[ "$(locks)" = "$before" ] || fail "workflows:1 COMPILE a .lock.yml changed after compile (commit the recompiled lock)"
 
 for id in POL25 POL31; do
   echo "# $id repo"

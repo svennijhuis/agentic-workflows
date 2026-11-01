@@ -1,6 +1,6 @@
 # Auth and secrets
 
-Consumer-facing summary of [ARC03](../pbi/done/ARC03-identity-auth.md). Secret **names** only; never put values in git ([POL04](../../policies/POL04.yml), [POL20](../../policies/POL20.yml)).
+Consumer-facing summary of [ARC03](../pbi/done/ARC03-identity-auth.md). Secret **names** only; never put values in git.
 
 ## Tokens in Block 1 scope
 
@@ -15,7 +15,7 @@ Cross-repo write PATs with `contents:write` or `pull-requests:write` on other re
 
 ## `copilot-requests: none`
 
-Catalog workflows use `copilot-requests: none` where required ([POL21](../../policies/POL21.yml)). Personal accounts do not use org billing tips for `copilot-requests: write`.
+Catalog workflows use `copilot-requests: none` until org Copilot billing switch. Personal accounts do not use org billing tips for `copilot-requests: write`.
 
 ## `ignore-if-missing`
 
