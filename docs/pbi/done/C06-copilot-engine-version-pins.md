@@ -9,13 +9,13 @@
 - proof: gh aw compile --dir workflows --strict && ./scripts/verify.sh
 - door: two-way
 ## Goal
-Pin the gh-aw toolchain and Copilot engine action versions in `.github/aw.json` and workflow lock metadata so compiles are reproducible and POL01 is satisfied.
+Pin the gh-aw toolchain and Copilot engine action versions in `.github/aw.json` and workflow lock metadata so compiles are reproducible (`gh aw compile --strict`).
 ## Context
 Bar H requires pinned gh-aw plus import SHA or tag. Engine updates flow through L04 and measured cost audit on first runs after bump.
 ## Steps
 1. Set action pins in `.github/aw.json` per gh-aw compiler config.
 2. Record gh-aw CLI version in docs and CHANGELOG on bump.
-3. Add gate check alignment with POL01 and POL17.
+3. Gate alignment: pinned gh-aw in `.github/aw.json` and committed locks after compile.
 4. Document upgrade path via L04/L05.
 ## Definition of Done
 - [ ] `.github/aw.json` pins documented and committed
@@ -47,7 +47,7 @@ sequenceDiagram
 - Door: two-way (pin)
 ## Evidence
 
-Shipped in PR #4 (Block 1). Gate: `./scripts/verify.sh` log on the exact head SHA, posted as a PR comment (Q0, Actions billing blocked).
+Shipped in PR #4 (Block 1). Gate: `make verify` log on the exact head SHA, posted as a PR comment (Q0, Actions billing blocked).
 (commands, logs, verify log on SHA, run links)
 ## Flow
 ```mermaid
@@ -55,7 +55,7 @@ sequenceDiagram
   participant A as .github/aw.json
   participant W as workflow.md
   participant L as .lock.yml
-  participant G as scripts/verify.sh
+  participant G as make verify
   W->>A: read action pins
   W->>L: record import SHAs
   G->>W: compile --strict validates pins

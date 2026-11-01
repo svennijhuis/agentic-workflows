@@ -1,0 +1,14 @@
+# Good POL25 case: pull_request on the file is out of scope for POL25.
+name: smoke-run
+on:
+  workflow_dispatch:
+  workflow_call:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - run: echo fixture

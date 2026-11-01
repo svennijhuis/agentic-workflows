@@ -1,8 +1,0 @@
-scenarios:
-  - id: shared-id
-    env: acc
-    method: HEAD
-    path: /health
-    auth: none
-    expect:
-      status: 200

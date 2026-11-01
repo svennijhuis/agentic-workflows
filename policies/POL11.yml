@@ -1,8 +1,0 @@
-id: POL11
-title: 'Least permissions, read-only agent'
-rule: 'Every workflow declares permissions; no scope is write and no write-all.'
-why: 'Writes go through safe-outputs jobs, never the agent job.'
-check: policies/checks/POL11.sh
-bad_fixture: test/fixtures/bad/POL11.md
-good_fixture: test/fixtures/good/POL11.md
-pbi: docs/pbi/done/POL11-least-permissions-read-only-agent.md

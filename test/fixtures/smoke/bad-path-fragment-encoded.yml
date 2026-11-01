@@ -1,8 +1,0 @@
-scenarios:
-  - id: orders-list
-    env: tst
-    method: GET
-    path: /x%23access_token=FAKE0000000000
-    auth: none
-    expect:
-      status: 200

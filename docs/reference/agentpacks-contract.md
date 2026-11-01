@@ -1,11 +1,11 @@
 # agentPacks import contract (C12 v1.1)
 
-Canonical contract lives in [agentPacks PR #80](https://github.com/svennijhuis/agentPacks/pull/80). This repo mirrors the allowlist in [policies/POL01.yml](../../policies/POL01.yml) (`agentpacks_allowlist`; gh-aw v0.93.4 rejects unknown `aw.yml` keys) and enforces pins with POL01.
+Canonical contract lives in [agentPacks PR #80](https://github.com/svennijhuis/agentPacks/pull/80). Pins and allowlists are enforced by `gh aw compile --strict` on consumer and catalog workflows.
 
 ## Pins
 
 - `imports:` and `plugins:` use `@vX.Y.Z` on the generated agentPacks marketplace commit, or its 40-hex SHA.
-- Never a branch ref. Never `plugins:` at a `main` SHA ([POL01](../../policies/POL01.yml)).
+- Never a branch ref. Never `plugins:` at a `main` SHA.
 - Bump pins only via L02 `scripts/bump-pin.sh` (tags only) when that script ships.
 
 ## PR #2 correction
@@ -18,7 +18,7 @@ Per-stack bundles first; typed `import-schema` inputs later. Consumers do not ed
 
 ## Allowlist v1 (agentPacks owns)
 
-Mirrored in `policies/POL01.yml` (`agentpacks_allowlist`):
+Documented paths (agentPacks repo is source of truth):
 
 - `shared/standards/{http-api,testing-principles,design,engineering}.md`
 - `plugins/{dotnet,rust,typescript}/standards/*.md`
@@ -28,7 +28,7 @@ Mirrored in `policies/POL01.yml` (`agentpacks_allowlist`):
 
 ## Caps
 
-`max-ai-credits`, `max-daily-ai-credits`, `max-turns`, `timeout-minutes` belong in **each workflow's own frontmatter** ([POL02](../../policies/POL02.yml)). The compiler ignores caps in imports. Repo vars `GH_AW_DEFAULT_MAX_AI_CREDITS` and `GH_AW_DEFAULT_MAX_DAILY_AI_CREDITS` are optional fallbacks.
+`max-ai-credits`, `max-daily-ai-credits`, `max-turns`, `timeout-minutes` belong in **each workflow's own frontmatter**. The compiler ignores caps in imports. Repo vars `GH_AW_DEFAULT_MAX_AI_CREDITS` and `GH_AW_DEFAULT_MAX_DAILY_AI_CREDITS` are optional fallbacks.
 
 ## Compat
 
@@ -72,11 +72,10 @@ HTTP MCP to deployed [mcp-services](https://github.com/svennijhuis/mcp-services)
 sequenceDiagram
   participant AP as agentPacks
   participant AW as AW workflow
-  participant V as verify.sh
-  participant P as POL01
+  participant V as make verify
   AP->>AP: tag vX.Y.Z on generated commit
   AW->>AP: import @vX.Y.Z
-  V->>P: check pin
+  V->>V: gh aw compile --strict
 ```
 
 ## See also

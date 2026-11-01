@@ -4,15 +4,15 @@
 - Wave: PR 0
 - Block: 5
 - Lane: Cursor CLI
-- Depends on: X01, O02, G01
+- Depends on: X01, G01
 - proof: test -f docs/pbi/testing/X02-staged-dry-run-checklist.md
 - door: two-way
 ## Goal
 Publish a repeatable checklist for staged and report-only dry runs before enabling writes or schedules.
 ## Context
-Pairs with O02 and G01 ladder. Used by Builder before merging new workflows.
+Pairs with staged safe-outputs and G01 ladder. Used by Builder before merging new workflows.
 ## Steps
-1. List pre-run gates: scripts/verify.sh on SHA, compile --strict.
+1. List pre-run gates: make verify on SHA (`gh aw compile --strict` clean, POL25 and POL31 clean).
 2. List run steps: dispatch, verify staged artifacts, confirm 0 writes.
 3. List promotion requirements: 3 audits, cost tier, Sven yes for cron.
 ## Definition of Done

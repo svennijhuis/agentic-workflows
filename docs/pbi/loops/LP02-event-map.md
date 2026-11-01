@@ -18,7 +18,7 @@ Map who starts what: automatic GitHub events, human triggers (slash commands, la
 ## Context
 Extends trigger PBIs R01-R06. F76 log insights folded into [M05](../monitoring/M05-github-log-watcher.md); F77 issue-to-PR folded into [P04](../multi-repo/P04-research-plan-assign-copilot.md) assign-only. Human go label is `agent-ok` only. LP02 guards apply to LP00 and LP01.
 
-Block 0 map: guards ship in B2 (POL10 actor check, concurrency, [AO03](../agent-ops/AO03-kill-switch.md) as guard dependency); first event triggers in B3 (M05, P12, P13, AO01 weekly, AO02); the rest in B5 (P04, P14, F16, L02 bump PRs, M05 risk:low handoff).
+Block 0 map: guards ship in B2 (workflow frontmatter actor check, concurrency, [AO03](../agent-ops/AO03-kill-switch.md) as guard dependency); first event triggers in B3 (M05, P12, P13, AO01 weekly, AO02); the rest in B5 (P04, P14, F16, L02 bump PRs, M05 risk:low handoff).
 
 ### A. Automatic events (self-improvement)
 
@@ -31,7 +31,7 @@ Block 0 map: guards ship in B2 (POL10 actor check, concurrency, [AO03](../agent-
 | `pull_request_review` with FAIL (changes requested) | F16 pr-fix, max 2 rounds per PR | fix commit | B5 | one-way |
 | `push` to main or `release` published | X07 benchmark, AO02 scorecard update, L02 consumer bump PRs | benchmark row, scorecard, bump PRs | B3 (scorecard, script), B5 (bump PRs) | one-way |
 | `repository_dispatch` type `azure-alert` | M01 watcher | issue | B4 | one-way |
-| weekly `schedule` | AO01 retro; same FAIL twice or a revert becomes a POL PBI (A5 findings rule) | retro issue, POL PBI draft | B3 | one-way |
+| weekly `schedule` | AO01 retro; same FAIL twice or a revert becomes a findings PBI (A5 findings rule) | retro issue, findings PBI draft | B3 | one-way |
 
 ```mermaid
 flowchart LR
@@ -44,7 +44,7 @@ flowchart LR
   RVF[review: changes requested] --> F16[F16 pr-fix, max 2]
   PM[push main / release] --> X07 & AO02[AO02 scorecard] & L02[L02 consumer bump PRs]
   RD[repository_dispatch azure-alert] --> M01[M01 watcher]
-  WK[weekly schedule] --> AO01[AO01 retro] -->|same FAIL twice or revert| POL[new POL PBI, next nF block]
+  WK[weekly schedule] --> AO01[AO01 retro] -->|same FAIL twice or revert| FPB[new findings PBI, next nF block]
   IMP -->|Sven adds agent-ok| P04
   IMP -->|risk low rule| P04H
 ```
@@ -81,10 +81,10 @@ flowchart LR
 
 ### Guards (every trigger, automatic and human)
 
-- Roles gate: `on.roles: [admin, write]` (POL10); today that is only Sven. Bot actors never count: `skip-bots`, plus an actor check that the label or comment came from a human.
+- Roles gate: `on.roles: [admin, write]` (workflow frontmatter); today that is only Sven. Bot actors never count: `skip-bots`, plus an actor check that the label or comment came from a human.
 - No loops: writes made with GITHUB_TOKEN do not start new workflow runs (GitHub default). Labels or comments a bot sets never start a workflow, enforced by the actor check. Exception: M05 `risk:low` handoff to P04 in the same run (explicit, rule-gated, listed above).
 - Concurrency group per issue or PR (`aw-${{ github.event.issue.number || github.event.pull_request.number }}`), cancel-in-progress false.
-- Daily caps: `max-daily-ai-credits` per workflow (POL02) plus safe-output `max` (POL08). Each trigger answers with one reply.
+- Daily caps: `max-daily-ai-credits` per workflow plus safe-output `max` in frontmatter. Each trigger answers with one reply.
 - Kill switch AO03: a pre-step reads the global repo var and the per-workflow var and noops. `/stop` sets the global var (AO03 ships B2 as guard dependency for `/stop`).
 - Rollout like F01: manual (`workflow_dispatch` and slash) first. An event trigger turns on only after 3 audited runs, measured AIC and Sven's yes.
 
@@ -100,13 +100,13 @@ Manual first: `workflow_dispatch` and slash commands. Each automatic `on:` event
 | `BOARD_TOKEN` secret | Projects read and write on the user board only; P05 sync and P14 pre-step, never an agent job | B3 | Revoke or rotate token |
 | F01b | `pull_request` opened/sync auto review | B3 | Remove pull_request trigger |
 | M05 rollout step 1 | Report-only issues on 1 repo | B4 | Turn off M05 workflow |
-| M05 rollout step 2 | Writes `agent:improve` on all allowlisted repos | B4 | AO03 off or shrink `m05_repos` (policies/POL01.yml) |
+| M05 rollout step 2 | Writes `agent:improve` on all allowlisted repos | B4 | AO03 off or shrink `allowed-repos` in M05 workflow frontmatter |
 | M05 rollout step 3 | Auto-fix `risk:low` via P04 same run | B5 | Disable handoff job; issues only |
 | `M05_READ_TOKEN` | Cross-repo Actions read, Issues write | B4 | Remove secret; M05 noops |
 | `P04_ASSIGN_TOKEN` | Cross-repo Issues assign | B5 | Remove secret; assign skipped |
 | Copilot cloud agent per repo | Required for assign path | B5 | Disable agent in repo settings |
 
-**Blocks:** the map in PR 0; the guards in B2 (POL10 actor check, concurrency, AO03 pulled forward from B3 as a guard dependency); the first event triggers in B3 (M05, P12, P13, AO01 weekly, AO02); the rest in B5 (P04, P14, F16, L02 bump PRs, M05 risk:low handoff).
+**Blocks:** the map in PR 0; the guards in B2 (workflow frontmatter actor check, concurrency, AO03 pulled forward from B3 as a guard dependency); the first event triggers in B3 (M05, P12, P13, AO01 weekly, AO02); the rest in B5 (P04, P14, F16, L02 bump PRs, M05 risk:low handoff).
 
 ## Steps
 1. Keep automatic and human tables aligned with deployed workflow triggers (manual and slash first per rollout rule).
@@ -122,7 +122,7 @@ Manual first: `workflow_dispatch` and slash commands. Each automatic `on:` event
 - [ ] Rollout and doors table lists every one-way door named in strategy
 - [ ] Blocks line matches PR 0 block plan
 ## Technical design
-- Components and files: `workflows/*.md` per trigger; `aw.yml` allowlists; [AO03](../agent-ops/AO03-kill-switch.md) repo variables; gh-aw `command:` handlers for slash; [P14](../multi-repo/P14-board-pick-up.md) scheduled poll; POL10 check scripts in B2.
+- Components and files: `workflows/*.md` per trigger; `aw.yml` allowlists; [AO03](../agent-ops/AO03-kill-switch.md) repo variables; gh-aw `command:` handlers for slash; [P14](../multi-repo/P14-board-pick-up.md) scheduled poll; workflow frontmatter scripts in B2.
 - Module boundary: the event table is the interface; each workflow PBI owns its trigger
 - Interfaces: GitHub webhooks (`workflow_run`, `check_suite`, `issues`, `pull_request`, `pull_request_review`, `push`, `repository_dispatch`, `schedule`); slash `/plan`, `/grill`, `/fix`, `/pr-review`, `/benchmark`, `/retro`, `/stop`; labels `plan`, `grill`, `agent-ok`; M05 to P04 in-run assign for `risk:low`.
 - Sequence:
@@ -130,7 +130,7 @@ Manual first: `workflow_dispatch` and slash commands. Each automatic `on:` event
 ```mermaid
 sequenceDiagram
   participant GH as GitHub event
-  participant G as guards POL10 AO03
+  participant G as guards workflow frontmatter AO03
   participant WF as target workflow
   GH->>G: event received
   G->>G: roles skip-bots human actor
@@ -138,13 +138,13 @@ sequenceDiagram
     G-->>GH: noop 0 AIC
   else allowed
     G->>WF: start single reply
-    WF-->>GH: output capped POL02 POL08
+    WF-->>GH: output capped workflow frontmatter workflow frontmatter
   end
 ```
 
 - Failure modes: bot label or comment triggers workflow (blocked by actor check); GITHUB_TOKEN write starts loop (GitHub default prevents); kill switch not read (AO03 pre-step required); P14 runs before Sven yes (must stay disabled).
-- Security: POL10 `on.roles: [admin, write]` today only Sven; `/stop` deterministic 0 AIC sets global kill; no bot-started workflows except documented M05 risk:low handoff.
-- Observability: B01 audit every run; AO02 scorecard on approve; AO01 weekly retro and POL PBI on repeat FAIL (A5).
+- Security: workflow frontmatter `on.roles: [admin, write]` today only Sven; `/stop` deterministic 0 AIC sets global kill; no bot-started workflows except documented M05 risk:low handoff.
+- Observability: B01 audit every run; AO02 scorecard on approve; AO01 weekly retro and findings PBI on repeat FAIL (A5).
 - Cost: Map doc 0 AIC; per-trigger AIC in child PBIs; P14 schedule 48 runs per day counted in measured cost when enabled.
 - Rollback: Map doc two-way; disable triggers per child PBI rollback; AO03 global off via `/stop` or var.
 - Proof: `grep -q 'M05 risk:low handoff' docs/pbi/loops/LP02-event-map.md`

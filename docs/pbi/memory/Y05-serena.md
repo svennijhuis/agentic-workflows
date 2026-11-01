@@ -4,8 +4,8 @@
 - Wave: PR 0
 - Block: 6
 - Lane: Cursor CLI
-- Depends on: S04, POL07
-- proof: ./scripts/verify.sh
+- Depends on: S04
+- proof: make verify
 - door: two-way
 ## Goal
 Document Serena code MCP integration path for semantic code navigation in advanced workflows.
@@ -13,7 +13,7 @@ Document Serena code MCP integration path for semantic code navigation in advanc
 Serena increases capability for refactors but expands MCP trust boundary. Later wave with strict allowlist.
 ## Steps
 1. Summarize Serena reference and required MCP gateway config.
-2. Map to POL07 tool allowlist process.
+2. Map to tool allowlist in workflow frontmatter.
 3. Identify candidate workflows (F12, F16) as optional.
 ## Definition of Done
 - [ ] No Serena in W1-W3 default toolchains.

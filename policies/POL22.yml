@@ -1,8 +1,0 @@
-id: POL22
-title: 'PR review output COMMENT only'
-rule: 'submit-pull-request-review sets allowed-events to exactly [COMMENT].'
-why: 'Review workflows report; they never approve or block.'
-check: policies/checks/POL22.sh
-bad_fixture: test/fixtures/bad/POL22.md
-good_fixture: test/fixtures/good/POL22.md
-pbi: docs/pbi/done/POL22-pr-review-comment-only.md

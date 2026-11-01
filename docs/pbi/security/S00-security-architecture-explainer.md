@@ -5,12 +5,12 @@
 - Block: 2
 - Lane: Cursor CLI
 - Depends on: none
-- proof: ./scripts/verify.sh && gh aw compile --dir workflows --strict
+- proof: make verify && gh aw compile --dir workflows --strict
 - door: two-way
 ## Goal
 Publish a concise explainer of gh-aw six-layer security model for maintainers and consumers: compile validation, sandbox read-only agent, credential isolation, integrity filtering, threat detection, safe outputs in separate jobs.
 ## Context
-Part of gh-aw defense in depth for svennijhuis/agentic-workflows. Complements policies POL01 through POL18 and Bar H workflow requirements.
+Part of gh-aw defense in depth for svennijhuis/agentic-workflows. Complements workflow frontmatter security (minimal permissions, safe-outputs, timeouts) and Bar H workflow requirements.
 ## Steps
 1. Author docs/explanation security overview linking S01 through S06.
 2. Map layers to shared/security.md and policy IDs.

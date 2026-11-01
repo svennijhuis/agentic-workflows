@@ -4,20 +4,20 @@
 - Wave: W2
 - Block: 2
 - Lane: Builder
-- Depends on: S00, POL07
-- proof: ./scripts/verify.sh && gh aw compile --dir workflows --strict
+- Depends on: S00
+- proof: make verify && gh aw compile --dir workflows --strict
 - door: two-way
 ## Goal
-Document Agent Workflow sandbox boundaries and MCP gateway credential isolation; align tool allowlists with POL07.
+Document Agent Workflow sandbox boundaries and MCP gateway credential isolation; align tool allowlists with workflow frontmatter and compile --strict.
 ## Context
-Part of gh-aw defense in depth for svennijhuis/agentic-workflows. Complements policies POL01 through POL18 and Bar H workflow requirements.
+Part of gh-aw defense in depth for svennijhuis/agentic-workflows. Complements workflow frontmatter security (minimal permissions, safe-outputs, timeouts) and Bar H workflow requirements.
 ## Steps
 1. Map gh-aw sandbox read-only defaults.
 2. Document MCP gateway token handling (no tokens in agent env).
 3. Reference Azure MCP gap from packet (OIDC JWT vs Entra).
 ## Definition of Done
 - [ ] Sandbox and MCP gateway section in security docs
-- [ ] POL07 aligned with MCP allowlist
+- [ ] MCP allowlist matches workflow frontmatter
 - [ ] M04 notes read-only Azure MCP path
 ## Evidence
 (commands, logs, verify log on SHA, run links)

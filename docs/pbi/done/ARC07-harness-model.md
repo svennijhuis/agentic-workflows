@@ -40,9 +40,9 @@ sequenceDiagram
   B-->>A: result or file:line hits
 ```
 
-- Failure modes: A new catalog workflow ships without a row: HX02 card check (POL24) still holds the facts, the page is updated in the same PR
+- Failure modes: A new catalog workflow ships without a row: HX02 card plus this table are updated in the same PR
 - Security: Docs only, no tokens
-- Observability: LINK rule in scripts/verify.sh
+- Observability: Reviewer checks relative links on doc PRs
 - Cost: 0 AIC
 - Rollback: Revert the page and its two links
 - Proof: same as proof: above

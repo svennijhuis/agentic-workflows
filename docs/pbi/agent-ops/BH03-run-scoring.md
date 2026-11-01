@@ -44,7 +44,7 @@ sequenceDiagram
 ```
 
 - Failure modes: Unclear label set: scorer rejected by the schema
-- Security: Run logs redacted (POL26), never committed
+- Security: Run logs redacted, never committed
 - Observability: score rows per run
 - Cost: judge tokens per sampled run, cap from AO07a
 - Rollback: Delete the scorer file

@@ -1,0 +1,1 @@
+deterministic_triggers: [smoke-run.yml]

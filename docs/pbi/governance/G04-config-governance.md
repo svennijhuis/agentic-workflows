@@ -4,13 +4,13 @@
 - Wave: PR 0
 - Block: 5
 - Lane: Cursor CLI
-- Depends on: C03, POL18
+- Depends on: C03
 - proof: test -f docs/pbi/governance/G04-config-governance.md && grep -q '## Definition of Done' docs/pbi/governance/G04-config-governance.md
 - door: two-way
 ## Goal
 Document repo-level gh aw env runtime policy vars and precedence (workflow, repo, org) for personal account.
 ## Context
-POL18 gh aw env vars can disable PR creation etc. Org enterprise controls are G05 only.
+gh aw env vars can disable PR creation etc. Org enterprise controls are G05 only.
 ## Steps
 1. Document precedence chain from governance/defaults.example.yml.
 2. List recommended repo variables for caps and admission on personal repos.

@@ -21,7 +21,7 @@ This file is a Block 0 map. Workflows ship in the blocks named in the step table
 | Plan | [P12](../multi-repo/P12-planning-workflow.md): label `plan` on an issue, and the workflow writes a PBI from the template (goal, DoD, `proof:`, `door:`, technical design, mermaid) as an issue comment. The human copies or approves it | B3 | one-way (tokens) | 3 runs per day |
 | Grill | [P13](../multi-repo/P13-grilling-workflow.md) (gist 27): label `grill`, and the agent posts one round of max 5 questions on goal, DoD and edge cases. It waits for Sven's reply and only then asks the next round. It never moves a card to Ready | B3 | one-way (tokens) | 1 round per issue per run |
 | Pick up | [P14](../multi-repo/P14-board-pick-up.md): only cards Sven moved to Ready. Assigned to the Copilot cloud agent via P04, WIP 1, and the draft PR links back to the card | B5 | one-way (PR + tokens) | WIP 1, 1 per day |
-| Code + review | Copilot cloud agent codes, then F01, `scripts/verify.sh`, X07 if a workflow changed. Card moves to Review | B5 | one-way (tokens) | 2 fix rounds |
+| Code + review | Copilot cloud agent codes, then F01, `make verify`, X07 if a workflow changed. Card moves to Review | B5 | one-way (tokens) | 2 fix rounds |
 | Human | Sven merges, and the card moves to Done. An agent never merges | B5 | two-way | none |
 
 **P14 pick-up (scheduled poll):** Board pick-up is a 30 minute `schedule` workflow with a deterministic noop pre-step (`gh api graphql` lists Ready items without a linked PR; 0 AIC when Ready is empty). It is a scheduled workflow, so it stays OFF until Sven's exact yes (one-way door, B5). Its Actions minutes (48 runs per day) count toward measured cost in Evidence.
@@ -64,7 +64,7 @@ sequenceDiagram
 ```
 
 - Failure modes: Ready poll runs while workflow disabled (noop only); multiple Ready cards blocked by WIP 1; grill agent moves card (forbidden by P13); Copilot assign fails (comment on issue, no PR).
-- Security: POL10 actor checks on labels; bot labels never start workflows; tokens only on one-way steps (P12, P13, P14, P04); `BOARD_TOKEN` only in deterministic jobs (P05 sync, P14 poll pre-step), never in an agent job.
+- Security: workflow frontmatter actor checks on labels; bot labels never start workflows; tokens only on one-way steps (P12, P13, P14, P04); `BOARD_TOKEN` only in deterministic jobs (P05 sync, P14 poll pre-step), never in an agent job.
 - Observability: B01 run logs per workflow; AO01 retro counts delivery loop merges; board column changes visible on Project.
 - Cost: Map doc 0 AIC; P05 sync 0 AIC; P12/P13 agent steps capped per table; P14 schedule 48 workflow runs per day (mostly noop pre-step, 0 AIC when empty); implementation PRs incur Copilot and F01 AIC per Bar H measure.
 - Rollback: Map doc edits freely (two-way); disable P14 schedule until Sven re-approves; turn off P12/P13 via AO03 or workflow_dispatch off.
@@ -81,7 +81,7 @@ flowchart LR
   G -->|label grill| P13[P13 grilling: one round, max 5 questions] -->|Sven answers| P13
   P13 -->|Sven moves card| R[Ready]
   R -->|P14 pick-up, WIP 1| P04["P04 Copilot cloud agent"] --> IP["In progress: draft PR linked"]
-  IP --> V[verify.sh + F01 + X07 if workflow changed] --> RV[Review]
+  IP --> V[make verify + F01 + X07 if workflow changed] --> RV[Review]
   RV -->|FAIL| F16[F16 pr-fix] --> IP
   RV -->|Sven merges| D[Done]
   D --> AO01[AO01 retro]

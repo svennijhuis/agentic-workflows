@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
-# Shared on: normalizer for POL03, POL10, POL14 and POL25 (md frontmatter and yml alike).
-# Reviewer FAIL on 3e300ec: `on: push` (string) made `yq '.on | keys'` error, the loop ran empty and POL03
-# passed. Here a string becomes [s], a list stays the list, a map becomes its keys, and anything else
+# on: normalizer for POL25 (md frontmatter and yml alike). `on: push` (string) would make
+# `yq '.on | keys'` error and the loop run empty. Here a string becomes [s], a list stays the list, a map becomes its keys, and anything else
 # (a yq or parse error, a list item that is not a string, an unknown shape) is an error the caller must
 # count as a hit (fail closed).
 #

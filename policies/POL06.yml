@@ -1,8 +1,0 @@
-id: POL06
-title: 'Network allowlist, no wildcard'
-rule: 'Every workflow declares network.allowed as a list; no entry holds a wildcard.'
-why: 'Default-deny egress; each host is a named choice.'
-check: policies/checks/POL06.sh
-bad_fixture: test/fixtures/bad/POL06.md
-good_fixture: test/fixtures/good/POL06.md
-pbi: docs/pbi/done/POL06-network-allowlist-no-wildcard.md

@@ -4,7 +4,7 @@
 - Wave: PR 0
 - Block: 0
 - Lane: Builder
-- Depends on: M05, M01, P04, F01, F16, F72, X07, AO01, AO03, POL12, Y02, O04, O05, C03
+- Depends on: M05, M01, P04, F01, F16, F72, X07, AO01, AO03, Y02, C03
 - proof: every LP00 mermaid block renders (mmdc, PR 0 gate section 10) and on GitHub; all links resolve
 - door: two-way
 - triage: build (map doc)
@@ -26,28 +26,28 @@ Block 0 map doc: steps ship in B3, B4, and B5 as named in the table. Each step l
 | 1. Read logs | M01 Azure watcher, **M05** GitHub logs: Actions logs, workflow failures, gh-aw run audits (B01). Looks for errors, slow steps, flaky tests, cost spikes. Deterministic pre-check, so nothing new means a noop and 0 AIC | B3 (M05), B4 (M01) | one-way (tokens) | 1 run per hour max, Sven sets |
 | 2. Make issues | F72 triage with repro. One issue per finding, dedupe by fingerprint (workflow + step + error hash), fixed format: log excerpt, repro command, first seen, count. Label `agent:improve` | B3 | one-way (writes issues) | max 3 issues (local); v2 cross-repo cap 5 issues total |
 | 3. Make PR | **P04** assign-only: assigns the issue to the Copilot cloud agent (human `agent-ok` path, or M05 `risk:low` same-run handoff). Copilot opens the draft PR linked to the issue | B5 | one-way (assign + tokens) | max 1 open auto-fix PR per repo (WIP 1) |
-| 4. Review | F01 `/pr-review` comments. X07 runs when a `workflows/*.md` file changed. `scripts/verify.sh` must be green. On FAIL, F16 pr-fix pushes a fix (max 2 rounds) | B5 | one-way (tokens) | max 2 fix rounds per PR |
+| 4. Review | F01 `/pr-review` comments. X07 runs when a `workflows/*.md` file changed. `make verify` must be green. On FAIL, F16 pr-fix pushes a fix (max 2 rounds) | B5 | one-way (tokens) | max 2 fix rounds per PR |
 | 5. Human | An agent never merges. Sven merges. AO01 retro counts loop PRs as merged, fixed or rejected, plus the AIC per merged PR | B5 | two-way | none |
 
 ## LP00 v2: cross-repo self-fix
 
-**M05 cross-repo log watcher** (B4 with multi-repo/, depends P01, POL12, AO03)
+**M05 cross-repo log watcher** (B4 with multi-repo/, depends P01, workflow frontmatter, AO03)
 
-- Runs once, centrally in agentic-workflows. Reads Actions runs and failed job logs from every repo in `policies/POL01.yml` key `m05_repos` (allowlist, personal svennijhuis only; POL12 check fails on any other owner).
+- Runs once, centrally in agentic-workflows. Reads Actions runs and failed job logs from every repo in the M05 `allowed-repos` allowlist (svennijhuis owners only).
 - Pre-step (deterministic, 0 AIC): `gh run list --status failure` per repo since last run (cursor in repo-memory Y02). Nothing new means noop. Fingerprint = repo + workflow + step + error hash; a known fingerprint only bumps a counter.
 - Agent step: small cheap model (C03 alias `small`), max-turns low. Writes one issue per new fingerprint in the repo where it failed (`target-repo` from the allowlist), labeled `agent:improve` + `risk:low|high`, body = log excerpt, repro command, first seen, count.
 - **Risk class is set by rules, not the model.** A table in `shared/risk-classes.md` maps failing step + touched paths to a class. Low: lint, markdown/docs, flaky test (passed on rerun), dependency patch bump, CI config typo. High: anything matching auth, payment, secret, infra/bicep/terraform, Azure, `.github/workflows/`, `workflows/*.md`, or no rule matched. The model may move low to high, never high to low.
 - Log text is untrusted input (OWASP LLM01 prompt injection). Treat excerpts as data, not instructions.
-- Caps: max 5 issues per day over all repos, max 1 open auto-fix PR per repo, same fingerprint reopened twice becomes a POL PBI (A5). [AO03](../agent-ops/AO03-kill-switch.md) kill switch noops everything.
+- Caps: max 5 issues per day over all repos, max 1 open auto-fix PR per repo, same fingerprint reopened twice becomes a findings PBI (A5). [AO03](../agent-ops/AO03-kill-switch.md) kill switch noops everything.
 
-**Auto-fix path** (B5, depends M05, P04, O04, O05)
+**Auto-fix path** (B5, depends M05, P04)
 
 - For `risk:low` only, M05 hands off to P04 in the same run (assign the issue to the Copilot cloud agent in that repo). It does not rely on a label event, so the LP02 guard "bot labels never start a workflow" still holds; the one bot-started path is this explicit, rule-gated handoff, listed in [LP02](LP02-event-map.md).
 - No `agent-ok` label on the auto-fix path, so bot labels never start a workflow stays true (own LP02 row).
 - P04 only assigns the issue to the Copilot cloud agent in the target repo.
 - Copilot opens the draft PR under its own identity in the target repo.
 - Copilot not enabled in a repo: skip assign and comment on the issue, no fallback PR.
-- PR then: draft PR in the target repo, F01 review, `scripts/verify.sh` (or that repo's CI), Tester, then Sven merges. An agent never merges.
+- PR then: draft PR in the target repo, F01 review, `make verify` (or that repo's CI), Tester, then Sven merges. An agent never merges.
 - `risk:high` (auth, payments, secrets, infra/Azure, the workflows themselves, unclear): `agent:improve` issue only and Sven decides (he may add `agent-ok` himself).
 
 **Who opens the PR, with which token**
@@ -94,7 +94,7 @@ flowchart LR
   RC -->|risk:high or no rule| IH[issue agent:improve risk:high in that repo] --> S((Sven decides))
   RC -->|risk:low| IL[issue agent:improve risk:low] --> P04X["P04 assign Copilot cloud agent, max 1 open PR per repo"]
   P04X --> PR[draft PR in that repo] --> F01X["F01 + verify/CI + Tester"] --> S
-  IH & IL -->|same fingerprint twice| POL[POL PBI, A5]
+  IH & IL -->|same fingerprint twice| POL[findings PBI, A5]
 ```
 
 ## Definition of Done
@@ -105,7 +105,7 @@ flowchart LR
 - [ ] Header `proof:` grep count matches three diagram blocks (cross-repo, sequence, Flow)
 - [ ] GitHub markdown preview renders diagrams
 ## Technical design
-- Components and files: [M05](../monitoring/M05-github-log-watcher.md) workflow in agentic-workflows; `policies/POL01.yml` `m05_repos`; `shared/risk-classes.md`; [P04](../multi-repo/P04-research-plan-assign-copilot.md) assign job in same run; Y02 repo-memory cursor; F01, F16, X07 on PR path; secrets `M05_READ_TOKEN`, `P04_ASSIGN_TOKEN`.
+- Components and files: [M05](../monitoring/M05-github-log-watcher.md) workflow in agentic-workflows; M05 `allowed-repos` in workflow frontmatter; `shared/risk-classes.md`; [P04](../multi-repo/P04-research-plan-assign-copilot.md) assign job in same run; Y02 repo-memory cursor; F01, F16, X07 on PR path; secrets `M05_READ_TOKEN`, `P04_ASSIGN_TOKEN`.
 - Module boundary: the step table is the interface; each step links its own PBI
 - Interfaces: `gh run list --status failure` pre-step; issue labels `agent:improve`, `risk:low`, `risk:high`, human `agent-ok`; in-run P04 assign API to Copilot cloud agent; LP02 exception for bot-started assign on `risk:low`.
 - Sequence:
@@ -133,17 +133,17 @@ sequenceDiagram
       P04->>GH: assign Copilot cloud agent
       CA->>GH: open draft PR
       CA->>F01: review path
-      F01->>GH: verify.sh Tester
+      F01->>GH: make verify Tester
       Sven->>GH: merge PR
     end
   end
 ```
 
-- Failure modes: allowlist owner not svennijhuis (POL12 fail); Copilot disabled (comment, no PR); daily cap hit (stop creating issues); duplicate fingerprint twice (POL PBI); kill switch on (noop).
+- Failure modes: allowlist owner not svennijhuis (workflow frontmatter fail); Copilot disabled (comment, no PR); daily cap hit (stop creating issues); duplicate fingerprint twice (findings PBI); kill switch on (noop).
 - Security: split read and assign tokens; log text untrusted (OWASP LLM01); no cross-repo contents or PR write PAT; threat detection on agent steps per Bar H.
 - Observability: B01 run id on every issue; fingerprint and count in issue body; AO01 retro on merged loop PRs.
 - Cost: Map doc 0 AIC; M05 pre-step 0 AIC when noop; small model capped via C03; P04 assign deterministic low AIC; PR path F01 and Copilot per measure in Evidence.
-- Rollback: Disable M05 workflow; AO03 global off; revoke tokens; shrink the `m05_repos` allowlist in `policies/POL01.yml`.
+- Rollback: Disable M05 workflow; AO03 global off; revoke tokens; shrink `allowed-repos` in M05 workflow frontmatter.
 - Proof: header `proof:` command plus GitHub render
 - Door: two-way (Block 0 map; child PBIs and tokens are one-way)
 ## Evidence
@@ -163,7 +163,7 @@ flowchart LR
   I -->|Sven adds agent-ok| P04["P04 assign Copilot cloud agent"]
   I -->|M05 risk low same run| P04
   P04 --> PR[draft PR linked to issue, max 1 open]
-  PR --> V[verify.sh] --> F01[F01 /pr-review] --> X07{workflow changed?}
+  PR --> V[make verify] --> F01[F01 /pr-review] --> X07{workflow changed?}
   X07 -->|yes| B[X07 benchmark, Sven yes per run] --> H
   X07 -->|no| H[Sven merges]
   F01 -->|FAIL| F16[F16 pr-fix, max 2 rounds] --> PR

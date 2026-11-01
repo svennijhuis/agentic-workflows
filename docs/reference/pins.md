@@ -1,37 +1,28 @@
 # Tool and engine pins (C06)
 
-Reproducible compiles require pinned gh-aw and Copilot engine versions ([POL01](../../policies/POL01.yml)).
+Reproducible compiles require pinned gh-aw and Copilot engine versions in [`.github/aw.json`](../../.github/aw.json).
 
 ## `.github/aw.json`
 
-Catalog pin file (Block 1):
+- **`gh-aw`**: compiler pin **v0.93.4** (read by `Makefile` and `.github/workflows/verify.yml`).
+- **`engines.copilot`**: Copilot engine **1.0.101** (must match `workflows/shared/defaults.md` when you bump).
+- **`tools`**: **yq** and **gitleaks** only, each with `version`, `url` and `sha256`. The verify job downloads them for POL25/POL31 checks and the secret scan. git, gh, jq and make are runner-provided.
 
-- gh-aw compiler **v0.93.4**
-- Copilot engine **1.0.101**
-- `tools:` map (VF01, [POL27](../../policies/POL27.yml)): actionlint, gitleaks, yq and shellcheck, each with `version`, `url` and `sha256`. `scripts/verify.sh` exits 2 (needs-human) when one is missing or at another version. `.github/workflows/verify.yml` downloads exactly those urls, each with a plain `curl ... -o FILE` line and the exact `echo "<sha256>  FILE" | sha256sum -c -` line in the same `run:` block ([VF02d1](../pbi/done/VF02d1.md)); every `run:` line there must match `run_allow:` in [POL28](../../policies/POL28.yml). The top-level `gh-aw` key is the only gh-aw pin. git, gh and jq are runner-provided.
-
-Fields follow gh-aw compiler config: action pins, `compiler_version`, and `engine_versions.copilot` (plus checksum when set). `scripts/verify.sh` runs `gh aw compile --dir workflows --strict --actionlint` against these pins.
+`make compile` checks the installed gh-aw extension against the top-level pin. `make verify` does not re-pin auxiliary tools locally; CI installs yq and gitleaks from the same file.
 
 ## Lock file metadata
 
-Each `workflows/*.lock.yml` records resolved import SHAs and shows:
+Each `workflows/*.lock.yml` records resolved import SHAs and shows `compiler_version` and `engine_versions.copilot`.
 
-- `compiler_version`
-- `engine_versions.copilot`
-
-After frontmatter or pin bumps, recompile and commit fresh locks ([POL17](../../policies/POL17.yml)).
+After frontmatter or pin bumps, run `make compile` and commit fresh locks.
 
 ## Bump procedure
 
-1. Read [L04 gh-aw tool pin](../pbi/release/L04-gh-aw-tool-pin.md).
-2. Update `.github/aw.json` (for a `tools:` bump: version, url and sha256 together, and the same url and sha256 in `.github/workflows/verify.yml`) and any shared engine pin in `workflows/shared/defaults.md` if needed.
-3. Recompile all workflows strict; commit lock files.
-4. Run `./scripts/verify.sh`.
-5. Add an [CHANGELOG.md](../../CHANGELOG.md) entry under the release section.
-
-## Todo
-
-- [ ] gh-aw v1.x bump: offline `gh aw compile --strict` needs a committed `.github/aw/actions-lock.json` (not needed on v0.93.4; found in C12b).
+1. Update `.github/aw.json` (for a `tools:` bump: version, url and sha256 together, and matching `curl` lines in `.github/workflows/verify.yml`).
+2. Update `workflows/shared/defaults.md` engine version if the Copilot pin changed.
+3. `make compile`; commit all `.lock.yml` files.
+4. `make verify`.
+5. Add a [CHANGELOG.md](../../CHANGELOG.md) entry under the release section.
 
 ## See also
 

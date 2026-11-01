@@ -15,7 +15,7 @@ Containers inside one consumer run: the Actions runner VM, the agent container (
 ## Steps
 1. Publish context mermaid matching strategy architecture.md.
 2. Link to ARC02-ARC06 and G00 governance pages.
-3. Reviewer checks diagram on any edit; verify.sh POL16 (no em dash) on docs.
+3. Reviewer checks diagram on any edit and house style (no em dash in markdown).
 ## Definition of Done
 - [ ] Context mermaid matches approved strategy diagram
 - [ ] All container names and edges documented in prose
@@ -39,7 +39,7 @@ sequenceDiagram
   CR->>CP: workflow runs agent
 ```
 
-- Failure modes: diagram drifts from live repo names; fixed by ARC05 release review and POL checks on doc edits.
+- Failure modes: diagram drifts from live repo names; fixed by ARC05 release review and Reviewer on doc edits.
 - Security: diagram shows read-only Azure path (M02/M04) and B5 notify only to Teams; no secret names in prose.
 - Observability: n/a (static doc); ARC05 ties releases to diagram review.
 - Cost: 0 AIC (docs only).
@@ -48,7 +48,7 @@ sequenceDiagram
 - Door: two-way (docs evolve with catalog; no token spend).
 ## Evidence
 
-Shipped in PR #4 (Block 1). Gate: `./scripts/verify.sh` log on the exact head SHA, posted as a PR comment (Q0, Actions billing blocked).
+Shipped in PR #4 (Block 1). Gate: `make verify` log on the exact head SHA, posted as a PR comment (Q0, Actions billing blocked).
 (PR link; GitHub rendered mermaid screenshot optional)
 ## Flow
 ```mermaid

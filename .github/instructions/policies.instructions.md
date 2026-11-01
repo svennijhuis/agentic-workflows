@@ -4,29 +4,34 @@ applyTo: "policies/**,test/fixtures/**"
 
 # Policies and fixtures
 
-Each policy has `policies/POLnn.yml` (human rule + why) and `policies/checks/POLnn.sh` (gate). Shared helpers: `policies/checks/lib.sh`.
+This repo keeps two policy checks:
+
+| Id | Rule file | Check |
+| --- | --- | --- |
+| POL25 | [POL25.yml](../../policies/POL25.yml) | Agentic workflows are `workflow_dispatch` only |
+| POL31 | [POL31.yml](../../policies/POL31.yml) | No `skills:` in `workflows/shared/` fragments |
+
+Shared helpers: `policies/checks/lib.sh`.
 
 ## Edit workflow
 
 1. Change `policies/POLnn.yml` if the rule changed.
 2. Update `policies/checks/POLnn.sh` to match.
-3. Update `test/fixtures/bad/POLnn.md` (or `test/fixtures/bad/POL17/` folder) so the bad case still fails.
-4. Update paired `test/fixtures/good/POLnn.md` if needed.
-5. Run `./scripts/verify.sh`.
+3. Update `test/fixtures/bad/` and `test/fixtures/good/` for that id.
+4. Run `make verify`.
 
-POL23 meta check: every check must fail on its bad fixture and pass on good ([POL23](../../policies/POL23.yml)).
+Each check runs on the repo, then on fixtures: every bad case exits 1 with exactly one hit; every good case exits 0 with no output.
 
 ## Test one check
 
 ```bash
-bash policies/checks/POLnn.sh test/fixtures/bad/POLnn.md
-bash policies/checks/POLnn.sh test/fixtures/good/POLnn.md
+bash policies/checks/POL25.sh test/fixtures/bad/POL25-no-on/smoke-run.yml
+bash policies/checks/POL31.sh test/fixtures/good/POL31/workflows/squad-review.md
 ```
 
 ## Cross-links
 
 - [docs.instructions.md](docs.instructions.md)
 - [AGENTS.md](../../AGENTS.md)
-- PBI index [docs/pbi/policies/00-overview.md](../../docs/pbi/policies/00-overview.md)
 
-Do not embed secrets or real tokens in fixtures ([POL04](../../policies/POL04.yml), [POL20](../../policies/POL20.yml)).
+Do not embed secrets or real tokens in fixtures.

@@ -6,7 +6,7 @@
 - Block: 1
 - Lane: Builder
 - Depends on: C02, C05
-- proof: gh aw compile --dir workflows --strict && ./scripts/verify.sh
+- proof: gh aw compile --dir workflows --strict && make verify
 - door: two-way
 ## Goal
 Provide `shared/defaults.md` imported by every workflow: `engine: copilot`, pinned gh-aw import tag or SHA, model routing and aliases, fallback models, cost caps (50 AIC per run, 200 per day starting suggestion), admission rules, concurrency, timeouts, and sub-agent limits.
@@ -16,18 +16,18 @@ Personal account uses `COPILOT_GITHUB_TOKEN` fine-grained PAT; `copilot-requests
 1. Author `shared/defaults.md` as a shared component (no `on:`).
 2. Set `engine: copilot` and document model aliases per gh-aw Copilot reference.
 3. Set `max-ai-credits: 50`, `max-daily-ai-credits: 200`, `max-turns`, `timeout-minutes` (starting suggestion, unverified).
-4. Add admission, concurrency, and sub-agent guardrails consistent with POL02, POL09, POL15.
+4. Add admission, concurrency, and sub-agent guardrails in shared defaults and workflow frontmatter.
 5. Require every workflow PBI to import shared defaults (Bar H).
 ## Definition of Done
 - [ ] `shared/defaults.md` exists and validates as shared import
 - [ ] Every NOW workflow imports shared defaults
-- [ ] Cost caps present and match POL02
+- [ ] Cost caps present in each workflow frontmatter (Bar H)
 - [ ] Engine is copilot everywhere in catalog
 - [ ] First three runs per workflow record measured AIC in owning PBI (Bar H audit)
 - [ ] Model or prompt comparison docs reference X07 score per AIC on the shared benchmark cases
 ## Technical design
 - Components and files: `shared/defaults.md`
-- Interfaces: Engine copilot pinned, model routing + aliases (incl `small`), fallback-models, concurrency, sub-agents. Caps NOT here (POL02, compiler ignores them in imports)
+- Interfaces: Engine copilot pinned, model routing + aliases (incl `small`), fallback-models, concurrency, sub-agents. Caps live in each workflow frontmatter (compiler ignores them in imports)
 - Sequence:
 
 ```mermaid
@@ -49,7 +49,7 @@ sequenceDiagram
 - Door: two-way (file, tagged release)
 ## Evidence
 
-Shipped in PR #4 (Block 1). Gate: `./scripts/verify.sh` log on the exact head SHA, posted as a PR comment (Q0, Actions billing blocked).
+Shipped in PR #4 (Block 1). Gate: `make verify` log on the exact head SHA, posted as a PR comment (Q0, Actions billing blocked).
 (commands, logs, verify log on SHA, run links)
 ## Flow
 ```mermaid

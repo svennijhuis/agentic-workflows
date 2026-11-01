@@ -4,8 +4,8 @@
 - Wave: W5
 - Block: 5
 - Lane: Builder
-- Depends on: C02, C04, O05, G01, X01
-- proof: gh aw compile --dir workflows --strict && ./scripts/verify.sh
+- Depends on: C02, C04, G01, X01
+- proof: gh aw compile --dir workflows --strict && make verify
 - door: one-way
 - one-way gate: Sven's exact yes required (named ask in its block). Rollback: disconnect consumer aw.yml hub wiring
 ## Goal
@@ -38,9 +38,9 @@ gh-aw CentralRepoOps and gallery issue-tracking show a hub repo coordinating man
 - [ ] Tool, bash, and MCP allowlists; `on.roles` and skip-bots configured
 - [ ] Issue/PR format matches `shared/reporting.md`
 - [ ] Trial run on X01 test repo; `gh aw audit` on first 3 runs; measured AIC recorded in Evidence
-- [ ] `scripts/verify.sh` pass on workflow SHA while Actions billing blocked (Q0)
+- [ ] `make verify` pass on workflow SHA while Actions billing blocked (Q0)
 ## Evidence
-(commands, `scripts/verify.sh` log on SHA, `gh aw` run links, audit output)
+(commands, `make verify` log on SHA, `gh aw` run links, audit output)
 ## Flow
 ```mermaid
 sequenceDiagram

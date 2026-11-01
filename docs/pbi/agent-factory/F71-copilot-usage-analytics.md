@@ -4,45 +4,43 @@
 - Wave: PR 0 (implementation W6)
 - Block: 6
 - Lane: Builder
-- Depends on: C01, C02, C03, C04, C05, C06, O01, O02, O03, R01, X01, L01, B02, F04
-- proof: gh aw compile --dir workflows --strict workflows/f71.md; gh aw audit <run-id> (Block exit runs)
+- Depends on: C01, C02, C03, C04, C05, C06, R01, X01, L01, B02, F04
+- proof: `make verify` exits 0 (`gh aw compile --strict --dir workflows` clean for `workflows/copilot-usage-analytics.md`, lock unchanged after compile, POL25 and POL31 clean); no run, no token spend
 - door: one-way
-- one-way gate: Sven's exact yes required (named ask in its block). Rollback: disable workflow via workflow_dispatch off or remove schedule trigger
+- feedback: `make compile` (`gh aw compile --strict`)
 ## Goal
 Ship `copilot-usage-analytics` as an installable gh-aw workflow for svennijhuis repos that bucket pbi for pr analysis, session insights, centralization reports (report-only bundle).
 ## Context
-Wave W6 later workflow. PR 0 documents intent only. Ratings: Consolidates Agent Factory Copilot analytics workflows after spend baselines exist. Cost tier L (unverified). Provider: GitHub Copilot (`engine: copilot`) on personal account svennijhuis.
+Wave W6 later workflow. PR 0 documents intent only.
+**What it does:** Bucket PBI for PR analysis, session insights, centralization reports (report-only bundle).
+**Value:** Consolidates Agent Factory Copilot analytics workflows after spend baselines exist.
+**How ours beats the example (Bar H):** One copilot engine entry point vs many claude or codex factory copies.
+**Trigger:** `workflow_dispatch` only (POL25). Monthly schedule is a named ask after B02 budget proof.
+**Safe outputs and limits:** Single deduped analytics issue per period; no raw prompts with secrets.; `create-issue` max 1, `staged: true`.
+**Issue/PR format:** Title prefix `[F71]`, footer from `shared/reporting.md`, dedupe key `copilot-usage-analytics:{date}`.
+Engine: `copilot` with `COPILOT_GITHUB_TOKEN` (personal fine-grained PAT).
+
+## Frontmatter security
+- `permissions:` read only (`contents: read`, `issues: read`); no write permission.
+- Writes only through `safe-outputs` (`create-issue` max 1), `staged: true` until Sven's yes.
+- `timeout-minutes:` 25
+- Trigger: `workflow_dispatch` only (POL25). Monthly schedule is a named ask in `policies/POL25.yml` `sven_yes` first.
 ## Steps
 1. Study upstream `githubnext/agentics` workflow `copilot-usage-analytics` and Agent Factory equivalents.
-2. Author `workflows/copilot-usage-analytics.md` with `engine: copilot` and shared imports.
-3. Compile with pinned gh-aw; run `scripts/verify.sh` on the workflow commit SHA.
-4. Trial on X01: staged or report-only run for `workflow_dispatch monthly`.
-5. Record AIC for first 3 runs in Evidence; enable write outputs only after Sven yes.
-6. Do not enable schedule or cron until explicit Sven approval and measured cost.
+2. Add `workflows/copilot-usage-analytics.md`; import `shared/defaults.md` and `shared/security.md`; set the frontmatter security above.
+3. Add deterministic pre-check returning `noop` when nothing to do.
+4. Run `make compile` and commit `workflows/copilot-usage-analytics.lock.yml`.
+5. Run `make verify`; no workflow run, no token spend.
+
 ## Definition of Done
+- [ ] `workflows/copilot-usage-analytics.md` and its `.lock.yml` committed; `gh aw compile --strict` clean (0 errors, 0 warnings), lock unchanged after `make compile`
+- [ ] Frontmatter: read-only `permissions`, writes only via `safe-outputs` (`staged: true`, a `max` per output), `timeout-minutes` set
+- [ ] Trigger `workflow_dispatch` only (POL25); no `skills:` in a shared fragment (POL31)
+- [ ] `make verify` exits 0; no run, no token spend
 - [ ] Fetches own context with tools and imports (Bar H, gist A7); prompt never pastes repo content
-- [ ] `workflows/copilot-usage-analytics.md` imports `shared/defaults.md` and uses `engine: copilot` with pinned gh-aw version and import SHA or tag (POL01)
-- [ ] Cost caps: max-ai-credits 50, max-daily-ai-credits 200, max-turns and timeout-minutes set (POL02, POL15)
-- [ ] Pre-check step then noop path; staged or report-only mode before any write outputs (POL03, O02)
-- [ ] Dedupe on output title, group-by-day, close-older, expires configured (O03)
-- [ ] `min-integrity: approved` on agent run (POL05)
-- [ ] Minimal network allowlist, no wildcards (POL06)
-- [ ] Tool, MCP, and bash allowlists documented (POL07)
-- [ ] Every output uses safe-output max limits (POL08)
-- [ ] Rate limits, concurrency, cooldown from shared defaults (POL09)
-- [ ] `on.roles` and skip-bots for triggers (POL10)
-- [ ] Least permissions, read-only agent where possible (POL11)
-- [ ] Explicit allowed-repos or target-repo in workflow (POL12)
-- [ ] Threat detection enabled, never off (POL13)
-- [ ] No merge-pull-request or unsafe pull_request_target (POL14)
-- [ ] Issue and PR bodies follow `shared/reporting.md` format (POL16)
-- [ ] Trial run on X01 test repo with staged or report-only first
-- [ ] First 3 production runs audited; measured AIC per run recorded in this PBI (B02)
-- [ ] `scripts/verify.sh` passes on workflow SHA (Q0 local verify until Actions billing fixed)
+- [ ] Single deduped analytics issue per period; no raw prompts with secrets
 ## Evidence
-- `scripts/verify.sh` log on workflow SHA (Q0)
-- X01 trial run URL and mode (staged or report-only)
-- First 3 run links with measured AIC recorded below
+(verify log on SHA when workflow lands)
 ## Flow
 ```mermaid
 sequenceDiagram
@@ -58,7 +56,9 @@ sequenceDiagram
     deactivate WF
 ```
 ## Named asks for Sven
-Q4, Q5
+- Q4, Q5 (Copilot metrics API access)
+- Monthly schedule: Sven exact yes, row in `policies/POL25.yml` `sven_yes` first
+- X01 live trial and first 3 audited runs (B02): Sven exact yes, spends tokens
 ## Cost
 Tier L: estimated 80-150 AIC per run (unverified). Daily cap 200 AIC repo-wide suggested.
 ## Sources
@@ -66,16 +66,3 @@ Tier L: estimated 80-150 AIC per run (unverified). Daily cap 200 AIC repo-wide s
 - https://github.com/githubnext/agentics/tree/main/workflows
 - https://github.github.com/gh-aw/reference/aw-yml-package-manifest/
 - https://github.github.com/gh-aw/blog/2026-01-13-meet-the-workflows-metrics-analytics/
-
-## Workflow detail (Bar H)
-**What it does:** Bucket PBI for PR analysis, session insights, centralization reports (report-only bundle).
-
-**Value:** Consolidates Agent Factory Copilot analytics workflows after spend baselines exist.
-
-**Better than example:** One copilot engine entry point vs many claude or codex factory copies.
-
-**Trigger:** workflow_dispatch monthly; no cron until B02 proves budget.
-
-**Safe outputs:** Single deduped analytics issue per period; no raw prompts with secrets.
-
-**Issue or PR format:** Title prefix `[F71]`, footer from `shared/reporting.md`, dedupe key `copilot-usage-analytics:{date}`.

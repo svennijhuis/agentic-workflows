@@ -4,8 +4,8 @@
 - Wave: W5
 - Block: 3
 - Lane: Builder
-- Depends on: C03, C04, O01, O02, O03, P05, G01
-- proof: gh aw compile --dir workflows --strict workflows/p12-planning.md && ./scripts/verify.sh
+- Depends on: C03, C04, P05, G01
+- proof: gh aw compile --dir workflows --strict workflows/p12-planning.md && make verify
 - door: one-way
 - one-way gate: Sven's exact yes required (tokens). Rollback: disable workflow via AO03 kill var for P12
 ## Goal
@@ -25,11 +25,11 @@ On label `plan` or human `/plan`, draft a full PBI from [docs/pbi/_template.md](
 - [ ] Max 3 runs per day enforced
 - [ ] `workflow_dispatch` and label or slash after promotion path documented
 - [ ] Trial on X01 issue; three audited runs; AIC in Evidence
-- [ ] `scripts/verify.sh` pass
+- [ ] `make verify` pass
 - [ ] X07 benchmark score at or above baseline (5+ cases)
 ## Technical design
 - Components and files: `workflows/p12-planning.md`, import `docs/pbi/_template.md` via read tool, `shared/defaults.md`
-- Interfaces: trigger `plan` label and `command: /plan`; safe-output `create-comment` only; POL10 human actor check
+- Interfaces: trigger `plan` label and `command: /plan`; safe-output `create-comment` only; workflow frontmatter human actor check
 - Sequence:
 
 ```mermaid

@@ -4,7 +4,7 @@
 - Wave: W4
 - Block: 4
 - Lane: Builder
-- Depends on: M02, S04, POL07
+- Depends on: M02, S04
 - proof: gh aw compile --dir workflows --strict; gh aw audit <run-id> (M04 trial run)
 - door: one-way
 - one-way gate: Sven's exact yes required (named ask in its block). Rollback: disable Azure MCP workflow
@@ -26,7 +26,7 @@ Gap: OIDC inside agent MCP is limited; prefer M01 deterministic KQL. M04 is expl
 ## Definition of Done
 - [ ] Fetches own context with tools and imports (Bar H, gist A7); prompt never pastes repo content
 
-- [ ] MCP gateway allowlist matches POL07
+- [ ] MCP gateway allowlist matches workflow frontmatter
 - [ ] No write commands in MCP argv
 - [ ] `imports:` shared/defaults.md (engine copilot, caps, admission, concurrency)
 - [ ] Pinned gh-aw compiler version and every remote import uses tag or SHA (no @main)
@@ -38,9 +38,9 @@ Gap: OIDC inside agent MCP is limited; prefer M01 deterministic KQL. M04 is expl
 - [ ] Tool, bash, and MCP allowlists; `on.roles` and skip-bots configured
 - [ ] Issue/PR format matches `shared/reporting.md`
 - [ ] Trial run on X01 test repo; `gh aw audit` on first 3 runs; measured AIC recorded in Evidence
-- [ ] `scripts/verify.sh` pass on workflow SHA while Actions billing blocked (Q0)
+- [ ] `make verify` pass on workflow SHA while Actions billing blocked (Q0)
 ## Evidence
-(commands, `scripts/verify.sh` log on SHA, `gh aw` run links, audit output)
+(commands, `make verify` log on SHA, `gh aw` run links, audit output)
 ## Flow
 ```mermaid
 sequenceDiagram

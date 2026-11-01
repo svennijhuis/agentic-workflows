@@ -437,7 +437,7 @@ Cost tier is an ESTIMATE per run (S <=20 AIC, M 20-60, L 60-150, XL >150), set f
 | Weekly Blog Post Writer | copilot | not ours: gh-aw team internal/experiment (reviewed) |
 | Weekly Editors Health Check | copilot | not ours: gh-aw team internal/experiment (reviewed) |
 | Weekly Issue Summary | pi | not ours: gh-aw team internal/experiment (reviewed) |
-| Weekly Network Domain Set Audit | pi | PICK POL06 |
+| Weekly Network Domain Set Audit | pi | PICK S01 |
 | Weekly Safe Outputs Specification Review | pi | not ours: gh-aw team internal/experiment (reviewed) |
 | Weekly Workflow Analysis | claude | PICK B02 |
 | Windows Grower | codex | not ours: language/tool we do not use or gh-aw internal |

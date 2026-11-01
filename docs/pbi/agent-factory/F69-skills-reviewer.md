@@ -4,44 +4,43 @@
 - Wave: PR 0 (implementation W6)
 - Block: 6
 - Lane: Builder
-- Depends on: C01, C02, C03, C04, C05, C06, O01, O02, O03, R01, X01, L01, C11
-- proof: gh aw compile --dir workflows --strict workflows/f69.md; gh aw audit <run-id> (Block exit runs)
+- Depends on: C01, C02, C03, C04, C05, C06, R01, X01, L01, C11
+- proof: `make verify` exits 0 (`gh aw compile --strict --dir workflows` clean for `workflows/skills-reviewer.md`, lock unchanged after compile, POL25 and POL31 clean); no run, no token spend
 - door: one-way
-- one-way gate: Sven's exact yes required (named ask in its block). Rollback: disable workflow via workflow_dispatch off or remove schedule trigger
+- feedback: `make compile` (`gh aw compile --strict`)
 ## Goal
 Ship `skills-reviewer` as an installable gh-aw workflow for svennijhuis repos that agent factory pick: lint skills against team conventions.
 ## Context
-Wave W6 later workflow. PR 0 documents intent only. Ratings: Reviews Cursor skills and instructions for quality and safety. Cost tier M (unverified). Provider: GitHub Copilot (`engine: copilot`) on personal account svennijhuis.
+Wave W6 later workflow. PR 0 documents intent only.
+**What it does:** Agent Factory pick: lint skills against team conventions.
+**Value:** Reviews Cursor skills and instructions for quality and safety.
+**How ours beats the example (Bar H):** 
+**Trigger:** `workflow_dispatch` only (POL25). `pull_request` paths `**/skills/**` is a named ask, row in `policies/POL25.yml` `sven_yes` first.
+**Safe outputs and limits:** PR review comments; checklist issue for egregious issues.; `submit-pull-request-review` max 1, `create-issue` max 1, `staged: true`.
+**Issue/PR format:** Title prefix `[F69]`, footer from `shared/reporting.md`, dedupe key `skills-reviewer:{date}`.
+Engine: `copilot` with `COPILOT_GITHUB_TOKEN` (personal fine-grained PAT).
+
+## Frontmatter security
+- `permissions:` read only (`contents: read`, `pull-requests: read`); no write permission.
+- Writes only through `safe-outputs` (`submit-pull-request-review` max 1, `create-issue` max 1), `staged: true` until Sven's yes.
+- `timeout-minutes:` 15
+- Trigger: `workflow_dispatch` only (POL25). `pull_request` paths filter is a named ask in `policies/POL25.yml` `sven_yes` first.
 ## Steps
 1. Study upstream `githubnext/agentics` workflow `skills-reviewer` and Agent Factory equivalents.
-2. Author `workflows/skills-reviewer.md` with `engine: copilot` and shared imports.
-3. Compile with pinned gh-aw; run `scripts/verify.sh` on the workflow commit SHA.
-4. Trial on X01: staged or report-only run for `pull_request paths **/skills/** or dispatch.`.
-5. Record AIC for first 3 runs in Evidence; enable write outputs only after Sven yes.
+2. Add `workflows/skills-reviewer.md`; import `shared/defaults.md` and `shared/security.md`; set the frontmatter security above.
+3. Add deterministic pre-check returning `noop` when nothing to do.
+4. Run `make compile` and commit `workflows/skills-reviewer.lock.yml`.
+5. Run `make verify`; no workflow run, no token spend.
+
 ## Definition of Done
+- [ ] `workflows/skills-reviewer.md` and its `.lock.yml` committed; `gh aw compile --strict` clean (0 errors, 0 warnings), lock unchanged after `make compile`
+- [ ] Frontmatter: read-only `permissions`, writes only via `safe-outputs` (`staged: true`, a `max` per output), `timeout-minutes` set
+- [ ] Trigger `workflow_dispatch` only (POL25); no `skills:` in a shared fragment (POL31)
+- [ ] `make verify` exits 0; no run, no token spend
 - [ ] Fetches own context with tools and imports (Bar H, gist A7); prompt never pastes repo content
-- [ ] `workflows/skills-reviewer.md` imports `shared/defaults.md` and uses `engine: copilot` with pinned gh-aw version and import SHA or tag (POL01)
-- [ ] Cost caps: max-ai-credits 50, max-daily-ai-credits 200, max-turns and timeout-minutes set (POL02, POL15)
-- [ ] Pre-check step then noop path; staged or report-only mode before any write outputs (POL03, O02)
-- [ ] Dedupe on output title, group-by-day, close-older, expires configured (O03)
-- [ ] `min-integrity: approved` on agent run (POL05)
-- [ ] Minimal network allowlist, no wildcards (POL06)
-- [ ] Tool, MCP, and bash allowlists documented (POL07)
-- [ ] Every output uses safe-output max limits (POL08)
-- [ ] Rate limits, concurrency, cooldown from shared defaults (POL09)
-- [ ] `on.roles` and skip-bots for triggers (POL10)
-- [ ] Least permissions, read-only agent where possible (POL11)
-- [ ] Explicit allowed-repos or target-repo in workflow (POL12)
-- [ ] Threat detection enabled, never off (POL13)
-- [ ] No merge-pull-request or unsafe pull_request_target (POL14)
-- [ ] Issue and PR bodies follow `shared/reporting.md` format (POL16)
-- [ ] Trial run on X01 test repo with staged or report-only first
-- [ ] First 3 production runs audited; measured AIC per run recorded in this PBI (B02)
-- [ ] `scripts/verify.sh` passes on workflow SHA (Q0 local verify until Actions billing fixed)
+- [ ] Lint skills against C11 authoring rules; no secret values in skill text
 ## Evidence
-- `scripts/verify.sh` log on workflow SHA (Q0)
-- X01 trial run URL and mode (staged or report-only)
-- First 3 run links with measured AIC recorded below
+(verify log on SHA when workflow lands)
 ## Flow
 ```mermaid
 sequenceDiagram
@@ -57,7 +56,8 @@ sequenceDiagram
     deactivate WF
 ```
 ## Named asks for Sven
-none
+- Secondary triggers listed in Context: Sven exact yes, row in `policies/POL25.yml` `sven_yes` first
+- X01 live trial and first 3 audited runs (B02): Sven exact yes, spends tokens
 ## Cost
 Tier M: estimated 25-50 AIC per run (unverified). Daily cap 200 AIC repo-wide suggested.
 ## Sources
@@ -66,16 +66,3 @@ Tier M: estimated 25-50 AIC per run (unverified). Daily cap 200 AIC repo-wide su
 - https://github.github.com/gh-aw/reference/aw-yml-package-manifest/
 - https://github.github.com/gh-aw/agent-factory-status/
 - agentic-workflows-workflow-ratings.md (agent-factory-status PICK row)
-
-## Workflow detail (Bar H)
-**What it does:** Agent Factory pick: lint skills against team conventions.
-
-**Value:** Reviews Cursor skills and instructions for quality and safety.
-
-**Better than example:** POL20 no tokens in markdown scan plus C11 authoring rules.
-
-**Trigger:** pull_request paths **/skills/** or dispatch.
-
-**Safe outputs:** PR review comments; checklist issue for egregious issues.
-
-**Issue or PR format:** Title prefix `[F69]`, footer from `shared/reporting.md`, dedupe key `skills-reviewer:{date}`.

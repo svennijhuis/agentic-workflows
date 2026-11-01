@@ -4,7 +4,7 @@
 - Wave: W5
 - Block: 5
 - Lane: Builder
-- Depends on: C01, POL16
+- Depends on: C01
 - proof: policies/checks or verify step flags sample PII string in workflow prompt fixture; docs/privacy/agent-data-rules.md merged
 - door: two-way
 ## Goal

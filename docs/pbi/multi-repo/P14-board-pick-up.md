@@ -4,12 +4,12 @@
 - Wave: W5
 - Block: 5
 - Lane: Builder
-- Depends on: P05, P04, O04, O05, AO03, G01
-- proof: gh aw compile --dir workflows --strict workflows/p14-board-pick-up.md && ./scripts/verify.sh
+- Depends on: P05, P04, AO03, G01
+- proof: gh aw compile --dir workflows --strict workflows/p14-board-pick-up.md && make verify
 - door: one-way
 - one-way gate: Sven's exact yes required before schedule trigger stays on (B5). Rollback: disable schedule workflow; AO03 kill var for P14
 - triage: park (schedule off until B5 Sven yes)
-- feedback: gh aw compile --dir workflows --strict workflows/p14-board-pick-up.md && ./scripts/verify.sh
+- feedback: gh aw compile --dir workflows --strict workflows/p14-board-pick-up.md && make verify
 - harness: gh-aw engine
 - review-input: diff + this PBI + DoD (+ linked spec) + PR description, never builder session logs
 - kind: script
@@ -31,7 +31,7 @@ Poll every 30 minutes (`schedule`) because GitHub Actions has no Projects v2 eve
 - [ ] Hands off to P04; draft PR links to Project item
 - [ ] `imports:` shared/defaults.md; caps; AO03 pre-step
 - [ ] Three audited runs with measured Actions minutes and AIC in Evidence
-- [ ] `scripts/verify.sh` pass
+- [ ] `make verify` pass
 - [ ] X07 benchmark score at or above baseline (5+ cases)
 ## Technical design
 - Components and files: `workflows/p14-board-pick-up.md`, Project id from masked var, shared WIP counter with P04

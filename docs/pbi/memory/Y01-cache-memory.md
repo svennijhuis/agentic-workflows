@@ -5,7 +5,7 @@
 - Block: 3
 - Lane: Cursor CLI
 - Depends on: C03
-- proof: ./scripts/verify.sh
+- proof: make verify
 - door: two-way
 ## Goal
 Document cache-memory for short-lived cross-run context without committing secrets to the repo.
@@ -14,7 +14,7 @@ Cache memory complements deterministic steps. Used lightly to avoid repeat fetch
 ## Steps
 1. Document cache-memory TTL and size limits from gh-aw reference.
 2. Define what may be cached (public metadata) vs forbidden (tokens).
-3. Link to POL04 no secrets in files.
+3. No secrets in files (workflow and docs; gitleaks in CI).
 ## Definition of Done
 - [ ] Authoring guidance for when to use cache vs repo-memory (Y02).
 - [ ] F12 metrics path notes cache-memory if adopted.

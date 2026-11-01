@@ -5,10 +5,10 @@
 - Block: 3
 - Lane: Builder
 - Depends on: F01, F16, BH09
-- proof: fixture review output: each finding has severity severe|important|nit and the check it ran, else marked unverified; 3rd FAIL round gets needs-human and no 3rd run
+- proof: `make verify` exits 0; no run, no token spend
 - door: two-way
 - triage: build
-- feedback: review output schema check plus the round-cap fixture
+- feedback: `make compile` (`gh aw compile --strict`)
 - harness: gh-aw, engine copilot via shared/defaults.md (when built)
 - review-input: diff + this PBI + DoD (+ linked spec) + PR description, never builder session logs (PA6)
 - kind: skill
@@ -17,35 +17,26 @@
 F01 output is structured: each finding has a severity (severe, important, nit) and names the check it ran; without one it is marked unverified. F01 and F16 loop at most 2 rounds, then `needs-human` (absorbs BH02).
 ## Context
 Warp review skill: structured `review.json` with severity severe, important, nit; the reviewer can build and test, so it can test hypotheses before it suggests changes. Ben Holmes: the review agent cycles "for a few rounds before human review". Not built in PR #4: docs only, nothing enabled (PA9).
+
+## Frontmatter security
+- Applies to `workflows/pr-review.md` and `workflows/pr-fix.md` when F01a ships: read-only `permissions` unchanged from F01/F16; review output stays COMMENT-only via `safe-outputs`.
+- No new write outputs; schema lives in prompt/imports, not GitHub writes.
+- `timeout-minutes:` unchanged from parent workflows (15 for review, 20 for pr-fix).
+- Trigger: still `workflow_dispatch` only (POL25) on those workflows; F01a does not add triggers.
+
 ## Steps
-1. Output schema with severity and check.
-2. Round counter in F01/F16, cap 2.
+1. Define review output schema (severity severe|important|nit, check field) under `workflows/shared/` or agentPacks import.
+2. Wire schema validation into F01 and F16 prompts; unverified when check missing.
+3. Add round counter in F01/F16 workflows, cap at 2 rounds then `needs-human`.
+4. Run `make compile` and `make verify` when F01/F16 workflow files change.
+5. Add fixture or doc check: finding without severity fails; third round fixture gets needs-human.
+
 ## Definition of Done
 - [ ] Schema check red on a finding without severity
 - [ ] Unverified mark on a finding without a check
 - [ ] 3rd round fixture gets needs-human, no run
+- [ ] `make verify` exits 0 when F01/F16 workflow changes land; no run, no token spend
 - [ ] Every Bar H line from [README.md](../README.md#bar-h-every-workflow-pbi) when the workflow ships
-## Technical design
-- Components and files: F01 and F16 workflows, schema under `workflows/shared/`
-- Module boundary: the review output schema
-- Interfaces: severity enum, check field, round label
-- Sequence:
-
-```mermaid
-sequenceDiagram
-  participant A as caller
-  participant B as F01a
-  A->>B: input
-  B-->>A: result or file:line hits
-```
-
-- Failure modes: Cap reached means a human decides
-- Security: Read-only review (POL22 COMMENT only)
-- Observability: rounds per PR
-- Cost: per F01 run
-- Rollback: Drop the schema check
-- Proof: same as proof: above
-- Door: two-way (revert is one commit)
 ## Evidence
 (todo)
 ## Flow

@@ -4,20 +4,20 @@
 - Wave: W2
 - Block: 2
 - Lane: Builder
-- Depends on: S00, POL05
-- proof: ./scripts/verify.sh && gh aw compile --dir workflows --strict
+- Depends on: S00
+- proof: make verify && gh aw compile --dir workflows --strict
 - door: two-way
 ## Goal
 Implement integrity filtering defaults (`min-integrity: approved`) for untrusted GitHub content consumed by agents.
 ## Context
-Part of gh-aw defense in depth for svennijhuis/agentic-workflows. Complements policies POL01 through POL18 and Bar H workflow requirements.
+Part of gh-aw defense in depth for svennijhuis/agentic-workflows. Complements workflow frontmatter security (minimal permissions, safe-outputs, timeouts) and Bar H workflow requirements.
 ## Steps
 1. Set integrity in shared security import.
 2. Document approved content sources (issues, PRs, comments).
-3. Align with POL05 gate.
+3. Align with `gh aw compile --strict` and workflow frontmatter.
 ## Definition of Done
 - [ ] shared security sets min-integrity approved
-- [ ] POL05 gate green
+- [ ] compile --strict clean
 - [ ] Workflow PBIs cite integrity in Bar H section
 ## Evidence
 (commands, logs, verify log on SHA, run links)

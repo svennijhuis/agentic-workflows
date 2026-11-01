@@ -59,11 +59,11 @@ sequenceDiagram
 - Observability: run id on every issue; fingerprint dedupe in M05 pre-step.
 - Cost: M05 spends AIC when not noop; doc 0 AIC.
 - Rollback: disable M05 workflow; flip AO03 global var.
-- Proof: diagrams render; POL13 threat detection referenced in workflow PBIs.
+- Proof: diagrams render; threat detection on in workflow PBIs.
 - Door: two-way doc; M05 and P04 rollout one-way per loops.md.
 ## Evidence
 
-Shipped in PR #4 (Block 1). Gate: `./scripts/verify.sh` log on the exact head SHA, posted as a PR comment (Q0, Actions billing blocked).
+Shipped in PR #4 (Block 1). Gate: `make verify` log on the exact head SHA, posted as a PR comment (Q0, Actions billing blocked).
 (gh-aw threat detection doc link; sample blocked run id when available)
 ## Flow
 ```mermaid

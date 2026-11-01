@@ -4,17 +4,17 @@
 - Wave: W2
 - Block: 2
 - Lane: Builder
-- Depends on: C06, POL01, POL17
-- proof: ./scripts/verify.sh && gh aw compile --dir workflows --strict
+- Depends on: C06
+- proof: make verify && gh aw compile --dir workflows --strict
 - door: two-way
 ## Goal
 Harden GitHub Actions supply chain: pinned actions in aw.json, actions-lock file, frontmatter hash integrity, Dependabot updates for gh-aw-actions.
 ## Context
-Part of gh-aw defense in depth for svennijhuis/agentic-workflows. Complements policies POL01 through POL18 and Bar H workflow requirements.
+Part of gh-aw defense in depth for svennijhuis/agentic-workflows. Complements workflow frontmatter security (minimal permissions, safe-outputs, timeouts) and Bar H workflow requirements.
 ## Steps
 1. Enable Dependabot for gh-aw action bumps with review.
 2. Document frontmatter hash validation on compile.
-3. Tie to POL01 and POL17.
+3. Tie to pinned actions in frontmatter and compile --strict.
 ## Definition of Done
 - [ ] Action pins and lock strategy documented
 - [ ] Dependabot config for gh-aw actions (when repo enables)
@@ -26,7 +26,7 @@ Part of gh-aw defense in depth for svennijhuis/agentic-workflows. Complements po
 sequenceDiagram
   participant D as Dependabot
   participant L as actions-lock
-  participant G as scripts/verify.sh
+  participant G as make verify
   D->>L: propose pin bump
   G->>L: verify on PR
 ```

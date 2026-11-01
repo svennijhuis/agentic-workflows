@@ -1,8 +1,0 @@
-scenarios:
-  - id: orders-list
-    env: tst
-    method: GET
-    path: /x/glpat-FAKE00000000000000
-    auth: none
-    expect:
-      status: 200

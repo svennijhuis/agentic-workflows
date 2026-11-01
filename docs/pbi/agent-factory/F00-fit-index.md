@@ -5,10 +5,10 @@
 - Block: 0
 - Lane: Cursor CLI
 - Depends on: none
-- proof: ./scripts/verify.sh
+- proof: `make verify` exits 0; no run, no token spend
 - door: two-way
 - triage: build (index edit in PR #4)
-- feedback: ./scripts/verify.sh (A1 and LINK rules on this file)
+- feedback: `make compile` (`gh aw compile --strict`)
 - harness: none (docs page)
 - review-input: diff + this PBI + DoD (+ linked spec) + PR description, never builder session logs (PA6)
 - kind: skill
@@ -124,14 +124,18 @@ Full table with Decision column (not ours, PICK, F71 analytics bucket) lives in 
 1. Keep this index aligned when adding or retiring F PBIs.
 2. On each new PICK, add a row here and open the matching F PBI file.
 3. Reconcile gallery vs agentics naming in D02 use-case catalog (W5).
+4. Run `make verify` after index edits (POL25/POL31 and compile still apply to workflow files in repo).
+
 ## Definition of Done
 - [ ] All 62 agentics entries represented (redirects point to canonical PBI)
 - [ ] All 18 gallery pages mapped to a PBI id
 - [ ] Agent-factory 348-row table linked from `docs/pbi/workflow-ratings.md`
 - [ ] Every PICK in F01 to F71 has a matching `docs/pbi/agent-factory/` file when in scope
-- [ ] No em dash or en dash in this folder (gate POL16)
+- [ ] No em dash or en dash in this folder
+- [ ] `make verify` exits 0 on the repo after index edits
 ## Evidence
-(link to committed `docs/pbi/workflow-ratings.md` and grep clean dash check)
+(link to committed `docs/pbi/workflow-ratings.md`; run `make verify` on the PR SHA)
+
 ## Flow
 ```mermaid
 sequenceDiagram

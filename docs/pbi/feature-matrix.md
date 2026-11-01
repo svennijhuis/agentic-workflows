@@ -147,7 +147,7 @@ Source: [gh-aw sitemap](https://github.github.com/gh-aw/sitemap-0.xml), 2026-10-
 | Standalone ledger replay projections | [experimental/ledger-replay](https://github.github.com/gh-aw/experimental/ledger-replay/) | Y02 |
 | Monitoring with Projects | [experimental/monitoring-with-projects](https://github.github.com/gh-aw/experimental/monitoring-with-projects/) | P05 |
 | QMD Documentation Search | [experimental/qmd](https://github.github.com/gh-aw/experimental/qmd/) | Y04 QMD doc search (later) |
-| Safe-Outputs Samples | [experimental/safe-outputs-samples](https://github.github.com/gh-aw/experimental/safe-outputs-samples/) | O01 |
+| Safe-Outputs Samples | [experimental/safe-outputs-samples](https://github.github.com/gh-aw/experimental/safe-outputs-samples/) | safe outputs catalog |
 | Graders | [experimental/trace-graders](https://github.github.com/gh-aw/experimental/trace-graders/) | X04 graders/evals |
 | TrialOps | [experimental/trial-ops](https://github.github.com/gh-aw/experimental/trial-ops/) | X01 |
 | GitHub Agentic Workflows Gallery | [gallery](https://github.github.com/gh-aw/gallery/) | F00 factory index (gallery fit table) |
@@ -190,7 +190,7 @@ Source: [gh-aw sitemap](https://github.github.com/gh-aw/sitemap-0.xml), 2026-10-
 | LabelOps | [patterns/label-ops](https://github.github.com/gh-aw/patterns/label-ops/) | R02 label_command |
 | MemoryOps | [patterns/memory-ops](https://github.github.com/gh-aw/patterns/memory-ops/) | Y01 + Y02 |
 | MonitorOps | [patterns/monitor-ops](https://github.github.com/gh-aw/patterns/monitor-ops/) | M01 |
-| MultiRepoOps | [patterns/multi-repo-ops](https://github.github.com/gh-aw/patterns/multi-repo-ops/) | P01 + O05 |
+| MultiRepoOps | [patterns/multi-repo-ops](https://github.github.com/gh-aw/patterns/multi-repo-ops/) | P01 cross-repo |
 | OrchestratorOps | [patterns/orchestrator-ops](https://github.github.com/gh-aw/patterns/orchestrator-ops/) | P02 |
 | ProjectOps | [patterns/project-ops](https://github.github.com/gh-aw/patterns/project-ops/) | P05 user-owned Project board (`BOARD_TOKEN`) |
 | ResearchPlanAssignOps | [patterns/research-plan-assign-ops](https://github.github.com/gh-aw/patterns/research-plan-assign-ops/) | P04 research-plan-assign to Copilot cloud agent |
@@ -215,9 +215,9 @@ Source: [gh-aw sitemap](https://github.github.com/gh-aw/sitemap-0.xml), 2026-10-
 | Copilot Cloud Agent | [reference/copilot-cloud-agent](https://github.github.com/gh-aw/reference/copilot-cloud-agent/) | P04 + T01 |
 | Importing Copilot Agent Files | [reference/copilot-custom-agents](https://github.github.com/gh-aw/reference/copilot-custom-agents/) | C05 agent files import |
 | Cost Management | [reference/cost-management](https://github.github.com/gh-aw/reference/cost-management/) | C03 caps + B02 spend + admission |
-| Cross-Repository Operations | [reference/cross-repository](https://github.github.com/gh-aw/reference/cross-repository/) | O05 cross-repo |
+| Cross-Repository Operations | [reference/cross-repository](https://github.github.com/gh-aw/reference/cross-repository/) | P01 M05 cross-repo |
 | Skills support for Agentic Workflows | [reference/custom-agent-for-aw](https://github.github.com/gh-aw/reference/custom-agent-for-aw/) | D05 authoring guide (skills for creating workflows) |
-| Custom Safe Outputs | [reference/custom-safe-outputs](https://github.github.com/gh-aw/reference/custom-safe-outputs/) | O06 custom safe outputs (later) |
+| Custom Safe Outputs | [reference/custom-safe-outputs](https://github.github.com/gh-aw/reference/custom-safe-outputs/) | custom safe outputs (later) |
 | Dependabot Manifest Generation | [reference/dependabot](https://github.github.com/gh-aw/reference/dependabot/) | S05 dependabot manifest for gh-aw-actions |
 | APM Dependencies | [reference/dependencies](https://github.github.com/gh-aw/reference/dependencies/) | C05 APM deps (optional, later) |
 | Workflow Editors | [reference/editors](https://github.github.com/gh-aw/reference/editors/) | D05 authoring guide |
@@ -230,48 +230,48 @@ Source: [gh-aw sitemap](https://github.github.com/gh-aw/sitemap-0.xml), 2026-10-
 | Pi reference | [reference/engines/pi](https://github.github.com/gh-aw/reference/engines/pi/) | C07 |
 | Enterprise Configuration | [reference/enterprise-configuration](https://github.github.com/gh-aw/reference/enterprise-configuration/) | G05 org-only (GHES, central admission) |
 | Environment Variables | [reference/environment-variables](https://github.github.com/gh-aw/reference/environment-variables/) | C03 + D05 |
-| Ephemerals | [reference/ephemerals](https://github.github.com/gh-aw/reference/ephemerals/) | O03 dedupe/expiry/noise |
+| Ephemerals | [reference/ephemerals](https://github.github.com/gh-aw/reference/ephemerals/) | Bar H dedupe/expiry/noise |
 | GitHub Agentic Workflows FAQ | [reference/faq](https://github.github.com/gh-aw/reference/faq/) | D01 FAQ links + X01 TrialOps |
 | Feature Flags | [reference/feature-flags](https://github.github.com/gh-aw/reference/feature-flags/) | S02 integrity-reactions, S03 external detection |
-| Footer Control | [reference/footers](https://github.github.com/gh-aw/reference/footers/) | O03 provenance footers |
+| Footer Control | [reference/footers](https://github.github.com/gh-aw/reference/footers/) | Bar H provenance footers |
 | Fork Support | [reference/fork-support](https://github.github.com/gh-aw/reference/fork-support/) | S06 forks |
-| Frontmatter Reference | [reference/frontmatter-full](https://github.github.com/gh-aw/reference/frontmatter-full/) | C01 schema check + POL all |
+| Frontmatter Reference | [reference/frontmatter-full](https://github.github.com/gh-aw/reference/frontmatter-full/) | C01 compile strict + frontmatter |
 | Frontmatter | [reference/frontmatter](https://github.github.com/gh-aw/reference/frontmatter/) | C02 house frontmatter template |
 | GH-AW as an MCP Server | [reference/gh-aw-as-mcp-server](https://github.github.com/gh-aw/reference/gh-aw-as-mcp-server/) | B01 (read logs/audit via MCP) + D05 |
-| GitHub Tools (for reading from GitHub) | [reference/github-tools](https://github.github.com/gh-aw/reference/github-tools/) | POL07 + S04 |
+| GitHub Tools (for reading from GitHub) | [reference/github-tools](https://github.github.com/gh-aw/reference/github-tools/) | S04 tool allowlist |
 | Glossary | [reference/glossary](https://github.github.com/gh-aw/reference/glossary/) | D01 glossary link |
-| Configuration Governance | [reference/governance](https://github.github.com/gh-aw/reference/governance/) | POL18 gh aw env runtime policy + G04; rulesets G05 org-only |
+| Configuration Governance | [reference/governance](https://github.github.com/gh-aw/reference/governance/) | G04 gh aw env + G05 org-only |
 | Imports | [reference/imports](https://github.github.com/gh-aw/reference/imports/) | C05 imports + import-schema + inlined-imports |
 | Inline Sub-Agents | [reference/inline-sub-agents](https://github.github.com/gh-aw/reference/inline-sub-agents/) | C05 + C03 cheaper sub-agents |
-| GitHub Integrity Filtering | [reference/integrity](https://github.github.com/gh-aw/reference/integrity/) | POL05 + S02 |
+| GitHub Integrity Filtering | [reference/integrity](https://github.github.com/gh-aw/reference/integrity/) | S02 integrity |
 | Markdown | [reference/markdown](https://github.github.com/gh-aw/reference/markdown/) | D05 prompt writing rules |
 | MCP Gateway Specification | [reference/mcp-gateway](https://github.github.com/gh-aw/reference/mcp-gateway/) | S04 |
-| MCP Scripts | [reference/mcp-scripts](https://github.github.com/gh-aw/reference/mcp-scripts/) | O06 later (mcp-scripts)  |
+| MCP Scripts | [reference/mcp-scripts](https://github.github.com/gh-aw/reference/mcp-scripts/) | custom mcp-scripts (later) |
 | Model Routing | [reference/model-routing](https://github.github.com/gh-aw/reference/model-routing/) | C03 model routing (Copilot only) |
 | Model Aliases | [reference/model-tables](https://github.github.com/gh-aw/reference/model-tables/) | C03 aliases |
-| Network Permissions | [reference/network](https://github.github.com/gh-aw/reference/network/) | POL06 + S01 |
+| Network Permissions | [reference/network](https://github.github.com/gh-aw/reference/network/) | S01 network |
 | OpenTelemetry Attribute Reference | [reference/open-telemetry-attributes](https://github.github.com/gh-aw/reference/open-telemetry-attributes/) | B04 |
 | OpenTelemetry | [reference/open-telemetry](https://github.github.com/gh-aw/reference/open-telemetry/) | B04 OTLP (optional, Azure Monitor; Sven ask) |
 | Outcomes | [reference/outcomes](https://github.github.com/gh-aw/reference/outcomes/) | B03 |
-| GitHub Tools Read Permissions | [reference/permissions](https://github.github.com/gh-aw/reference/permissions/) | POL11 + C04 |
+| GitHub Tools Read Permissions | [reference/permissions](https://github.github.com/gh-aw/reference/permissions/) | C04 read permissions |
 | Playwright | [reference/playwright](https://github.github.com/gh-aw/reference/playwright/) | F48 + S08 playwright policy |
 | Provider Issue Triggers | [reference/provider-issue-triggers](https://github.github.com/gh-aw/reference/provider-issue-triggers/) | R06 provider triggers (Jira/Linear/ADO; org-ready doc) |
-| Rate Limiting Controls | [reference/rate-limiting-controls](https://github.github.com/gh-aw/reference/rate-limiting-controls/) | POL09 + C03 |
+| Rate Limiting Controls | [reference/rate-limiting-controls](https://github.github.com/gh-aw/reference/rate-limiting-controls/) | C03 rate limits |
 | Releases and Versioning | [reference/releases](https://github.github.com/gh-aw/reference/releases/) | L02 upgrade vs update + L04 tool pin |
 | Repo Memory | [reference/repo-memory](https://github.github.com/gh-aw/reference/repo-memory/) | Y02 |
-| Safe Outputs (Pull Requests) | [reference/safe-outputs-pull-requests](https://github.github.com/gh-aw/reference/safe-outputs-pull-requests/) | O04 PR outputs (merge-pull-request NEVER enabled) |
-| Safe Outputs | [reference/safe-outputs](https://github.github.com/gh-aw/reference/safe-outputs/) | O01 output catalog + limits |
+| Safe Outputs (Pull Requests) | [reference/safe-outputs-pull-requests](https://github.github.com/gh-aw/reference/safe-outputs-pull-requests/) | PR safe outputs (merge never enabled) |
+| Safe Outputs | [reference/safe-outputs](https://github.github.com/gh-aw/reference/safe-outputs/) | safe outputs catalog |
 | Sandbox Configuration | [reference/sandbox](https://github.github.com/gh-aw/reference/sandbox/) | S04 sandbox/AWF |
 | Schedule Syntax | [reference/schedule-syntax](https://github.github.com/gh-aw/reference/schedule-syntax/) | R01 fuzzy schedules |
 | Self-Hosted Runners | [reference/self-hosted-runners](https://github.github.com/gh-aw/reference/self-hosted-runners/) | C09 |
 | Using Serena | [reference/serena](https://github.github.com/gh-aw/reference/serena/) | Y05 Serena code MCP (later) |
-| Staged Mode | [reference/staged-mode](https://github.github.com/gh-aw/reference/staged-mode/) | O02 |
+| Staged Mode | [reference/staged-mode](https://github.github.com/gh-aw/reference/staged-mode/) | staged mode |
 | Custom Steps and Jobs | [reference/steps-jobs](https://github.github.com/gh-aw/reference/steps-jobs/) | M01 + C03 deterministic steps |
 | Templating | [reference/templating](https://github.github.com/gh-aw/reference/templating/) | C05 |
 | Custom AI Engines | [reference/third-party-agent](https://github.github.com/gh-aw/reference/third-party-agent/) | C07 |
 | Threat Detection | [reference/threat-detection](https://github.github.com/gh-aw/reference/threat-detection/) | S03 |
 | Tools | [reference/tools](https://github.github.com/gh-aw/reference/tools/) | S04 |
-| Triggering CI | [reference/triggering-ci](https://github.github.com/gh-aw/reference/triggering-ci/) | O04 |
+| Triggering CI | [reference/triggering-ci](https://github.github.com/gh-aw/reference/triggering-ci/) | triggering CI / PR outputs |
 | Triggers | [reference/triggers](https://github.github.com/gh-aw/reference/triggers/) | R01 R02 R04 |
 | WebAssembly Compilation | [reference/wasm-compilation](https://github.github.com/gh-aw/reference/wasm-compilation/) | X05 wasm compile in docs playground (later) |
 | Web Search | [reference/web-search](https://github.github.com/gh-aw/reference/web-search/) | Y06 web search tool (later, Tavily key = Sven ask) |
@@ -283,20 +283,20 @@ Source: [gh-aw sitemap](https://github.github.com/gh-aw/sitemap-0.xml), 2026-10-
 | Create a GitHub Agentic Workflow | [setup/creating-workflows](https://github.github.com/gh-aw/setup/creating-workflows/) | D05 |
 | GitHub Agentic Workflows Quickstart | [setup/quick-start](https://github.github.com/gh-aw/setup/quick-start/) | D01 |
 | Working with Workflows | [setup/working-with-workflows](https://github.github.com/gh-aw/setup/working-with-workflows/) | D01 + L02 |
-| AW Admission Service Specification | [specs/admission-service-specification](https://github.github.com/gh-aw/specs/admission-service-specification/) | C03 admission + POL02 |
+| AW Admission Service Specification | [specs/admission-service-specification](https://github.github.com/gh-aw/specs/admission-service-specification/) | C03 admission + caps |
 | AI Credits Specification | [specs/ai-credits-specification](https://github.github.com/gh-aw/specs/ai-credits-specification/) | B02 |
-| Bash Command Parser Specification | [specs/bash-command-parser-specification](https://github.github.com/gh-aw/specs/bash-command-parser-specification/) | POL07 bash allowlist |
+| Bash Command Parser Specification | [specs/bash-command-parser-specification](https://github.github.com/gh-aw/specs/bash-command-parser-specification/) | S04 bash allowlist |
 | Checkout Behavior Specification | [specs/checkout-behavior-specification](https://github.github.com/gh-aw/specs/checkout-behavior-specification/) | S06 |
 | Copilot SDK Driver Specification | [specs/copilot-sdk-driver-specification](https://github.github.com/gh-aw/specs/copilot-sdk-driver-specification/) | C03 (driver default, note) |
 | Forecast Command Specification | [specs/forecast-specification](https://github.github.com/gh-aw/specs/forecast-specification/) | B05 spend forecast |
 | Frontmatter Hash Specification | [specs/frontmatter-hash-specification](https://github.github.com/gh-aw/specs/frontmatter-hash-specification/) | S05 lock integrity |
 | Fuzzy Schedule Time Syntax Specification | [specs/fuzzy-schedule-specification](https://github.github.com/gh-aw/specs/fuzzy-schedule-specification/) | R01 |
 | Graders Specification | [specs/graders-specification](https://github.github.com/gh-aw/specs/graders-specification/) | X04 |
-| MCP Scripts Specification | [specs/mcp-scripts-specification](https://github.github.com/gh-aw/specs/mcp-scripts-specification/) | O06 |
+| MCP Scripts Specification | [specs/mcp-scripts-specification](https://github.github.com/gh-aw/specs/mcp-scripts-specification/) | custom outputs (later) |
 | Model Alias Format Specification | [specs/model-alias-specification](https://github.github.com/gh-aw/specs/model-alias-specification/) | C03 |
 | Git-backed Ledger Specification | [specs/repo-memory-ledger-specification](https://github.github.com/gh-aw/specs/repo-memory-ledger-specification/) | Y02 |
 | Package Management (Spec) | [specs/repository-package-manifest-specification](https://github.github.com/gh-aw/specs/repository-package-manifest-specification/) | C02 |
-| Safe Outputs MCP Gateway Specification | [specs/safe-outputs-specification](https://github.github.com/gh-aw/specs/safe-outputs-specification/) | O01 |
+| Safe Outputs MCP Gateway Specification | [specs/safe-outputs-specification](https://github.github.com/gh-aw/specs/safe-outputs-specification/) | safe outputs catalog |
 | Safe Update Specification | [specs/safe-update-specification](https://github.github.com/gh-aw/specs/safe-update-specification/) | L02 |
 | Unified Agent Session Specification | [specs/unified-agent-session-specification](https://github.github.com/gh-aw/specs/unified-agent-session-specification/) | B01 |
 | Webhook Gateway Specification | [specs/webhook-gateway-specification](https://github.github.com/gh-aw/specs/webhook-gateway-specification/) | R05 |

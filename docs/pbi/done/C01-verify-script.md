@@ -6,83 +6,71 @@
 - Block: 1
 - Lane: Builder
 - Depends on: none
-- proof: ./scripts/verify.sh (exit 0 on green SHA; last line `0 failures` on pass)
+- proof: `make verify` (exit 0 on green SHA)
 - door: two-way
 ## Goal
-Ship one verify script (`scripts/verify.sh`) that local developers and CI both run. It blocks bad workflow and policy changes before merge. Until GitHub Actions billing is fixed (Q0), a green run on the exact commit SHA is the release authority instead of CI.
+Ship one verify script (`scripts/verify.sh`, invoked via `make verify`) that local developers and CI both run. It blocks bad workflow changes before merge. Until GitHub Actions billing is fixed (Q0), a green run on the exact commit SHA is the release authority instead of CI.
 ## Context
-Plan W1 starts with [X06](X06-verification-skill.md) (verification skill spec) then C01 plus POL01 through POL23 checks and fixtures. Gist handover points A, B, and C define the minimum bar: compile strict, lock drift, linters, secret and style scans, and every `policies/checks/*.sh`. Personal account `svennijhuis` only; org rulesets may mirror POL19 later (G05).
+Plan W1 starts with [X06](X06-verification-skill.md) (verification skill spec) then C01. The gate follows githubnext/agentics: `gh aw compile --strict` is the primary check, plus POL25 and POL31 repo checks with good and bad fixtures. Personal account `svennijhuis` only; org rulesets may mirror no-force-push later (G05).
 ## Steps
-1. Add `scripts/verify.sh` with a stable interface: `./scripts/verify.sh` from repo root, non-zero exit on any failure.
-2. Compile: `gh aw compile --dir workflows --strict` for catalog workflows; compile repo CI under `.github/workflows/` with the same strictness.
-3. Lock drift: after compile, `git diff --exit-code workflows/*.lock.yml` (and CI lock paths if applicable). POL17 requires committed fresh locks.
-4. Linters: `actionlint` on compiled YAML; optional zizmor where adopted.
-5. Style: reject U+2013 and U+2014 in tracked markdown and workflow sources (POL16).
-6. Secrets: `gitleaks` on tracked files (POL04); POL20 secret-pattern scan on markdown where specified.
-7. Invoke each `policies/checks/POL*.sh` including POL01 pins (imports and `plugins:`), POL02 caps in each workflow frontmatter, POL21 `copilot-requests: none`, POL22 review COMMENT only, POL19 no force push in automation, and [POL23](POL23-no-tautological-checks.md) good/bad pairing for every check.
-8. Output contract (gist A3): on failure, print one line per failure as `file:line rule-id message`; on pass print no failure lines; always end with a last line `N failures` where N is the failure count; exit code 0 only when N is 0.
-9. Pin CI helpers per gist C: `actions/checkout` by full SHA (not a floating tag) and `gh-aw` extension `v0.93.4`. Point `.github/workflows/*` at `scripts/verify.sh` instead of ad hoc compile steps.
-10. Document Q0 in CONTRIBUTING (Builder): when Actions billing is blocked, attach verify log on SHA in PR evidence.
+1. Add `scripts/verify.sh` with a stable interface: `make verify` from repo root, non-zero exit on any failure.
+2. Compile: `make compile` runs `gh aw compile --strict --dir workflows` and on `.github/workflows` when it holds agentic `.md` files; fail if lock files drift after compile.
+3. Run `policies/checks/POL25.sh` and `policies/checks/POL31.sh` on the repo and on paired fixtures under `test/fixtures/good/` and `test/fixtures/bad/`.
+4. Pin CI helpers per gist C: `actions/checkout` by full SHA (not a floating tag) and `gh-aw` extension v0.93.4 in `.github/aw.json`. Point `.github/workflows/verify.yml` at `make verify` plus gitleaks.
+5. Document Q0 in CONTRIBUTING (Builder): when Actions billing is blocked, attach verify log on SHA in PR evidence.
 ## Definition of Done
-- [ ] `scripts/verify.sh` exists and runs compile strict, lock drift, actionlint, em dash scan, gitleaks, and all policy checks POL01 through POL23
-- [ ] Failure output is one line per failure: `file:line rule-id message`; on pass no failure lines; last line `N failures`; exit 0 only when N is 0
-- [ ] Verify passes on green SHA with `test/fixtures/good/` coverage
-- [ ] Verify fails on each `test/fixtures/bad/POL*.md` (one bad fixture per policy; POL17 is folder `test/fixtures/bad/POL17/`)
-- [ ] CI workflow calls the same script as local (when Q0 unblocks Actions billing)
-- [ ] Evidence: verify log attached for at least one green SHA on `builder/pbi-docs`
+- [x] `make verify` runs compile strict, lock drift check, POL25, POL31, and fixture cases
+- [x] Verify passes on green SHA with POL25 and POL31 good fixtures
+- [x] Verify fails on each POL25 and POL31 bad fixture
+- [x] CI workflow calls the same script as local (when Q0 unblocks Actions billing)
+- [x] Evidence: verify log attached for at least one green SHA
 ## Technical design
-- Components and files: `scripts/verify.sh`, `policies/checks/*.sh`, CI job `verify` (later). verify.sh is the one name
-- Interfaces: No args. Exit 0 on pass, 1 on fail. Stdout one line per failure `file:line rule-id message`, last line `N failures`
+- Components and files: `scripts/verify.sh`, `Makefile`, `policies/checks/POL25.sh`, `policies/checks/POL31.sh`, CI job `verify`
+- Interfaces: `make verify`. Exit 0 on pass, 1 on fail
 - Sequence:
 
 ```mermaid
 sequenceDiagram
   participant Dev as Maintainer
   participant V as verify.sh
-  participant A as gh aw
-  participant G as git
-  participant L as actionlint, gitleaks, dash scan
-  participant P as policies/checks
-  Dev->>V: run
-  V->>A: compile --dir workflows --strict
-  V->>G: diff --exit-code *.lock.yml
-  V->>L: lint and scan
-  V->>P: run every POL check
-  V-->>Dev: N failures
+  participant A as gh aw compile --strict
+  participant P as POL25 and POL31
+  Dev->>V: make verify
+  V->>A: compile workflows + CI locks
+  V->>V: git diff lock files
+  V->>P: repo + fixtures
+  V-->>Dev: exit 0 or 1
 ```
 
-- Failure modes: Missing tool fails loud (`missing: actionlint`), never skips. Lock drift fails with `run gh aw compile`
-- Security: gitleaks on the diff; no network beyond tool installs
+- Failure modes: Missing gh-aw pin fails loud; lock drift fails with recompile and commit
+- Security: gitleaks in CI; no network beyond tool installs in verify.sh
 - Observability: Same output local and CI
 - Cost: 0 AIC (script)
 - Rollback: Revert the script commit
-- Proof: `scripts/verify.sh` green on main, red on each bad fixture
+- Proof: `make verify` green on main, red on bad fixtures
 - Door: two-way (local script)
 ## Evidence
 
-Shipped in PR #4 (Block 1). Gate: `./scripts/verify.sh` log on the exact head SHA, posted as a PR comment (Q0, Actions billing blocked).
-(commands, logs, verify log on SHA, run links)
+Shipped in PR #4 (Block 1). Gate: `make verify` log on the exact head SHA, posted as a PR comment (Q0, Actions billing blocked).
 ## Flow
 ```mermaid
 sequenceDiagram
   actor Dev as maintainer
-  participant V as scripts/verify.sh
+  participant V as make verify
   participant C as gh aw compile --strict
-  participant L as actionlint + gitleaks + dash scan
-  participant P as policies/checks/*.sh
+  participant P as POL25 POL31
   Dev->>V: run on commit SHA
   V->>C: compile workflows + CI
-  V->>V: git diff --exit-code workflows/*.lock.yml
-  V->>L: lint and scan
-  V->>P: POL01..POL22
+  V->>V: lock drift check
+  V->>P: checks + fixtures
   alt all pass
     V-->>Dev: exit 0
   else any fail
-    V-->>Dev: exit 1 + log
+    V-->>Dev: exit 1
   end
 ```
 ## Named asks for Sven
-Q0 (GitHub Actions billing blocked; local `scripts/verify.sh` on SHA until fixed)
+Q0 (GitHub Actions billing blocked; local `make verify` on SHA until fixed)
 ## Cost
 n/a
 ## Sources

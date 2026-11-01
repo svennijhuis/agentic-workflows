@@ -5,10 +5,10 @@
 - Block: 2
 - Lane: Builder
 - Depends on: C12, agentPacks PBI 04 (first release)
-- proof: git ls-remote --tags https://github.com/svennijhuis/agentPacks 'v*' shows the tag; bash policies/checks/POL01.sh passes with `plugins:` pinned to that tag; gh aw compile --dir workflows --strict
+- proof: git ls-remote --tags https://github.com/svennijhuis/agentPacks 'v*' shows the tag; `gh aw compile --strict --dir workflows`; `make verify` (exit 0)
 - door: two-way
 - triage: park (waits for agentPacks PBI 04, the first release tag)
-- feedback: POL01 plus strict compile on squad-review
+- feedback: strict compile plus `make verify` on squad-review
 - harness: gh-aw, engine copilot via shared/defaults.md (when built)
 - review-input: diff + this PBI + DoD (+ linked spec) + PR description, never builder session logs (PA6)
 - kind: script
@@ -16,14 +16,14 @@
 ## Goal
 After agentPacks cuts its first release tag, re-add `plugins:` to `workflows/squad-review.md` pinned to that tag, and record the tag's commit SHA in `docs/reference/pins.md`.
 ## Context
-PR #4 dropped `plugins:` from squad-review: agentPacks has no tags yet and a pin to a main commit loads 0 agents ([C12](../done/C12-agentpacks-import-contract.md) correction). POL01 allows a `plugins:` pin to a vX.Y.Z tag only. agentPacks [PBI 04, First release](https://github.com/svennijhuis/agentPacks/pull/80) (in agentPacks PR #80, not merged yet) cuts that tag; agentPacks PBI 04 names this repo's PBI 101 premise, which C12 records. Not from the 2026-10-25 links: Source is the PR #4 room (PA9 keeps it out of Block 1). Not built in PR #4: docs only, nothing enabled (PA9).
+PR #4 dropped `plugins:` from squad-review: agentPacks has no tags yet and a pin to a main commit loads 0 agents ([C12](../done/C12-agentpacks-import-contract.md) correction). C12 v1.1 requires a `plugins:` pin to a vX.Y.Z tag only. agentPacks [PBI 04, First release](https://github.com/svennijhuis/agentPacks/pull/80) cuts that tag. Not built in PR #4: docs only, nothing enabled (PA9).
 ## Steps
 1. Wait for the agentPacks tag (PBI 04).
-2. Add `plugins:` with `@vX.Y.Z` to squad-review; recompile; update the card if mcp or tools change (POL24).
+2. Add `plugins:` with `@vX.Y.Z` to squad-review; recompile; update the card if mcp or tools change (HX02).
 3. Record tag and SHA in `docs/reference/pins.md`.
 ## Definition of Done
-- [ ] `plugins:` pinned to a vX.Y.Z tag, POL01 green
-- [ ] Lock recompiled and committed (POL17)
+- [ ] `plugins:` pinned to a vX.Y.Z tag, compile strict clean
+- [ ] Lock recompiled and committed with md
 - [ ] Tag SHA recorded in pins.md
 - [ ] squad-review loads the agents (staged run on X01, Bar H)
 - [ ] Every Bar H line from [README.md](../README.md#bar-h-every-workflow-pbi) when the workflow ships

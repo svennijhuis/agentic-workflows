@@ -1,5 +1,0 @@
-# Bad POL03 case: yaml that does not parse must fail closed, not pass.
-name: bad-pol03-broken
-on: [push, workflow_dispatch
-jobs:
-  build: {runs-on: ubuntu-latest

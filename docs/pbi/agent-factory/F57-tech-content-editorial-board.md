@@ -4,44 +4,43 @@
 - Wave: PR 0 (implementation W6)
 - Block: 6
 - Lane: Builder
-- Depends on: C01, C02, C03, C04, C05, C06, O01, O02, O03, R01, X01, L01
-- proof: gh aw compile --dir workflows --strict workflows/f57.md; gh aw audit <run-id> (Block exit runs)
+- Depends on: C01, C02, C03, C04, C05, C06, R01, X01, L01
+- proof: `make verify` exits 0 (`gh aw compile --strict --dir workflows` clean for `workflows/tech-content-editorial-board.md`, lock unchanged after compile, POL25 and POL31 clean); no run, no token spend
 - door: one-way
-- one-way gate: Sven's exact yes required (named ask in its block). Rollback: disable workflow via workflow_dispatch off or remove schedule trigger
+- feedback: `make compile` (`gh aw compile --strict`)
 ## Goal
 Ship `tech-content-editorial-board` as an installable gh-aw workflow for svennijhuis repos that reviews docs prs for clarity, structure, and diataxis placement.
 ## Context
-Wave W6 later workflow. PR 0 documents intent only. Ratings: Editorial pass on long-form docs and tutorials. Cost tier M (unverified). Provider: GitHub Copilot (`engine: copilot`) on personal account svennijhuis.
+Wave W6 later workflow. PR 0 documents intent only.
+**What it does:** Reviews docs PRs for clarity, structure, and Diataxis placement.
+**Value:** Editorial pass on long-form docs and tutorials.
+**How ours beats the example (Bar H):** aligns with caveman style prefs in instructions.
+**Trigger:** `workflow_dispatch` only (POL25). `pull_request` on `docs/**` is a named ask, row in `policies/POL25.yml` `sven_yes` first.
+**Safe outputs and limits:** Review comments and optional checklist issue.; `submit-pull-request-review` max 1, `create-issue` max 1, `staged: true`.
+**Issue/PR format:** Title prefix `[F57]`, footer from `shared/reporting.md`, dedupe key `tech-content-editorial-board:{date}`.
+Engine: `copilot` with `COPILOT_GITHUB_TOKEN` (personal fine-grained PAT).
+
+## Frontmatter security
+- `permissions:` read only (`contents: read`, `pull-requests: read`); no write permission.
+- Writes only through `safe-outputs` (`submit-pull-request-review` max 1, `create-issue` max 1), `staged: true` until Sven's yes.
+- `timeout-minutes:` 15
+- Trigger: `workflow_dispatch` only (POL25). `pull_request` paths filter is a named ask in `policies/POL25.yml` `sven_yes` first.
 ## Steps
 1. Study upstream `githubnext/agentics` workflow `tech-content-editorial-board` and Agent Factory equivalents.
-2. Author `workflows/tech-content-editorial-board.md` with `engine: copilot` and shared imports.
-3. Compile with pinned gh-aw; run `scripts/verify.sh` on the workflow commit SHA.
-4. Trial on X01: staged or report-only run for `pull_request paths docs/** or dispatch.`.
-5. Record AIC for first 3 runs in Evidence; enable write outputs only after Sven yes.
+2. Add `workflows/tech-content-editorial-board.md`; import `shared/defaults.md` and `shared/security.md`; set the frontmatter security above.
+3. Add deterministic pre-check returning `noop` when nothing to do.
+4. Run `make compile` and commit `workflows/tech-content-editorial-board.lock.yml`.
+5. Run `make verify`; no workflow run, no token spend.
+
 ## Definition of Done
+- [ ] `workflows/tech-content-editorial-board.md` and its `.lock.yml` committed; `gh aw compile --strict` clean (0 errors, 0 warnings), lock unchanged after `make compile`
+- [ ] Frontmatter: read-only `permissions`, writes only via `safe-outputs` (`staged: true`, a `max` per output), `timeout-minutes` set
+- [ ] Trigger `workflow_dispatch` only (POL25); no `skills:` in a shared fragment (POL31)
+- [ ] `make verify` exits 0; no run, no token spend
 - [ ] Fetches own context with tools and imports (Bar H, gist A7); prompt never pastes repo content
-- [ ] `workflows/tech-content-editorial-board.md` imports `shared/defaults.md` and uses `engine: copilot` with pinned gh-aw version and import SHA or tag (POL01)
-- [ ] Cost caps: max-ai-credits 50, max-daily-ai-credits 200, max-turns and timeout-minutes set (POL02, POL15)
-- [ ] Pre-check step then noop path; staged or report-only mode before any write outputs (POL03, O02)
-- [ ] Dedupe on output title, group-by-day, close-older, expires configured (O03)
-- [ ] `min-integrity: approved` on agent run (POL05)
-- [ ] Minimal network allowlist, no wildcards (POL06)
-- [ ] Tool, MCP, and bash allowlists documented (POL07)
-- [ ] Every output uses safe-output max limits (POL08)
-- [ ] Rate limits, concurrency, cooldown from shared defaults (POL09)
-- [ ] `on.roles` and skip-bots for triggers (POL10)
-- [ ] Least permissions, read-only agent where possible (POL11)
-- [ ] Explicit allowed-repos or target-repo in workflow (POL12)
-- [ ] Threat detection enabled, never off (POL13)
-- [ ] No merge-pull-request or unsafe pull_request_target (POL14)
-- [ ] Issue and PR bodies follow `shared/reporting.md` format (POL16)
-- [ ] Trial run on X01 test repo with staged or report-only first
-- [ ] First 3 production runs audited; measured AIC per run recorded in this PBI (B02)
-- [ ] `scripts/verify.sh` passes on workflow SHA (Q0 local verify until Actions billing fixed)
+- [ ] Editorial comments align with caveman style prefs in repo instructions
 ## Evidence
-- `scripts/verify.sh` log on workflow SHA (Q0)
-- X01 trial run URL and mode (staged or report-only)
-- First 3 run links with measured AIC recorded below
+(verify log on SHA when workflow lands)
 ## Flow
 ```mermaid
 sequenceDiagram
@@ -57,7 +56,8 @@ sequenceDiagram
     deactivate WF
 ```
 ## Named asks for Sven
-none
+- Secondary triggers listed in Context: Sven exact yes, row in `policies/POL25.yml` `sven_yes` first
+- X01 live trial and first 3 audited runs (B02): Sven exact yes, spends tokens
 ## Cost
 Tier M: estimated 28-50 AIC per run (unverified). Daily cap 200 AIC repo-wide suggested.
 ## Sources
@@ -65,16 +65,3 @@ Tier M: estimated 28-50 AIC per run (unverified). Daily cap 200 AIC repo-wide su
 - https://github.com/githubnext/agentics/tree/main/workflows
 - https://github.github.com/gh-aw/reference/aw-yml-package-manifest/
 - https://github.github.com/gh-aw/blog/2026-01-13-meet-the-workflows-documentation/
-
-## Workflow detail (Bar H)
-**What it does:** Reviews docs PRs for clarity, structure, and Diataxis placement.
-
-**Value:** Editorial pass on long-form docs and tutorials.
-
-**Better than example:** POL16 no slop; aligns with caveman style prefs in instructions.
-
-**Trigger:** pull_request paths docs/** or dispatch.
-
-**Safe outputs:** Review comments and optional checklist issue.
-
-**Issue or PR format:** Title prefix `[F57]`, footer from `shared/reporting.md`, dedupe key `tech-content-editorial-board:{date}`.

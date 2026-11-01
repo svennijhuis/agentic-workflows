@@ -14,8 +14,8 @@ flowchart TB
   Hub --> AwYml["aw.yml (includes)"]
   Hub --> Wf["workflows/ (.md + .lock.yml + .card.yml)"]
   Hub --> Shared["workflows/shared/ (defaults, security, reporting, agentpacks, mcp, prompts)"]
-  Hub --> Pol["policies/ (POLnn.yml + checks/)"]
-  Hub --> Verify["scripts/verify.sh"]
+  Hub --> Pol["policies/ (POL25, POL31 + checks/)"]
+  Hub --> Verify["make verify"]
   Hub --> Gov["governance/ (rollout.yml, rulesets/main.json, ORG-ONLY.md)"]
   Hub --> Pbi["docs/pbi/"]
   Cons["Consumer repos"]
@@ -52,23 +52,23 @@ flowchart LR
   n5 ==> o5
   n6 ==> o6
   n7 ==> o7
-  U["unchanged: workflows/, workflows/shared/, policies/, docs/pbi/, aw.yml, import pins, scripts/verify.sh, gh aw add paths except owner"]
+  U["unchanged: workflows/, workflows/shared/, policies/, docs/pbi/, aw.yml, import pins, make verify, gh aw add paths except owner"]
 ```
 
 ## Central Copilot billing
 
-- [ ] After switch, for org billing (AI Credits on the org Copilot tenant, per [gh-aw billing](https://github.github.com/gh-aw/reference/billing/)), all of these in one change: enable the org Copilot CLI billing policy (Organization, Settings, Copilot, Policies, Copilot CLI, "Allow use of Copilot CLI billed to the organization"); change `permissions.copilot-requests` from `none` to `write` in each workflow; recompile with `gh aw compile` and commit the updated `.lock.yml`; edit [POL21](../policies/POL21.yml) in the same change, because its check fails any value that is not `none`. Without all of these, workflows stay on `none` (seat or PAT billing).
-- [ ] Until switch, keep every catalog workflow on `copilot-requests: none` ([POL21](../policies/POL21.yml); personal account; org Copilot billing is not used).
+- [ ] After switch, for org billing (AI Credits on the org Copilot tenant, per [gh-aw billing](https://github.github.com/gh-aw/reference/billing/)), all of these in one change: enable the org Copilot CLI billing policy (Organization, Settings, Copilot, Policies, Copilot CLI, "Allow use of Copilot CLI billed to the organization"); change `permissions.copilot-requests` from `none` to `write` in each workflow; recompile with `gh aw compile` and commit the updated `.lock.yml`. Without all of these, workflows stay on `none` (seat or PAT billing).
+- [ ] Until switch, keep every catalog workflow on `copilot-requests: none` (personal account; org Copilot billing is not used).
 
 ## Rulesets
 
 - [ ] Apply [governance/rulesets/main.json](rulesets/main.json) on the default branch (proposed today, not applied on the personal account). As written it has `enforcement: active` (enforces as soon as it is created), rules `deletion` and `non_fast_forward`, and a `pull_request` rule with squash as the only merge method, `required_review_thread_resolution: true`, `dismiss_stale_reviews_on_push: true`, `required_approving_review_count: 0` (no approving review required) and `require_code_owner_review: false` (code-owner review off). Raise the review count or turn on code-owner review only with Sven's yes, once teams exist.
-- [ ] Require the `verify` check from [C01](../docs/pbi/done/C01-verify-script.md) on every PR to the catalog and AW consumer repos.
-- [ ] [POL19](../policies/POL19.yml) no force push is the `non_fast_forward` rule already in that same file, not a second ruleset. At org level, target the same ruleset at the catalog and AW consumer repos.
+- [ ] Require the verify check from [C01](../docs/pbi/done/C01-verify-script.md) on every PR to the catalog and AW consumer repos (job runs `make verify` in [`.github/workflows/verify.yml`](../.github/workflows/verify.yml)).
+- [ ] No force push: the `non_fast_forward` rule in the same ruleset file covers this at org level for the catalog and AW consumer repos.
 
 ## Org secrets
 
-- [ ] Store provider trigger credentials in org secrets for [R06](../docs/pbi/triggers/R06-provider-triggers.md) (Jira, Linear, Azure DevOps), not in repo files ([POL04](../policies/POL04.yml), secret names only).
+- [ ] Store provider trigger credentials in org secrets for [R06](../docs/pbi/triggers/R06-provider-triggers.md) (Jira, Linear, Azure DevOps), not in repo files (secret names only).
 - [ ] Share cross-repo tokens via org secrets with selected repos to avoid per-repo PAT sprawl (pairs with GitHub App path in [ARC03](../docs/pbi/done/ARC03-identity-auth.md)).
 - [ ] Document secret names in workflow cards and PBI evidence; never commit values.
 

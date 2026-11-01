@@ -21,7 +21,7 @@ Plan v3.8: G00 is expanded into the six architecture pages [ARC01](ARC01-context
 6. Cross-link G05 as org-only delta checklist only.
 ## Definition of Done
 - [ ] Layout and naming documented and aligned with C02 DoD
-- [ ] Versioning and tag rules reference L01 and POL01
+- [ ] Versioning and tag rules reference L01 and `gh aw compile --strict` pin rules
 - [ ] Auth seams documented without secrets in repo
 - [ ] Mermaid flow shows consumer install path
 - [ ] ARC01-ARC06 pages exist, each with a mermaid diagram that renders on GitHub
@@ -42,7 +42,7 @@ sequenceDiagram
 ```
 
 - Failure modes: Docs drift from the code, so ARC05 release flow links the pages and Reviewer checks diagrams on every change
-- Security: ARC03 token table is the single source for C04; no secret values in docs (POL20)
+- Security: ARC03 token table is the single source for C04; no secret values in docs (secret names only)
 - Observability: n/a for runtime; GitHub renders each mermaid block
 - Cost: 0 AIC (docs)
 - Rollback: Revert the PR

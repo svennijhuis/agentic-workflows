@@ -11,14 +11,14 @@
 ## Goal
 Name the catalog, standards, and test repos; CODEOWNERS and rulesets on main; environment promotion ladder (test, pilot, all consumers).
 ## Context
-Names: `agentic-workflows` (catalog), `agentPacks` (standards), `aw-test` (test repo, name is Q0), pilot plus consumers keep their own names. Rulesets: PR required, squash only, no force push (POL19), linear history, required check `verify` (C01), 0 unresolved threads. Environments: test repo first, then pilot, then all. Promotion = tag moves only after X07 and verify are green.
+Names: `agentic-workflows` (catalog), `agentPacks` (standards), `aw-test` (test repo, name is Q0), pilot plus consumers keep their own names. Rulesets: PR required, squash only, no force push in automation (normal git push only for humans), linear history, required check `verify` (C01), 0 unresolved threads. Environments: test repo first, then pilot, then all. Promotion = tag moves only after X07 and verify are green.
 ## Steps
 1. Document repo names and CODEOWNERS paths (`workflows/`, `shared/`, `policies/` need Sven; `docs/` needs Sven or PO-approved bot PR).
 2. Publish promotion flow mermaid.
 3. Cross-link ARC05 release and [X07](../testing/X07-workflow-benchmark.md).
 ## Definition of Done
 - [ ] Repo name table complete including Q0 placeholder
-- [ ] CODEOWNERS and ruleset bullets match POL19 and C01
+- [ ] CODEOWNERS and ruleset bullets match no-force-push policy and C01
 - [ ] Promotion gates name X07 and verify
 - [ ] Mermaid renders on GitHub
 ## Technical design
@@ -48,7 +48,7 @@ sequenceDiagram
 - Door: two-way (topology doc tracks repo policy).
 ## Evidence
 
-Shipped in PR #4 (Block 1). Gate: `./scripts/verify.sh` log on the exact head SHA, posted as a PR comment (Q0, Actions billing blocked).
+Shipped in PR #4 (Block 1). Gate: `make verify` log on the exact head SHA, posted as a PR comment (Q0, Actions billing blocked).
 (ruleset export reference when available; verify job name in CI)
 ## Flow
 ```mermaid

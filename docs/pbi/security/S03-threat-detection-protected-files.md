@@ -4,21 +4,21 @@
 - Wave: W2
 - Block: 2
 - Lane: Builder
-- Depends on: S00, POL13
-- proof: ./scripts/verify.sh && gh aw compile --dir workflows --strict
+- Depends on: S00
+- proof: make verify && gh aw compile --dir workflows --strict
 - door: two-way
 ## Goal
 Keep threat detection enabled and define protected files that must not be modified by agents without escalation.
 ## Context
-Part of gh-aw defense in depth for svennijhuis/agentic-workflows. Complements policies POL01 through POL18 and Bar H workflow requirements.
+Part of gh-aw defense in depth for svennijhuis/agentic-workflows. Complements workflow frontmatter security (minimal permissions, safe-outputs, timeouts) and Bar H workflow requirements.
 ## Steps
 1. Document threat detection job behaviour.
 2. List protected paths (workflows, policies, gate scripts).
-3. Enforce POL13 never-off rule.
+3. Threat detection stays on in workflow frontmatter (compile --strict).
 ## Definition of Done
 - [ ] Threat detection on for all catalog workflows
 - [ ] Protected file list in docs and policy
-- [ ] POL13 fails if detection disabled
+- [ ] compile --strict fails if threat detection disabled in frontmatter
 ## Evidence
 (commands, logs, verify log on SHA, run links)
 ## Flow

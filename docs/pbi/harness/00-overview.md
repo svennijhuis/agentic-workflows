@@ -6,7 +6,7 @@
 
 | Id | Block | Door | File |
 |---|---|---|---|
-| HX02 | 1 | two-way | [../done/HX02-agent-card.md](../done/HX02-agent-card.md) (done, POL24) |
+| HX02 | 1 | two-way | [../done/HX02-agent-card.md](../done/HX02-agent-card.md) (done) |
 | HX03 | 2 | two-way | [HX03-harness-neutral-prompts.md](HX03-harness-neutral-prompts.md) |
 | HX05 | 3 | two-way | [HX05-tool-description-lint.md](HX05-tool-description-lint.md) |
 

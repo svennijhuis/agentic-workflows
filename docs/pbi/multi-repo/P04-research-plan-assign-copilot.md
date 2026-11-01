@@ -4,14 +4,14 @@
 - Wave: W5
 - Block: 5
 - Lane: Builder
-- Depends on: C04, O04, O05, M05, AO03, G01
-- proof: gh aw compile --dir workflows --strict workflows/p04-assign-copilot.md && ./scripts/verify.sh; B5 proof assigns Copilot on X01 test repo with P04_ASSIGN_TOKEN scope only
+- Depends on: C04, M05, AO03, G01
+- proof: gh aw compile --dir workflows --strict workflows/p04-assign-copilot.md && make verify; B5 proof assigns Copilot on X01 test repo with P04_ASSIGN_TOKEN scope only
 - door: one-way
 - one-way gate: Sven's exact yes required (Copilot enablement per repo and P04_ASSIGN_TOKEN). Rollback: set AO03 kill var for P04; remove workflow trigger
 ## Goal
 Fold **F77 issue to PR** into assign-only handoff: P04 runs centrally in agentic-workflows and **only assigns** the issue to the Copilot cloud agent in the target repo. The Copilot cloud agent opens the draft PR inside that repo under its own identity. Our workflow never pushes code or opens a PR in another repo; no contents:write or pull-requests:write token of ours exists.
 ## Context
-[LP00](../loops/LP00-improvement-loop.md) step 3 and [LP01](../loops/LP01-delivery-loop.md) pick-up via [P14](P14-board-pick-up.md). **Triggers:** human `agent-ok` label (label actor must be a human with write), `/fix`, [M05](../monitoring/M05-github-log-watcher.md) `risk:low` same-run handoff (no `agent-ok`), and P14 pick-up. Rejected: central write PAT across repos; per-repo P04 copies. After the draft PR: [F01](../agent-factory/F01-pr-review.md) review, `scripts/verify.sh` or that repo's CI, Tester, then Sven merges; an agent never merges. Caps: 1 open auto-fix PR per repo (WIP 1). If Copilot cloud agent is not enabled for a repo, P04 skips assign and comments on the issue (no fallback PR).
+[LP00](../loops/LP00-improvement-loop.md) step 3 and [LP01](../loops/LP01-delivery-loop.md) pick-up via [P14](P14-board-pick-up.md). **Triggers:** human `agent-ok` label (label actor must be a human with write), `/fix`, [M05](../monitoring/M05-github-log-watcher.md) `risk:low` same-run handoff (no `agent-ok`), and P14 pick-up. Rejected: central write PAT across repos; per-repo P04 copies. After the draft PR: [F01](../agent-factory/F01-pr-review.md) review, `make verify` or that repo's CI, Tester, then Sven merges; an agent never merges. Caps: 1 open auto-fix PR per repo (WIP 1). If Copilot cloud agent is not enabled for a repo, P04 skips assign and comments on the issue (no fallback PR).
 **How ours beats the example (Bar H):** shared defaults, pinned imports, caps, staged rollout, dedupe, trial repo plus first-3-run audit.
 ## Steps
 1. Add `workflows/p04-assign-copilot.md`; deterministic pre-check (noop when issue already assigned or cap hit).
@@ -31,11 +31,11 @@ Fold **F77 issue to PR** into assign-only handoff: P04 runs centrally in agentic
 - [ ] `on.roles` and skip-bots; bot labels never start assign except M05 rule-gated handoff
 - [ ] Issue format matches `shared/reporting.md`
 - [ ] Trial on X01; `gh aw audit` on first 3 runs; measured AIC in Evidence
-- [ ] `scripts/verify.sh` pass on workflow SHA
+- [ ] `make verify` pass on workflow SHA
 - [ ] X07 benchmark score at or above baseline (5+ cases)
 - [ ] WIP 1 open auto-fix PR per repo enforced
 ## Technical design
-- Components and files: `workflows/p04-assign-copilot.md`, aw.yml allowlist aligned with POL12, optional comment template when Copilot disabled
+- Components and files: `workflows/p04-assign-copilot.md`, aw.yml allowlist aligned with workflow frontmatter, optional comment template when Copilot disabled
 - Interfaces: secret `P04_ASSIGN_TOKEN`; safe-output comment and assign; inputs `target-repo`, `issue-number`; concurrency per issue; AO03 pre-step
 - Sequence:
 
@@ -53,7 +53,7 @@ sequenceDiagram
 ```
 
 - Failure modes: missing Copilot enablement comments and exits; cap exceeded noops; kill switch noop
-- Security: P04_ASSIGN_TOKEN Issues write only on allowlist; separate from M05 read token; POL12 owner check
+- Security: P04_ASSIGN_TOKEN Issues write only on allowlist; separate from M05 read token; workflow frontmatter owner check
 - Observability: assign events in B01; link issue to PR in target repo
 - Cost: mostly deterministic assign steps; low AIC unless agent summarizes issue
 - Rollback: AO03 kill var for P04; disable triggers
@@ -70,7 +70,7 @@ flowchart LR
   P14[P14 pick-up] --> P04
   P04 --> CA[Copilot cloud agent]
   CA --> PR[draft PR in target repo]
-  PR --> V[verify.sh or CI]
+  PR --> V[make verify or CI]
   V --> F01[F01 pr-review]
   F01 --> SV((Sven merges))
 ```

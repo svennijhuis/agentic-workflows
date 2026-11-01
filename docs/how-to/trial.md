@@ -17,7 +17,7 @@ gh aw compile
 ## Checklist before promotion
 
 1. **Dispatch**: `workflow_dispatch` only until Sven enables other triggers.
-2. **Staged**: report-only or staged safe-outputs first ([POL03](../../policies/POL03.yml)).
+2. **Staged**: report-only or staged safe-outputs first (frontmatter).
 3. **Measure AIC**: record cost in the workflow PBI Evidence ([B03a](../pbi/observability/B03a-value-vs-cost.md)).
 4. **Promote**: update [governance/rollout.yml](../../governance/rollout.yml) ladder when gates pass ([G01](../pbi/governance/G01-rollout-ladder-human-review.md), Block 2).
 

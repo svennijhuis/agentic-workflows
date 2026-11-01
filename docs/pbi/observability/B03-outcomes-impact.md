@@ -4,8 +4,8 @@
 - Wave: PR 0
 - Block: 5
 - Lane: Cursor CLI
-- Depends on: B01, O01
-- proof: test -f docs/pbi/observability/B03-outcomes-impact.md && ./scripts/verify.sh
+- Depends on: B01
+- proof: test -f docs/pbi/observability/B03-outcomes-impact.md && make verify
 - door: two-way
 ## Goal
 Document gh aw outcomes and measuring impact guidance to prove workflows save time without vanity metrics.

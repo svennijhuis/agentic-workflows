@@ -4,8 +4,8 @@
 - Wave: W5
 - Block: 3
 - Lane: Builder
-- Depends on: C03, C04, O01, O02, O03, P05, G01
-- proof: gh aw compile --dir workflows --strict workflows/p13-grilling.md && ./scripts/verify.sh
+- Depends on: C03, C04, P05, G01
+- proof: gh aw compile --dir workflows --strict workflows/p13-grilling.md && make verify
 - door: one-way
 - one-way gate: Sven's exact yes required (tokens). Rollback: disable workflow via AO03 kill var for P13
 ## Goal
@@ -24,7 +24,7 @@ Gist point 27: on label `grill` or human `/grill`, post one round of at most 5 q
 - [ ] Never moves Project card to Ready
 - [ ] Bot label actor noop
 - [ ] Trial issue on board; three audited runs; AIC in Evidence
-- [ ] `scripts/verify.sh` pass
+- [ ] `make verify` pass
 - [ ] X07 benchmark score at or above baseline (5+ cases)
 ## Technical design
 - Components and files: `workflows/p13-grilling.md`, `shared/defaults.md`, issue comment thread as state

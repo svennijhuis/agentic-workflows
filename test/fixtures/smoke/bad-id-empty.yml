@@ -1,8 +1,0 @@
-scenarios:
-  - id: ""
-    env: tst
-    method: GET
-    path: /api/orders?limit=1
-    auth: none
-    expect:
-      status: 200

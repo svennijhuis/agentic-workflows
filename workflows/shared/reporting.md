@@ -1,5 +1,5 @@
 ---
-description: Fixed report format for issues, PR comments and reviews (POL16). Optional title prefix via import-schema.
+description: Fixed report format for issues, PR comments and reviews. Optional title prefix via import-schema.
 import-schema:
   title-prefix:
     type: string

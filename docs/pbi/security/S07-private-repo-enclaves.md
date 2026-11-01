@@ -5,12 +5,12 @@
 - Block: 6
 - Lane: Builder
 - Depends on: S00, G05
-- proof: ./scripts/verify.sh && gh aw compile --dir workflows --strict
+- proof: make verify && gh aw compile --dir workflows --strict
 - door: two-way
 ## Goal
 Document private repo enclave pattern for sensitive workflows (`private: true` manifest) when org or private catalogs are needed.
 ## Context
-Part of gh-aw defense in depth for svennijhuis/agentic-workflows. Complements policies POL01 through POL18 and Bar H workflow requirements.
+Part of gh-aw defense in depth for svennijhuis/agentic-workflows. Complements workflow frontmatter security (minimal permissions, safe-outputs, timeouts) and Bar H workflow requirements.
 ## Steps
 1. Explain gh-aw private package install restrictions.
 2. Link G05 org-only private catalog options.

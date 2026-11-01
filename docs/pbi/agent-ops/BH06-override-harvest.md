@@ -4,12 +4,12 @@
 - Wave: W5
 - Block: 5
 - Lane: Builder
-- Depends on: LP00, AO09, POL26
-- proof: fixture: a relabel by Sven becomes one decision row (label before, after, short reason), no thread text, no personal data; store is local, redacted, 30 days, never committed (POL26)
+- Depends on: LP00, AO09
+- proof: fixture: a relabel by Sven becomes one decision row (label before, after, short reason), no thread text, no personal data; store is local, redacted, 30 days, never committed
 - door: one-way
 - one-way gate: manual only until Sven's exact yes on a schedule (PA1). Rollback: stop the harvest, delete the local store
 - triage: spec
-- feedback: harvest fixture plus POL26
+- feedback: harvest fixture plus redaction rules (AO09)
 - harness: gh-aw, engine copilot via shared/defaults.md (when built)
 - review-input: diff + this PBI + DoD (+ linked spec) + PR description, never builder session logs (PA6)
 - kind: script
@@ -20,11 +20,11 @@ When Sven overrides agent output (relabels F72 or F06 output, marks an F01 comme
 Warp skills loop: a reviewer changes a label and comments why, and a daily outer agent turns the change and reason into a skill diff. Warp review: the outer loop synthesizes human feedback on review comments. PA2: only the decision, never full threads or personal data. PA3: local, redacted, 30 days, never committed. Not built in PR #4: docs only, nothing enabled (PA9).
 ## Steps
 1. Decision row format.
-2. Local store under a POL26 log dir.
+2. Local store under a redacted local log dir.
 3. Manual run, 3 audited runs, Sven's yes.
 ## Definition of Done
 - [ ] Fixture row has no thread text
-- [ ] Store ignored and scanned by POL26
+- [ ] Store gitignored and covered by AO09 redaction rules
 - [ ] Manual only
 - [ ] Every Bar H line from [README.md](../README.md#bar-h-every-workflow-pbi) when the workflow ships
 ## Technical design
@@ -54,7 +54,7 @@ sequenceDiagram
 ```mermaid
 flowchart LR
   S1[Decision row format]
-  S2[Local store under a POL26 log dir]
+  S2[Local store under a redacted local log dir]
   S1 --> S2
   S3[Manual run, 3 audited runs, Sven's yes]
   S2 --> S3

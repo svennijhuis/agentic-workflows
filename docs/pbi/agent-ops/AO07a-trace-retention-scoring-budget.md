@@ -4,7 +4,7 @@
 - Wave: W5
 - Block: 5
 - Lane: Builder
-- Depends on: AO07, B01, POL26
+- Depends on: AO07, B01
 - proof: retention rule keeps run audits for the scoring window; scoring stops at the budget cap per risk class (fixture)
 - door: two-way
 - triage: build
@@ -38,7 +38,7 @@ sequenceDiagram
 ```
 
 - Failure modes: Cap reached: scoring skips, logs it
-- Security: Redacted logs (POL26)
+- Security: Redacted logs, never committed
 - Observability: spend per class
 - Cost: cap value
 - Rollback: Remove the cap
