@@ -25,7 +25,7 @@ Details: [docs/reference/layout.md](docs/reference/layout.md).
 ## Gate (contributors)
 
 ```bash
-make install   # once: pinned gh-aw v0.93.4
+make install   # once: pinned gh-aw v1.0.1
 make compile   # gh aw compile --strict
 make verify    # compile, then POL25 and POL31 on repo and fixtures
 ```

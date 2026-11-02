@@ -1,7 +1,7 @@
 {
-  "gh-aw": "v0.93.4",
+  "gh-aw": "v1.0.1",
   "engines": {
-    "copilot": "1.0.101"
+    "copilot": "1.0.103"
   },
   "tools": {
     "gitleaks": {

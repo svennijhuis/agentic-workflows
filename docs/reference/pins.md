@@ -4,8 +4,8 @@ Reproducible compiles require pinned gh-aw and Copilot engine versions in [`.git
 
 ## `.github/aw.json`
 
-- **`gh-aw`**: compiler pin **v0.93.4** (read by `Makefile` and `.github/workflows/verify.yml`).
-- **`engines.copilot`**: Copilot engine **1.0.101** (must match `workflows/shared/defaults.md` when you bump).
+- **`gh-aw`**: compiler pin **v1.0.1** (read by `Makefile` and `.github/workflows/verify.yml`).
+- **`engines.copilot`**: Copilot engine **1.0.103** (must match `workflows/shared/defaults.md` when you bump).
 - **`tools`**: **yq** and **gitleaks** only, each with `version`, `url` and `sha256`. The verify job downloads them for POL25/POL31 checks and the secret scan. git, gh, jq and make are runner-provided.
 
 `make compile` checks the installed gh-aw extension against the top-level pin. `make verify` does not re-pin auxiliary tools locally; CI installs yq and gitleaks from the same file.

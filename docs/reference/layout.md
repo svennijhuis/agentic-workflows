@@ -49,7 +49,7 @@ Install: `gh aw add svennijhuis/agentic-workflows/<workflow-stem>@vX.Y.Z`. Workf
 
 ## Why `workflows/shared/`
 
-gh-aw v0.93.4 refuses imports outside the workflows folder, for example: `path ../shared/defaults.md must be within workflows folder`. Shared fragments therefore live at `workflows/shared/`, not a top-level `shared/`.
+gh-aw v1.0.1 refuses imports outside the workflows folder, for example: `path ../shared/defaults.md must be within workflows folder`. Shared fragments therefore live at `workflows/shared/`, not a top-level `shared/`.
 
 ## Post-F01 squad-review removal
 

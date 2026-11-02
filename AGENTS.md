@@ -17,7 +17,7 @@ Entry point for coding agents and maintainers working in `svennijhuis/agentic-wo
 | `docs/` | Diataxis docs ([docs/README.md](docs/README.md)) |
 | `docs/pbi/` | Backlog (Builder-owned content) |
 
-Shared imports must stay under `workflows/shared/` because gh-aw v0.93.4 rejects paths outside `workflows/` ([layout.md](docs/reference/layout.md)).
+Shared imports must stay under `workflows/shared/` because gh-aw v1.0.1 rejects paths outside `workflows/` ([layout.md](docs/reference/layout.md)).
 
 ## Verify before PR
 

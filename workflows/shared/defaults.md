@@ -2,7 +2,7 @@
 description: Catalog defaults imported by every workflow. Engine copilot (pinned version), read-only GitHub tools. No caps here.
 engine:
   id: copilot
-  version: "1.0.101"
+  version: "1.0.103"
 tools:
   github:
     toolsets: [repos, issues, pull_requests]
