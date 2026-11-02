@@ -4,7 +4,7 @@
 
 ## PBIs
 
-- [F00: F00-fit-index](F00-fit-index.md)
+- [F00: F00-fit-index](../done/F00-fit-index.md)
 - [F01: F01-pr-review](F01-pr-review.md)
 - [F01b: F01b-pr-review-auto-on-push](F01b-pr-review-auto-on-push.md)
 - [F02: F02-ci-doctor](F02-ci-doctor.md)

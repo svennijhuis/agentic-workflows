@@ -75,7 +75,7 @@ KS[AO03 kill switch, /stop] -.noop.-> M05 & P04
 | 0001 | Repository layout | 0 | two-way | decisions | PR 0 | accepted | | Cursor CLI | [decisions/0001-repo-layout.md](decisions/0001-repo-layout.md) |
 | 0002 | Settled decisions | 0 | two-way | decisions | PR 0 | accepted | | Cursor CLI | [decisions/0002-settled-decisions.md](decisions/0002-settled-decisions.md) |
 | D00 | Documentation overview (Diataxis map) | 0 | two-way | docs | PR 0 | todo | C02 | Cursor CLI | [docs/D00-docs-overview.md](docs/D00-docs-overview.md) |
-| F00 | Agent factory fit index | 0 | two-way | agent-factory | PR 0 | todo | none | Cursor CLI | [agent-factory/F00-fit-index.md](agent-factory/F00-fit-index.md) |
+| F00 | Agent factory fit index | 0 | two-way | agent-factory | PR 0 | done | none | Cursor CLI | [done/F00-fit-index.md](done/F00-fit-index.md) |
 | LP00 | Improvement loop | 0 | two-way | loops | PR 0 | todo | M05, M01, P04, F01, F16, F72, X07, AO01, AO03, Y02, C03 | Builder | [loops/LP00-improvement-loop.md](loops/LP00-improvement-loop.md) |
 | LP01 | Delivery loop | 0 | two-way | loops | PR 0 | todo | P05, P12, P13, P14, P04, F01, F16, X07, AO01 | Builder | [loops/LP01-delivery-loop.md](loops/LP01-delivery-loop.md) |
 | LP02 | Event map | 0 | two-way | loops | PR 0 | todo | R01, R02, R03, R04, R06, M05, P04, P12, P13, P14, F01, F01b, F16, AO01, AO02, AO03, M01, L02 | Builder | [loops/LP02-event-map.md](loops/LP02-event-map.md) |

@@ -1,5 +1,6 @@
 # F00: Agent factory fit index
-- Status: todo
+- Status: done
+- PR: #PENDING
 - Area: agent-factory
 - Wave: PR 0
 - Block: 0
@@ -110,16 +111,16 @@ NOW in plan v3: F01, F02, F03, F04, F05, F06, F07, F11, F13, F14, F15, F17. F08 
 | security-review | F05 |
 
 ### Agent-factory-status (348 rows)
-Full table with Decision column (not ours, PICK, F71 analytics bucket) lives in `docs/pbi/workflow-ratings.md`. PICK rows in F00 to F35 scope include F04 (AIC audit), F11/F13 (factory names align with agentics), F20 to F29, and factory-backed F23 to F27.
+Full table with Decision column (not ours, PICK, F71 analytics bucket) lives in [docs/pbi/workflow-ratings.md](../workflow-ratings.md). PICK rows in F00 to F35 scope include F04 (AIC audit), F11/F13 (factory names align with agentics), F20 to F29, and factory-backed F23 to F27.
 
 ### Gist handover candidates (rated)
 | Id | Idea | Value | Cost tier | Block | PBI |
 |---|---|---|---|---|---|
-| F72 | Issue triage with repro on main (report-only) | High: ties issues to inner loop without proxy | M | 3 | [F72](F72-issue-triage-repro.md) |
-| F73 | Group related issues before work | Medium: one fix per root cause | M | 5 | [F73](F73-issue-grouping.md) |
-| F74 | Findings buffer on one pinned issue | High: cheap gardening, pattern visibility | S | 3 | [F74](F74-findings-buffer.md) |
-| F75 | Weekly merged PR sample (3 picks) | High: sample review, feeds new guards | S | 5 | [F75](F75-weekly-merged-pr-sample.md) |
-| X06 | Verification skill + script for this repo | High: one shared proof path for Tester | n/a | 1 | [X06](../done/X06-verification-skill.md) |
+| F72 | Issue triage with repro on main (report-only) | High: ties issues to inner loop without proxy | M | 3 | [F72](../agent-factory/F72-issue-triage-repro.md) |
+| F73 | Group related issues before work | Medium: one fix per root cause | M | 5 | [F73](../agent-factory/F73-issue-grouping.md) |
+| F74 | Findings buffer on one pinned issue | High: cheap gardening, pattern visibility | S | 3 | [F74](../agent-factory/F74-findings-buffer.md) |
+| F75 | Weekly merged PR sample (3 picks) | High: sample review, feeds new guards | S | 5 | [F75](../agent-factory/F75-weekly-merged-pr-sample.md) |
+| X06 | Verification skill + script for this repo | High: one shared proof path for Tester | n/a | 1 | [X06](X06-verification-skill.md) |
 ## Steps
 1. Keep this index aligned when adding or retiring F PBIs.
 2. On each new PICK, add a row here and open the matching F PBI file.
@@ -127,14 +128,44 @@ Full table with Decision column (not ours, PICK, F71 analytics bucket) lives in 
 4. Run `make verify` after index edits (POL25/POL31 and compile still apply to workflow files in repo).
 
 ## Definition of Done
-- [ ] All 62 agentics entries represented (redirects point to canonical PBI)
-- [ ] All 18 gallery pages mapped to a PBI id
-- [ ] Agent-factory 348-row table linked from `docs/pbi/workflow-ratings.md`
-- [ ] Every PICK in F01 to F71 has a matching `docs/pbi/agent-factory/` file when in scope
-- [ ] No em dash or en dash in this folder
-- [ ] `make verify` exits 0 on the repo after index edits
+- [x] All 62 agentics entries represented (redirects point to canonical PBI)
+- [x] All 18 gallery pages mapped to a PBI id
+- [x] Agent-factory 348-row table linked from `docs/pbi/workflow-ratings.md`
+- [x] Every PICK in F01 to F71 has a matching `docs/pbi/agent-factory/` file when in scope
+- [x] No em dash or en dash in this folder
+- [x] `make verify` exits 0 on the repo after index edits
+## Technical design
+- Components and files: `docs/pbi/done/F00-fit-index.md` (this index), [docs/pbi/workflow-ratings.md](../workflow-ratings.md) (348-row Decision table), `docs/pbi/README.md` (index row), `docs/pbi/agent-factory/00-overview.md` (link)
+- Module boundary: the fit table is the interface; each F PBI holds the detail
+- Interfaces: markdown tables only. Agentics workflow name to value, cost, when, and PBI id. Gallery page to PBI id. Gist handover id to the PBI file. No workflow frontmatter, no safe-outputs, no exit codes
+- Sequence:
+
+```mermaid
+sequenceDiagram
+  participant Sven
+  participant F00 as F00 index
+  participant Ratings as workflow-ratings.md
+  participant PBI as F PBI file
+  Sven->>F00: Read fit summary
+  F00->>Ratings: Open the 348-row table
+  Ratings-->>Sven: Decision and PBI id
+  Sven->>PBI: Open the matching file
+```
+
+- Failure modes: a new PICK in F01 to F71 with no file under `docs/pbi/agent-factory/`, or a redirect whose PBI id does not match the canonical row. The index then points at a missing priority. Add the row and the PBI file in the same change
+- Security: documentation only. No tokens, no secrets, no network, no workflow trigger
+- Observability: `make verify` log on the commit SHA (Q0). Counts on this page: 62 agentics rows, 18 gallery rows, link to 348 factory rows
+- Cost: 0 AIC
+- Rollback: revert this PR
+- Proof: `make verify` exits 0
+- Door: two-way (docs edit in the repo, no token spend)
 ## Evidence
-(link to committed `docs/pbi/workflow-ratings.md`; run `make verify` on the PR SHA)
+- 348-row table: [docs/pbi/workflow-ratings.md](../workflow-ratings.md) (348 data rows).
+- Agentics table on this page: 62 rows. Each redirect row names the canonical workflow and the same PBI id.
+- Gallery table on this page: 18 rows, each with a PBI id.
+- Every Decision `PICK F01` to `PICK F71` in the ratings table has a matching `docs/pbi/agent-factory/F<id>-*.md` file (F08 is not a PICK).
+- `make verify` exits 0. Last line `0 failures` (`gh aw compile --strict` inside `make compile`, then POL25 and POL31). Log is on the PR for this commit SHA (Q0). No run, no token spend.
+- actionlint: 0 findings. No workflow file changed.
 
 ## Flow
 ```mermaid
@@ -156,4 +187,4 @@ n/a (documentation)
 - https://github.github.com/gh-aw/gallery/
 - https://github.github.com/gh-aw/agent-factory-status/
 - https://github.com/githubnext/agentics/tree/main/workflows
-- docs/pbi/workflow-ratings.md
+- [docs/pbi/workflow-ratings.md](../workflow-ratings.md)
