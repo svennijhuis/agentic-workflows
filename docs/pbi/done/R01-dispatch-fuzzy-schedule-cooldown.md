@@ -1,6 +1,6 @@
 # R01: Dispatch, fuzzy schedule, cooldown
 - Status: done
-- PR: #<n>
+- PR: #31
 - Area: triggers
 - Wave: PR 0
 - Block: 2
