@@ -20,7 +20,7 @@ Wave W6 later workflow. PR 0 documents intent only. Ratings: Style nits without 
 
 **Better than example:** Skip merge permission; grumpy vs nit roles separated.
 
-**Trigger:** pull_request_comment `/nit` or dispatch.
+**Trigger:** `workflow_dispatch` first. A pull request comment `/nit` is a named ask (R03), recorded in `policies/POL25.yml` `sven_yes` before it exists.
 
 **Safe outputs:** Single review comment; deduped per PR per day.
 

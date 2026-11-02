@@ -16,7 +16,7 @@ Upstream reference: `archie` (https://github.com/githubnext/agentics/tree/main/w
 **What it does:** Mermaid map of issue/PR links from thread.
 **Value for Sven repos:** See workflow-ratings.md row; prioritize NOW set for daily maintenance and security.
 **How ours beats the example (Bar H):** Fits mermaid documentation habit
-**Trigger:** slash `/archie` after staged
+**Trigger:** `workflow_dispatch` first. Slash `/archie` is a named ask after staged, recorded in `policies/POL25.yml` `sven_yes` before it exists.
 **Safe outputs and limits:** issue comment mermaid
 **Issue/PR format:** Title prefix `[F35]`, body uses `shared/reporting.md` audit footer with workflow id, run URL, and AIC when known.
 Engine: `copilot` with `COPILOT_GITHUB_TOKEN` (personal PAT). No `copilot-requests: write` (org billing only).

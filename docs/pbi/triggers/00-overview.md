@@ -4,7 +4,7 @@
 
 ## PBIs
 
-- [R01: R01-dispatch-fuzzy-schedule-cooldown](R01-dispatch-fuzzy-schedule-cooldown.md)
+- [R01: R01-dispatch-fuzzy-schedule-cooldown](../done/R01-dispatch-fuzzy-schedule-cooldown.md)
 - [R02: R02-issue-label-skip-if-match-filters](R02-issue-label-skip-if-match-filters.md)
 - [R03: R03-slash-commands-reactions](R03-slash-commands-reactions.md)
 - [R04: R04-workflow-run-deployment-status](R04-workflow-run-deployment-status.md)

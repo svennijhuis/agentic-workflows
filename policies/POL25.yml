@@ -7,6 +7,7 @@ bad_fixture: test/fixtures/bad/POL25.md
 good_fixture: test/fixtures/good/POL25.md
 pbi: docs/pbi/done/POL25-agentic-dispatch-only.md
 # Keys under on: that are trigger settings, not triggers.
-settings: [roles, skip-bots, skip-roles]
+# cooldown, skip-if-match, and skip-if-no-match are admission guards (R01), not events.
+settings: [roles, skip-bots, skip-roles, cooldown, skip-if-match, skip-if-no-match]
 # A schedule or event needs Sven's exact yes recorded here: {workflow, date, quote}. None today.
 sven_yes: []

@@ -20,7 +20,7 @@ Wave W6 later workflow. PR 0 documents intent only. Ratings: High: routes cookie
 
 **Better than example:** Label gate, skip-bots, explicit allowed labels, cost cap per assignment.
 
-**Trigger:** issues labeled `copilot-cookie`; workflow_dispatch for dry run.
+**Trigger:** `workflow_dispatch` first. `issues` labeled `copilot-cookie` is a named ask, recorded in `policies/POL25.yml` `sven_yes` before it exists.
 
 **Safe outputs:** Agent assignment comment; no secret tokens in issue body.
 

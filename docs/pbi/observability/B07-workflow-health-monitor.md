@@ -12,6 +12,7 @@
 Document a catalog health workflow that detects failing compiles, stale lock files, and cap breaches across installed workflows.
 ## Context
 Complements M01 exception watcher (Azure) with GitHub-side catalog health. Dispatch-only until proven.
+**Trigger:** `workflow_dispatch` first. A schedule stays off until Sven's yes is in Evidence and in `policies/POL25.yml` `sven_yes`.
 ## Steps
 1. Define health signals: compile --strict, compile --strict clean, recent run failures.
 2. Safe-output issue to catalog repo with dedupe.

@@ -16,7 +16,7 @@ Upstream reference: `pr-fix` (https://github.com/githubnext/agentics/tree/main/w
 **What it does:** fix commit on PR after changes requested (high risk, staged).
 **Value for Sven repos:** See workflow-ratings.md row; prioritize NOW set for daily maintenance and security.
 **How ours beats the example (Bar H):** Never on default branch; human must merge
-**Trigger:** `pull_request_review` with changes requested (human); optional `workflow_dispatch` and slash after extended staged
+**Trigger:** `workflow_dispatch` first. `pull_request_review` and a `/pr-fix` slash are named asks, recorded in `policies/POL25.yml` `sven_yes` before they exist.
 **Safe outputs and limits:** `create-commit-on-branch` capped
 **Issue/PR format:** Title prefix `[F16]`, body uses `shared/reporting.md` audit footer with workflow id, run URL, and AIC when known.
 Engine: `copilot` with `COPILOT_GITHUB_TOKEN` (personal PAT). No `copilot-requests: write` (org billing only).

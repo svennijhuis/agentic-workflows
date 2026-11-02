@@ -14,7 +14,7 @@ Detect Azure or Actions exceptions with deterministic OIDC + KQL (or log scrape)
 
 **How ours beats the example (Bar H):** shared defaults and pinned imports, low AIC caps, `workflow_dispatch` and staged/report-only before writes, dedupe and min-integrity, trial repo plus first-3-run audit, versus upstream gallery samples that often use higher defaults.
 Implements MonitorOps + DeterministicOps. Agent runs only when exceptions.json is non-empty. Hourly cron is M03 (blocked until Sven yes + cost). Repo to resource map is Q5; issue target Q6.
-**Trigger:** `workflow_dispatch` only (M03 adds hourly)
+**Trigger:** `workflow_dispatch` first (M03 fuzzy hourly stays off until Sven's yes)
 
 **Safe outputs:** create-issue or add-comment; dedupe-by-title, group-by-day, close-older-issues
 

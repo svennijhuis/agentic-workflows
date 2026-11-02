@@ -12,6 +12,7 @@
 On label `plan` or human `/plan`, draft a full PBI from [docs/pbi/_template.md](../_template.md) as an issue comment (Goal, DoD, `proof:`, `door:`, Technical design, mermaid). Human copies into `docs/pbi/` or approves. Max 3 runs per day.
 ## Context
 [LP01](../loops/LP01-delivery-loop.md) plan step. Label actor must be human with write ([LP02](../loops/LP02-event-map.md)). One-way tokens. Does not move board cards.
+**Trigger:** `workflow_dispatch` first. Label `plan` and `/plan` are named asks, recorded in `policies/POL25.yml` `sven_yes` before they exist.
 ## Steps
 1. Add `workflows/p12-planning.md` with `issues: labeled plan` and `/plan` command trigger.
 2. Agent reads `_template.md` and issue context; outputs one comment with all required PBI sections.

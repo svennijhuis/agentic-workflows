@@ -14,7 +14,7 @@ Add fuzzy hourly schedule to the exception watcher after cost proof and explicit
 
 **How ours beats the example (Bar H):** shared defaults and pinned imports, low AIC caps, `workflow_dispatch` and staged/report-only before writes, dedupe and min-integrity, trial repo plus first-3-run audit, versus upstream gallery samples that often use higher defaults.
 Blocked until M01 dispatch runs are measured (target: quiet runs 0 AIC) and Sven says yes. Uses gh-aw fuzzy hourly schedule syntax.
-**Trigger:** `on: schedule: hourly` only after approval
+**Trigger:** `workflow_dispatch` first. Fuzzy `hourly` or `every 1h` stays off until Sven's yes is in Evidence and in `policies/POL25.yml` `sven_yes`.
 
 **Safe outputs:** same as M01
 

@@ -14,7 +14,7 @@ gh-aw v0.93.4 requires shared files under `workflows/shared/` (imports outside `
 
 | File | Use |
 | --- | --- |
-| [defaults.md](defaults.md) | Baseline engine, admission, shared tool defaults |
+| [defaults.md](defaults.md) | Baseline engine, admission, dispatch, cooldown, and rate limits |
 | [security.md](security.md) | Network and safety baseline |
 | [reporting.md](reporting.md) | Fixed issue/PR report shape |
 | [agentpacks.md](agentpacks.md) | Pinned agentPacks skills/commands (not copied SKILL.md) |

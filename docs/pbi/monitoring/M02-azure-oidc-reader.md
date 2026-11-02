@@ -14,7 +14,7 @@ Provide reusable deterministic Azure login (OIDC) with Reader role for KQL and h
 
 **How ours beats the example (Bar H):** shared defaults and pinned imports, low AIC caps, `workflow_dispatch` and staged/report-only before writes, dedupe and min-integrity, trial repo plus first-3-run audit, versus upstream gallery samples that often use higher defaults.
 Named ask for Sven: Entra app registration, federated credential for GitHub, Reader on subscription or workspace. No secrets in repo; use GitHub secrets and `id-token: write`.
-**Trigger:** n/a (library step)
+**Trigger:** `workflow_dispatch` first on the consumer workflow (this PBI is a library step and has no `on:` of its own)
 
 **Safe outputs:** n/a
 

@@ -15,6 +15,7 @@ Diataxis layout for the catalog. PBI backlog: [pbi/README.md](pbi/README.md). Se
 - [Auth and secrets](reference/auth.md)
 - [agentPacks contract (C12)](reference/agentpacks-contract.md)
 - [squad-review (legacy)](reference/squad-review.md)
+- [Triggers, fuzzy schedule, cooldown (R01)](reference/triggers.md)
 
 ## Explanation
 

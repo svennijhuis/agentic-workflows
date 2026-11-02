@@ -19,6 +19,7 @@
 Optional second step: enable `pull_request` opened/synchronize trigger for pr-review only after three audited F01 manual runs with measured AIC cost and Sven's exact yes.
 ## Context
 Plan v3.5 and gist point F: auto review spends Copilot credits on every push. Default remains F01 manual (`workflow_dispatch` only). The `/pr-review` slash is its own named ask, with a row in `policies/POL25.yml` `sven_yes` first. This PBI is gated; nothing merges without Sven yes named ask F01b.
+**Trigger:** `workflow_dispatch` first. `pull_request` stays off until Sven's exact yes is in Evidence and in `policies/POL25.yml` `sven_yes`.
 
 ## Frontmatter security
 - `permissions:` read only (`contents: read`, `pull-requests: read`, `issues: read`, `actions: read`); no write permission on the token.

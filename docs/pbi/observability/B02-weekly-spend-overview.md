@@ -12,6 +12,7 @@
 Implement or document a weekly AI Credits spend overview workflow aligned with F04 cost tracker and Copilot Pro monthly pool.
 ## Context
 Suggested caps: 50 AIC/run, 200/day (unverified). Pro plan 1,500 AIC/month. Weekly rollup helps catch drift before caps fail. Embeds [X07](../testing/X07-workflow-benchmark.md) benchmark tables/CSV and [B03a](B03a-value-vs-cost.md) value vs cost rows.
+**Trigger:** `workflow_dispatch` first. A weekly schedule stays off until Sven's yes is in Evidence and in `policies/POL25.yml` `sven_yes`.
 ## Steps
 1. Import shared/defaults caps and document measurement method.
 2. Aggregate gh aw logs or outcomes across repos Sven lists.

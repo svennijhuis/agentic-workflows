@@ -14,7 +14,7 @@ Operate automation from a side repo (or central) that targets main product repos
 
 **How ours beats the example (Bar H):** shared defaults and pinned imports, low AIC caps, `workflow_dispatch` and staged/report-only before writes, dedupe and min-integrity, trial repo plus first-3-run audit, versus upstream gallery samples that often use higher defaults.
 Combines gallery triage-from-side-repo and code-quality-monitoring. ChatOps uses R03; cross-repo writes need PAT or App (Q3).
-**Trigger:** issue_comment slash + `workflow_dispatch`
+**Trigger:** `workflow_dispatch` first. An issue comment slash is a named ask (R03), recorded in `policies/POL25.yml` `sven_yes` before it exists.
 
 **Safe outputs:** add-comment, create-issue on target-repo; staged first
 

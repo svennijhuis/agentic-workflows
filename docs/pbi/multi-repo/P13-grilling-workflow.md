@@ -12,6 +12,7 @@
 Gist point 27: on label `grill` or human `/grill`, post one round of at most 5 questions on goal, DoD, and edge cases. Wait for Sven's reply before the next round. Never moves a card to Ready.
 ## Context
 [LP01](../loops/LP01-delivery-loop.md) grill step. Human actor required for label ([LP02](../loops/LP02-event-map.md)). One-way tokens.
+**Trigger:** `workflow_dispatch` first. Label `grill` and `/grill` are named asks, recorded in `policies/POL25.yml` `sven_yes` before they exist.
 ## Steps
 1. Add `workflows/p13-grilling.md` with `grill` label and `/grill` command.
 2. Agent posts up to 5 questions per run; stores state in issue comments thread.

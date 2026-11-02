@@ -20,7 +20,7 @@ Wave W6 later workflow. PR 0 documents intent only. Ratings: Prefer F06 daily ba
 
 **Better than example:** Defers to F06 dedupe policy; per-event capped at S tier.
 
-**Trigger:** issues opened with filters; dispatch for replay.
+**Trigger:** `workflow_dispatch` first. `issues` opened is a named ask, recorded in `policies/POL25.yml` `sven_yes` before it exists.
 
 **Safe outputs:** Labels and triage comment per shared/reporting.md.
 

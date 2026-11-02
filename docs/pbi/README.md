@@ -112,7 +112,7 @@ KS[AO03 kill switch, /stop] -.noop.-> M05 & P04
 | G02 | RACI | 2 | two-way | governance | PR 0 | todo | G01 | Cursor CLI | [governance/G02-raci.md](governance/G02-raci.md) |
 | G03 | Onboarding + support | 2 | two-way | governance | PR 0 | todo | G02, D01 | Cursor CLI | [governance/G03-onboarding-support.md](governance/G03-onboarding-support.md) |
 | L01 | v1.0.0 + moving v1 + CHANGELOG | 2 | one-way | release | PR 0 | todo | C02 | Cursor CLI | [release/L01-v1-moving-v1-changelog.md](release/L01-v1-moving-v1-changelog.md) |
-| R01 | Dispatch, fuzzy schedule, cooldown | 2 | two-way | triggers | PR 0 | todo | C03 | Cursor CLI | [triggers/R01-dispatch-fuzzy-schedule-cooldown.md](triggers/R01-dispatch-fuzzy-schedule-cooldown.md) |
+| R01 | Dispatch, fuzzy schedule, cooldown | 2 | two-way | triggers | PR 0 | done | C03 | Cursor CLI | [done/R01-dispatch-fuzzy-schedule-cooldown.md](done/R01-dispatch-fuzzy-schedule-cooldown.md) |
 | R02 | Issue/label + skip-if-match filters | 2 | two-way | triggers | PR 0 | todo | R01 | Cursor CLI | [triggers/R02-issue-label-skip-if-match-filters.md](triggers/R02-issue-label-skip-if-match-filters.md) |
 | R03 | Slash commands + reactions | 2 | two-way | triggers | PR 0 | todo | R01 | Cursor CLI | [triggers/R03-slash-commands-reactions.md](triggers/R03-slash-commands-reactions.md) |
 | S00 | Security architecture explainer | 2 | two-way | security | W2 | todo | none | Cursor CLI | [security/S00-security-architecture-explainer.md](security/S00-security-architecture-explainer.md) |

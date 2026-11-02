@@ -8,7 +8,8 @@ on:
       pr:
         description: Pull request number to review
         required: true
-        type: string
+        type: number
+  cooldown: 15m
   roles: [admin, maintainer]
   skip-bots: [dependabot, renovate, github-actions]
 max-ai-credits: 50
