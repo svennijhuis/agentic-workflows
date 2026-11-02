@@ -1,6 +1,6 @@
 # F01: PR review (replaces squad-review)
 - Status: done
-- PR: #PENDING
+- PR: #30
 - Area: agent-factory
 - Wave: W3
 - Block: 2, 3
@@ -22,8 +22,9 @@ Upstream reference: [automated-pr-review](https://github.github.com/gh-aw/galler
 Engine: `copilot` with `COPILOT_GITHUB_TOKEN` (personal fine-grained PAT). Review output COMMENT only via `safe-outputs`; no org billing write scopes.
 
 ## Frontmatter security
-- `permissions:` read only (`contents: read`, `pull-requests: read`, `issues: read`, `actions: read`); no write permission on the token.
-- Writes only through `safe-outputs`: `submit-pull-request-review` (COMMENT only, `max: 1`), `staged: true` until Sven's yes.
+- `permissions:` read only on the workflow and on `diff_precheck` (`contents: read`, `pull-requests: read`, `issues: read`, `actions: read`).
+- `close_older` has `pull-requests: write` so it can minimize prior bot COMMENT reviews. While `staged: true` the step returns before any API call.
+- Other writes only through `safe-outputs`: `submit-pull-request-review` (COMMENT only, `max: 1`), `staged: true` until Sven's yes.
 - `timeout-minutes:` 15 (fits a single PR review pass).
 - Trigger: `workflow_dispatch` only (POL25). `/pr-review` slash or `pull_request` (F01b) are named asks for Sven, recorded in `policies/POL25.yml` `sven_yes` first.
 
@@ -38,21 +39,21 @@ Engine: `copilot` with `COPILOT_GITHUB_TOKEN` (personal fine-grained PAT). Revie
 
 ## Definition of Done
 - [x] `workflows/pr-review.md` and its `.lock.yml` committed; `gh aw compile --strict` clean (0 errors, 0 warnings), lock unchanged after `make compile`
-- [x] Frontmatter: read-only `permissions`, writes only via `safe-outputs` (`staged: true`, a `max` per output), `timeout-minutes` set
+- [x] Frontmatter: read-only `permissions` on the workflow and `diff_precheck`; `close_older` has `pull-requests: write` only to minimize prior bot COMMENT reviews, and that call is skipped while `staged: true`. Other writes only via `safe-outputs` (`staged: true`, a `max` per output). `timeout-minutes` set
 - [x] Trigger `workflow_dispatch` only (POL25); no `skills:` in a shared fragment (POL31)
 - [x] `make verify` exits 0; no run, no token spend
 - [x] Fetches own context with tools and imports (Bar H, gist A7); prompt never pastes repo content
 - [x] `workflows/pr-review.md` imports `shared/defaults.md` (engine copilot, admission)
 - [x] C12 v1.1 agentPacks `skills:` list in `workflows/pr-review.md` frontmatter (same pin as C12b, moved from `squad-review.md` before it is removed) plus the review command as an `imports:` pin (tag or tagged-commit SHA, not main)
 - [x] Deterministic pre-check; writes `noop` when nothing to do (0 AIC)
-- [x] Dedupe via title, `group-by-day`, `close-older-issues`, and expiry
+- [x] Dedupe via title, `group-by-day`, close-older (`close_older` minimizes prior `github-actions[bot]` COMMENT reviews that carry the marker after a published review; the write is skipped while staged), and expiry
 - [x] `workflow_dispatch` only, plus the "copy this" note in `docs/reference/pr-review.md`
 - [x] No slash, `pull_request` or `push` trigger in this PBI (slash and F01b are named asks)
 - [x] [X07](../testing/X07-workflow-benchmark.md) benchmark cases: 5 or more fixed cases with known answers written in `docs/benchmarks/<workflow>.md`, docs only, no run; the X07 score is a named ask
 ## Technical design
-- Components and files: `workflows/pr-review.md`, `workflows/pr-review.lock.yml`, `workflows/pr-review.card.yml`, `docs/reference/pr-review.md`, `docs/benchmarks/pr-review.md`, `scripts/pr-review-precheck-fixtures.sh`, `test/fixtures/pr-review/`. Removed: `workflows/squad-review.md`, `workflows/squad-review.lock.yml`, `workflows/squad-review.card.yml`, `docs/reference/squad-review.md`, and the `aw.yml` includes line for squad-review.
+- Components and files: `workflows/pr-review.md`, `workflows/pr-review.lock.yml`, `workflows/pr-review.card.yml`, `docs/reference/pr-review.md`, `docs/benchmarks/pr-review.md`, `scripts/pr-review-precheck-fixtures.sh`, `test/fixtures/pr-review/`, `test/fixtures/pr-review-close/`. Removed: `workflows/squad-review.md`, `workflows/squad-review.lock.yml`, `workflows/squad-review.card.yml`, `docs/reference/squad-review.md`, and the `aw.yml` includes line for squad-review.
 - Module boundary: the agentPacks review command import is the interface; the review contract stays in agentPacks
-- Interfaces: `workflow_dispatch` input `pr`; `skills:` and `imports:` pins at `34e1dec3535baa1d77cb441ea8c98498dc9b3684`; `safe-outputs` `noop` (`max: 1`, `report-as-issue: false`) and `submit-pull-request-review` (`max: 1`, `allowed-events: [COMMENT]`, `supersede-older-reviews: true`, `staged: true`); pre-check output `empty`
+- Interfaces: `workflow_dispatch` input `pr`; `skills:` and `imports:` pins at `34e1dec3535baa1d77cb441ea8c98498dc9b3684`; `safe-outputs` `noop` (`max: 1`, `report-as-issue: false`) and `submit-pull-request-review` (`max: 1`, `allowed-events: [COMMENT]`, `supersede-older-reviews: true`, `staged: true`); pre-check output `empty`; `close_older` minimizes prior bot COMMENT reviews after publish (`supersede-older-reviews` dismisses REQUEST_CHANGES only and is not close-older)
 - Sequence:
 
 ```mermaid
@@ -70,12 +71,13 @@ sequenceDiagram
     WF->>Agent: review with caps
     Agent-->>WF: findings
     WF->>GH: COMMENT review only
+    WF->>GH: minimize older bot COMMENT reviews (skipped while staged)
   end
 ```
 
-- Failure modes: pre-check API error fails `diff_precheck` and the agent `if` stays false (0 AIC). A non-digit PR number fails the step. Lock drift fails `make verify`.
-- Security: frontmatter permissions are read only. Writes only through staged safe-outputs, COMMENT only. No secret values. Threat detection comes from `shared/security.md`. Network allowlist is `defaults`. Tool allowlist is github toolsets plus a bash allowlist. `min-integrity: approved`. `on.roles` and `skip-bots` are set.
-- Observability: step summary line `noop: <reason>` or `review: <reason>`. Compile log and `make verify` on the PR head (Q0).
+- Failure modes: pre-check API error fails `diff_precheck` and the agent `if` stays false (0 AIC). A non-digit PR number fails the step. A `files_count` that is empty or not digits fails the step (exit 1) and `decide` returns non-zero. Lock drift fails `make verify`.
+- Security: workflow and `diff_precheck` permissions are read only. `close_older` has `pull-requests: write` for `minimizeComment` and returns before any call while `staged: true`. A COMMENT review counts for dedupe only when its author is `github-actions[bot]`. Other writes only through staged safe-outputs, COMMENT only. No secret values. Threat detection comes from `shared/security.md`. Network allowlist is `defaults`. Tool allowlist is github toolsets plus a bash allowlist. `min-integrity: approved`. `on.roles` and `skip-bots` are set.
+- Observability: step summary line `noop: <reason>` or `review: <reason>`. While staged, `close_older` prints `close-older: staged, write skipped`. Compile log and `make verify` on the PR head (Q0).
 - Cost: 0 AIC for this build. A live review is about 30-50 AIC and is a named ask.
 - Rollback: revert this PR. That restores `squad-review` and removes `pr-review`.
 - Proof: `make verify` exits 0
@@ -87,9 +89,9 @@ Offline only. No workflow run and no token spend.
 
 `gh aw compile --strict --actionlint` (actionlint 1.7.12 with shellcheck and pyflakes): No issues found.
 
-`scripts/pr-review-precheck-fixtures.sh` (no network, no token): 6 cases ok (`empty-diff`, `new-diff`, `group-by-day`, `title-within-expiry`, `expired`, `new-commits`).
+`scripts/pr-review-precheck-fixtures.sh` (no network, no token): decide cases `empty-diff`, `new-diff`, `group-by-day`, `title-within-expiry`, `expired`, `new-commits`, `foreign-author` (`review|no-prior`), `same-day-later`, `same-day-latest`, `same-time-last-row`, `bad-files` (non-zero). Close-older cases `staged-skip`, `published-closes-prior`, `two-priors`, `no-publish`, `foreign-not-closed`, `bad-run` (non-zero).
 
-Dedupe is not a `create-issue` block. This workflow does not create issues. Title marker `<!-- aw-pr-review -->`, group-by-day, and a 7 day expiry are the pre-check. Close-older is `supersede-older-reviews: true` on the COMMENT review.
+Dedupe is not a `create-issue` block. This workflow does not create issues. The title marker `<!-- aw-pr-review -->` counts only on a COMMENT review from `github-actions[bot]`. Group-by-day keeps the latest `submitted_at` (`>=`). Expiry is 7 days. Close-older is the `close_older` step: after a COMMENT is published it minimizes older marker reviews from that bot. The write is skipped while `staged: true`. `supersede-older-reviews` dismisses older REQUEST_CHANGES reviews only and is not close-older.
 
 The agentPacks pin is the C12b 40-hex SHA, not a branch ref. A `vX.Y.Z` tag remains named ask Q7.
 ## Flow
@@ -105,6 +107,7 @@ sequenceDiagram
   WF->>Agent: review with caps
   Agent-->>WF: findings
   WF->>GH: COMMENT review only
+  WF->>GH: minimize older bot COMMENT reviews (skipped while staged)
 ```
 ## Named asks for Sven
 - Q7 (agentPacks tag pin); Q3 (PAT); squad-review removal file list on merge

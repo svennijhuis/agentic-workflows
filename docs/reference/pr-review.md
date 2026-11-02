@@ -10,7 +10,7 @@
 - Committed `pr-review.lock.yml` (`make compile`).
 - `skills:` in `pr-review.md` frontmatter, same 40-hex pin as C12b. Not in `workflows/shared/` ([POL31](../../policies/POL31.yml)).
 - Review command import: `plugins/squad/commands/squad-review.md` at that same pin (tag or tagged-commit SHA when Q7 lands; not a branch ref).
-- Deterministic pre-check writes `noop` and skips the agent when the diff is empty (0 AIC). Dedupe is the title marker, group-by-day, expiry of 7 days, and `supersede-older-reviews` for the older review (close-older). Token-using API calls are proven offline by `scripts/pr-review-precheck-fixtures.sh`.
+- Deterministic pre-check writes `noop` and skips the agent when the diff is empty (0 AIC). Dedupe trusts the title marker only on a COMMENT review from `github-actions[bot]`, keeps the latest `submitted_at`, and expires after 7 days. Close-older is the `close_older` step, which minimizes prior bot COMMENT reviews after a published review. While `staged: true` that step skips the write. `supersede-older-reviews` dismisses older REQUEST_CHANGES reviews only. Token-using API calls are proven offline by `scripts/pr-review-precheck-fixtures.sh`.
 
 Shared wiring: [`workflows/shared/agentpacks.md`](../../workflows/shared/agentpacks.md), [`defaults.md`](../../workflows/shared/defaults.md), [`security.md`](../../workflows/shared/security.md), [`reporting.md`](../../workflows/shared/reporting.md).
 

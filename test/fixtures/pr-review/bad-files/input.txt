@@ -1,0 +1,4 @@
+files nope
+head abcdef
+today 2026-11-02
+expiry 7

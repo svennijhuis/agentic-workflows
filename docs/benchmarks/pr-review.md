@@ -4,7 +4,7 @@ Docs only. No run. The score is a named ask: a live X07 run on the X01 repo need
 
 Each case has a fixed diff shape and a known answer. The workflow fetches the pull request itself. These pages do not paste a repository.
 
-Title marker on a real COMMENT review: `[aw] pr-review` plus `<!-- aw-pr-review -->`. Event is COMMENT only.
+Title marker on a real COMMENT review: `[aw] pr-review` plus `<!-- aw-pr-review -->`. The pre-check trusts that marker only when the author is `github-actions[bot]`. Event is COMMENT only.
 
 ## Cases
 
