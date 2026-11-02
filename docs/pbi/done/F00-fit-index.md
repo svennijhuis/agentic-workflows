@@ -1,6 +1,6 @@
 # F00: Agent factory fit index
 - Status: done
-- PR: #PENDING
+- PR: #29
 - Area: agent-factory
 - Wave: PR 0
 - Block: 0
@@ -20,7 +20,7 @@ Publish a single index that places all 62 `githubnext/agentics` workflows, 18 gh
 ## Context
 This file is the PR 0 companion to `docs/pbi/workflow-ratings.md` (full tables). PICK rows in agent-factory become workflow PBIs F01 to F71. Redirect workflows in agentics map to their canonical PBI. Gallery pages often overlap agentics; both columns are kept for traceability.
 
-### Agentics (62 entries: 61 workflow .md files plus shared/; 13 redirects)
+### Agentics (62 entries: 61 workflow .md files plus shared/; 12 redirects)
 | Workflow | What it does | Value for Sven repos | Cost | When | PBI |
 |---|---|---|---|---|---|
 | accessibility-review | Reviews a site for a11y, files issues | M: Chatmarkt web | M | later | F30 |
@@ -156,7 +156,7 @@ sequenceDiagram
 - Security: documentation only. No tokens, no secrets, no network, no workflow trigger
 - Observability: `make verify` log on the commit SHA (Q0). Counts on this page: 62 agentics rows, 18 gallery rows, link to 348 factory rows
 - Cost: 0 AIC
-- Rollback: revert this PR
+- Rollback: revert of PR #29
 - Proof: `make verify` exits 0
 - Door: two-way (docs edit in the repo, no token spend)
 ## Evidence
