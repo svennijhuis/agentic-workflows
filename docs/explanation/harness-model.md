@@ -33,6 +33,6 @@ flowchart LR
 
 | Workflow | Interface | Harness | Engine | Tools | MCP (transport, secret name) | Writes |
 |---|---|---|---|---|---|---|
-| `squad-review` | `workflow_dispatch`, input `pr` | gh-aw agent job | copilot (`COPILOT_GITHUB_TOKEN`) | bash, github | github (stdio, `GH_AW_GITHUB_MCP_SERVER_TOKEN`), safeoutputs (stdio, none) | review comments, COMMENT review, staged |
+| `pr-review` | `workflow_dispatch`, input `pr` | gh-aw agent job | copilot (`COPILOT_GITHUB_TOKEN`) | bash, github | github (stdio, `GH_AW_GITHUB_MCP_SERVER_TOKEN`), safeoutputs (stdio, none) | COMMENT review, noop, staged |
 
 The card for each row should match the frontmatter and the lock manifest. A new workflow adds a card and a row here in the same PR. `gh aw compile --strict` covers manifest consistency.

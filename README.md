@@ -37,7 +37,7 @@ Last line must be `0 failures`. Q0: Actions billing blocked; attach this log on 
 ```bash
 gh extension install github/gh-aw
 gh aw init    # in the consumer repo
-gh aw add svennijhuis/agentic-workflows/squad-review@v1.0.0
+gh aw add svennijhuis/agentic-workflows/pr-review@v1.0.0
 ```
 
 Full guide: [docs/how-to/consume.md](docs/how-to/consume.md). Pin tags or SHAs in production, never a branch ref.

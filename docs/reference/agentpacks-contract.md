@@ -50,9 +50,9 @@ skills:
   - svennijhuis/agentPacks/plugins/squad/skills/squad@<40-hex-sha>
 ```
 
-`skills:` goes in the consumer workflow frontmatter (for squad-review: [`workflows/squad-review.md`](../../workflows/squad-review.md)), never in a `workflows/shared/` fragment: gh-aw reads `skills:` only from the main workflow and silently drops it from an import (C12b, guarded by [POL31](../../policies/POL31.yml)). The fragment [`workflows/shared/agentpacks.md`](../../workflows/shared/agentpacks.md) keeps only the wiring note.
+`skills:` goes in the consumer workflow frontmatter (for pr-review: [`workflows/pr-review.md`](../../workflows/pr-review.md)), never in a `workflows/shared/` fragment: gh-aw reads `skills:` only from the main workflow and silently drops it from an import (C12b, guarded by [POL31](../../policies/POL31.yml)). The fragment [`workflows/shared/agentpacks.md`](../../workflows/shared/agentpacks.md) keeps only the wiring note.
 
-Copy this: an org copies `workflows/squad-review.md`, `workflows/squad-review.lock.yml` and `workflows/shared/`; the pinned skill comes with the md.
+Copy this: an org copies `workflows/pr-review.md`, `workflows/pr-review.lock.yml` and `workflows/shared/`; the pinned skill comes with the md. See [pr-review](pr-review.md).
 
 Private plugin repos need `github-token` or `github-app` on the object form ([gh-aw frontmatter](https://github.github.com/gh-aw/reference/frontmatter/)).
 

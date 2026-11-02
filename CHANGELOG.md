@@ -8,4 +8,4 @@ All notable catalog changes are listed here. Consumer upgrades should read notes
 - Pins: gh-aw **v0.93.4**, Copilot engine **1.0.101** (`.github/aw.json`).
 - Shared fragments under `workflows/shared/` (`defaults.md`, `security.md`, `reporting.md`, `agentpacks.md`).
 - Repo policies: only POL25 (agentic workflows are `workflow_dispatch` only) and POL31 (no `skills:` in a shared fragment), with fixtures.
-- `squad-review` catalog workflow: `workflow_dispatch` only; committed lock file.
+- `pr-review` catalog workflow (F01): `workflow_dispatch` only; committed lock file. Replaces `squad-review`.
