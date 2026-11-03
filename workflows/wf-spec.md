@@ -1,6 +1,6 @@
 ---
 # Source: pascalvanderheiden/turbo-agent-skills-cli/.github/workflows/wayfinder-spec.md@122b266d451eb8d06a8b96a0933c788c2fb0ac98
-# Copied as is. Changed only: renamed to wf-* (file, concurrency group, markers), skill import remote from mattpocock/skills, schedule removed (Sven house rules).
+# Copied as is. Changed only: renamed to wf-* (file, concurrency group, markers), skill to-spec from local copy shared/skills/to-spec.md, schedule removed (Sven house rules).
 description: Spec labelled issues and hand completed specifications to ticket planning.
 intent: Convert explicitly queued issues or resolved wayfinder maps into one traceable implementation spec and recover incomplete planning handoffs without duplicating specs.
 on:
@@ -22,8 +22,8 @@ tools:
   github:
     mode: gh-proxy
     toolsets: [default]
-skills:
-  - mattpocock/skills/skills/engineering/to-spec/SKILL.md@4ae2317ddb22b046e26455e4f9c9b3aaaf62212d
+imports:
+  - shared/skills/to-spec.md
 safe-outputs:
   add-comment:
     target: "*"
@@ -74,7 +74,7 @@ Never requeue an issue labelled `planned`.
 
 Read the map body, all resolution comments on its closed decision sub-issues,
 the repository glossary and ADRs when present, and the minimum codebase context
-needed to identify stable test seams. Apply the installed `to-spec` skill as the
+needed to identify stable test seams. Apply the imported `to-spec` skill (section `Skill: to-spec`) as the
 specification format, with this workflow-specific publishing override:
 
 - do not create a separate spec issue or add `ready-for-agent` to the parent;

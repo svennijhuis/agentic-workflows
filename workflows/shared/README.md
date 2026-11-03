@@ -18,9 +18,10 @@ gh-aw v0.93.4 requires shared files under `workflows/shared/` (imports outside `
 | [security.md](security.md) | Network and safety baseline |
 | [reporting.md](reporting.md) | Fixed issue/PR report shape |
 | [agentpacks.md](agentpacks.md) | Pinned agentPacks skills/commands (not copied SKILL.md) |
+| [skills/](skills/) | Local skill copies (mattpocock/skills, cursor/plugins), imported by builder, reviewer, retro, wf-spec, wf-plan. Source and SHA on top of each file |
 | [mcp/](mcp/) | MCP snippets (point at mcp-services; see [mcp/README.md](mcp/README.md)) |
 | [prompts/](prompts/) | Actions-only prompt snippets ([prompts/README.md](prompts/README.md)) |
 
-Configure consumers with `import-schema` `with:` only; unknown keys fail compile ([C05](../../docs/pbi/done/C05-imports-import-schema.md)).
+Configure consumers with `import-schema` `with:` only; unknown keys fail compile.
 
-Caps are **not** importable; set them in each workflow frontmatter. No `skills:` in shared fragments ([POL31](../../policies/POL31.yml)).
+Caps are **not** importable; set them in each workflow frontmatter. No `skills:` in shared fragments: gh-aw drops it from imports. Skills come in as imported markdown from [skills/](skills/).

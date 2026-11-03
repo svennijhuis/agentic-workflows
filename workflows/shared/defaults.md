@@ -8,7 +8,7 @@ tools:
     toolsets: [repos, issues, pull_requests]
 ---
 
-Catalog defaults (C03). Engine: copilot, version pinned in `.github/aw.json` and here (C06). Read-only GitHub tools; writes only through the importing workflow's safe-outputs.
+Catalog defaults (C03). Engine: copilot, version pinned here (C06). Read-only GitHub tools; writes only through the importing workflow's safe-outputs.
 
 Caps are not importable (the compiler ignores them in imports). Each workflow sets `max-ai-credits` (at most 50), `max-daily-ai-credits` (at most 200), `max-turns` and `timeout-minutes` in its own frontmatter.
 

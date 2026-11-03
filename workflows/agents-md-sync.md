@@ -3,6 +3,7 @@ description: Write AGENTS.md when it is missing, or update it from the commits o
 on:
   workflow_dispatch:
 permissions:
+  copilot-requests: write
   contents: read
   pull-requests: read
 network:

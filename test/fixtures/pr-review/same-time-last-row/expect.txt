@@ -1,1 +1,0 @@
-noop|group-by-day

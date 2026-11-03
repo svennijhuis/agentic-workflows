@@ -1,5 +1,5 @@
 ---
-description: Hand one unblocked issue to the Copilot cloud agent. Blocked issues get a comment and the run stops. Sven merges.
+description: Hand one unblocked issue to the builder. Blocked issues get a comment and the run stops. Sven merges.
 on:
   issues:
     types: [labeled]
@@ -7,41 +7,33 @@ on:
   workflow_dispatch:
     inputs:
       issue_number:
-        description: Issue number to hand to Copilot
+        description: Issue number to hand to the builder
         required: true
         type: string
 permissions:
+  copilot-requests: write
   contents: read
   issues: read
   pull-requests: read
-  copilot-requests: write
 network:
   allowed: []
 tools:
   github:
     toolsets: [repos, issues, pull_requests]
 safe-outputs:
-  assign-to-agent:
-    allowed: [copilot]
-    custom-agent: squad
-    target: "*"
-    max: 1
   add-comment:
     target: "*"
     max: 1
-  # Optional: ask Copilot code review on the PR. Needs GH_AW_AGENT_TOKEN (Sven sets it).
-  add-reviewer:
-    target: "*"
-    allowed-reviewers: [copilot]
-    github-token: ${{ secrets.GH_AW_AGENT_TOKEN }}
+  dispatch-workflow:
+    workflows: [builder]
     max: 1
 ---
 
-# Issue Fix (Copilot cloud agent)
+# Issue Fix
 
 Issue: `${{ github.event.issue.number || github.event.inputs.issue_number }}` in `${{ github.repository }}`. Flow: [issue-fix README](README.md#issue-fix).
 
-This workflow writes no code. The implementation agent is the Copilot cloud agent.
+This workflow writes no code. The builder workflow does the implementation.
 
 ## 1. Blocker check first
 
@@ -51,23 +43,10 @@ The issue is **blocked** when any of these is true:
 - it has an open `blocked_by` dependency (an issue it is blocked by that is still open)
 - a predecessor issue it depends on has a linked PR that is not merged yet
 
-When blocked: post one comment that lists each blocker (label, open issue number and title, or unmerged PR), says Copilot starts once they are cleared, and stop. Assign nobody.
+When blocked: post one comment that lists each blocker (label, open issue number and title, or unmerged PR), says the builder starts once they are cleared, and stop.
 
-Also stop with one comment when Copilot is already assigned to this issue, or another issue with label `agent-fix` already has an open Copilot PR. One active ticket at a time.
+Also stop with one comment when an open PR with label `builder` already closes this issue, or another issue with label `agent-fix` already has an open `builder` PR. One active ticket at a time.
 
-## 2. Hand to Copilot
+## 2. Start the builder
 
-Only when nothing blocks: assign the issue to `copilot` with these instructions:
-
-- Work on this issue only. Stay inside what it asks.
-- Run the smallest validation that proves the change.
-- Open one PR that closes the issue (`Fixes #<issue>`).
-- When something is unclear, ask a question on the issue instead of guessing.
-
-## 3. Follow-ups
-
-When run again for an issue that already has an open Copilot PR:
-
-- Open review points: post one `@copilot` comment on the PR that lists them.
-- Optional: request a Copilot code review with `add-reviewer` (only works when `GH_AW_AGENT_TOKEN` is set).
-- Never merge. Sven reviews and merges.
+Only when nothing blocks: emit `dispatch_workflow` for `builder` with input `issue_number` = this issue. The builder opens the PR and starts the reviewer. Never merge. Sven reviews and merges.

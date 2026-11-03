@@ -5,7 +5,7 @@ interface: GitHub Actions workflow_dispatch with input pr (manual, from the Acti
 harness: gh-aw agent job (sandbox, firewall, MCP gateway, safe-outputs job)
 engine: copilot
 engine_secret: COPILOT_GITHUB_TOKEN
-model: default (engine pin in .github/aw.json, set in shared/defaults.md)
+model: default (engine pin in shared/defaults.md)
 instructions: [shared/defaults.md, shared/security.md, shared/reporting.md, shared/agentpacks.md, agentPacks squad-review command]
 tools: [bash, github]
 mcp:

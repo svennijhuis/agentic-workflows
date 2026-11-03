@@ -1,5 +1,3 @@
 *.lock.yml linguist-generated=true
 
 .github/workflows/*.lock.yml linguist-generated=true
-# keep CRLF in the POL31 CRLF fixture (C12b)
-test/fixtures/bad/POL31/shared-skills-crlf/** -text

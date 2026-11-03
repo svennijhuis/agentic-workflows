@@ -11,6 +11,7 @@ on:
         required: true
         type: string
 permissions:
+  copilot-requests: write
   contents: read
   issues: read
 network:
@@ -38,13 +39,13 @@ Read the issue (title, body, comments) and choose exactly one label.
 
 - **bug**: something that already worked or is described is broken now. It can be reproduced, fits in one PR, and needs no design. Goes to `issue-fix`.
 - **wayfinder**: something new, or there are choices to make, or it will be more than one PR. Goes to the wayfinder chain (map, spec, plan, delivery).
-- **In doubt: wayfinder.** Thinking too much is cheaper than a Copilot PR going the wrong way.
+- **In doubt: wayfinder.** Thinking too much is cheaper than a builder PR going the wrong way.
 
 ## Output
 
 1. Add the label `bug` or `wayfinder`.
 2. Post one comment: the label, the reason in two or three sentences, and the next step:
-   - bug: "Sven adds `agent-fix` to hand it to Copilot."
+   - bug: "Sven adds `agent-fix` to hand it to the builder."
    - wayfinder: "Sven adds `to-spec` (or makes it a `wayfinder:map` with decision sub-issues) to start the chain."
 3. For a bug without clear reproduction steps, ask for them in the same comment (steps, expected, actual).
 
