@@ -37,6 +37,8 @@ for id in POL25 POL31; do
   shopt -u nullglob
   [ "${#bad[@]}" -gt 0 ] || fail "test/fixtures/bad:1 $id no bad fixture"
   [ "${#good[@]}" -gt 0 ] || fail "test/fixtures/good:1 $id no good fixture"
+  # r01 holds the experimental rate-limit compile fixtures. POL25 must see them so a schedule key cannot stay green.
+  [ "$id" = POL25 ] && good+=(test/fixtures/r01)
   echo "${#bad[@]} bad cases, ${#good[@]} good cases"
   for b in "${bad[@]}"; do
     out=$(run "$id" "$b"); rc=$?

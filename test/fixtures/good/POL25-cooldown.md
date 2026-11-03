@@ -11,6 +11,9 @@ on:
   skip-if-match:
     query: "is:issue is:open label:status-report"
     max: 1
+  skip-if-no-match:
+    query: "is:issue is:open label:needs-dispatch"
+    max: 1
   roles: [admin, maintainer]
   skip-bots: [dependabot, renovate]
 engine: copilot
@@ -38,4 +41,4 @@ safe-outputs:
 
 # Gate minimal
 
-workflow_dispatch only. cooldown and skip-if-match are settings, not triggers.
+workflow_dispatch only. cooldown, skip-if-match, and skip-if-no-match are settings, not triggers.

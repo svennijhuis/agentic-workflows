@@ -28,6 +28,7 @@ user-rate-limit:
   max-runs-per-window: 1
   window: 180
   events: [workflow_dispatch]
+  ignored-roles: []
 concurrency:
   group: r01-daily-${{ github.repository }}
   cancel-in-progress: false

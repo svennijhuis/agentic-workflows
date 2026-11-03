@@ -16,6 +16,9 @@ compile:
 	gh aw compile --strict --dir workflows
 	@if grep -lx -m1 -- '---' .github/workflows/*.md 2>/dev/null | grep -v README.md | grep -q .; then gh aw compile --strict; \
 	  else echo "no agentic .md in .github/workflows, skipped"; fi
+	@rel=$$(mktemp -d -p . r01c.XXXXXX); trap 'rm -rf "$$rel"' EXIT; \
+	  cp -a test/fixtures/r01/. "$$rel/"; \
+	  gh aw compile --strict --dir "$$rel"
 
 # compile plus the two repo checks POL25 and POL31 and their fixtures
 verify:
@@ -24,5 +27,5 @@ verify:
 help:
 	@echo "Targets:"
 	@echo "  install  install the pinned gh-aw extension ($(GH_AW_VERSION))"
-	@echo "  compile  gh aw compile --strict on workflows/ and .github/workflows"
+	@echo "  compile  gh aw compile --strict on workflows/, .github/workflows, and test/fixtures/r01"
 	@echo "  verify   compile, then POL25 and POL31 on the repo and on their fixtures"

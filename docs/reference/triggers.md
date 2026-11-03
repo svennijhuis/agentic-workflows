@@ -22,7 +22,7 @@ Safe inputs:
 - `type` is `string`, `choice`, `boolean`, `number`, or `environment`. `choice` also needs `options`.
 - No default that starts the agent with an empty target.
 
-`workflows/squad-review.md` is the catalog review workflow: required `pr` number and `on.cooldown: 15m`. The review-class `user-rate-limit` (5 runs per 60 minutes) is compiled on `test/fixtures/r01/review-dispatch.md`. The compiler prints `experimental feature: rate limiting` for that key, so the installed workflow does not carry it.
+`workflows/squad-review.md` is the catalog review workflow: required `pr` number, `on.cooldown: 15m`, and concurrency `squad-review-${{ github.event.inputs.pr }}` with `job-discriminator: ${{ github.run_id }}`. The review-class `user-rate-limit` (5 runs per 60 minutes, `ignored-roles: []` so the owner is not exempt) is compiled on `test/fixtures/r01/review-dispatch.md`. The compiler prints `experimental feature: rate limiting` for that key, so the installed workflow does not carry it.
 
 ## Schedule stays off
 
@@ -70,16 +70,17 @@ Future use, still disabled:
 - `events`: optional, includes `workflow_dispatch`
 - `ignored-roles`: default admin, maintain, and write. The owner is exempt unless this is `[]`
 
-Review class (PR review, squad-review, later F01):
+Review class (PR review, squad-review, later F01). Cooldown is what the catalog workflow sets. The rate limit stays on `test/fixtures/r01/review-dispatch.md` (`ignored-roles: []`) until the experimental warning is gone.
 
 ```yaml
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: Pull request number to review
+        required: true
+        type: number
   cooldown: 15m
-user-rate-limit:
-  max-runs-per-window: 5
-  window: 60
-  events: [workflow_dispatch]
 concurrency:
   group: squad-review-${{ github.event.inputs.pr }}
   cancel-in-progress: true
@@ -88,7 +89,7 @@ concurrency:
 
 `15m` compiles to `GH_AW_COOLDOWN_SECONDS` `900`.
 
-Daily report class (F03 and similar, not enabled):
+Daily report class (F03 and similar, not enabled). Cooldown and `skip-if-match` are the class guards. The 1 run per 180 minutes key, with `ignored-roles: []`, stays on `test/fixtures/r01/daily-report-dispatch.md`.
 
 ```yaml
 on:
@@ -97,10 +98,6 @@ on:
   skip-if-match:
     query: "is:issue is:open label:status-report"
     max: 1
-user-rate-limit:
-  max-runs-per-window: 1
-  window: 180
-  events: [workflow_dispatch]
 concurrency:
   group: daily-report-${{ github.repository }}
   cancel-in-progress: false
@@ -117,4 +114,4 @@ Compiler pre-activation order when the keys are set: roles, then `user-rate-limi
 
 When activation passes and there is nothing to do, the workflow's deterministic pre-check writes noop and still spends 0 AIC. Only the remaining path starts the capped agent.
 
-Token-using checks (search, rate limit, cooldown history) are not run here. The offline proof is `gh aw compile --strict` on the dispatch-only fixtures under `test/fixtures/r01/` and on `workflows/squad-review.md`. Those fixtures have no `schedule` key.
+Token-using checks (search, rate limit, cooldown history) are not run here. The offline proof is `make compile`, which runs `gh aw compile --strict` on `workflows/` and on a copy of `test/fixtures/r01/`. POL25 also scans that directory, so a `schedule` key there fails the gate. The review fixture sets `ignored-roles: []`.

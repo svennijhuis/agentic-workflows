@@ -18,9 +18,9 @@
 Poll every 30 minutes (`schedule`) because GitHub Actions has no Projects v2 event trigger. Deterministic pre-step: `gh api graphql` lists Ready items without a linked PR (0 AIC when Ready is empty). Only cards Sven moved to Ready; hand issue to [P04](P04-research-plan-assign-copilot.md), WIP 1, max 1 pick-up per day. Draft PR links back to the card. Revisit webhook at org switch ([G05](../done/G05-org-only-appendix.md)).
 ## Context
 [LP01](../loops/LP01-delivery-loop.md) pick-up step. The board pick-up is a 30 min poll with a deterministic noop pre-step (0 AIC when Ready is empty). It is a scheduled workflow, so it stays OFF until Sven's exact yes (one-way door, B5), and its Actions minutes (48 runs a day) count toward the measured cost.
-**Trigger:** `workflow_dispatch` first. The 30 minute poll stays off until Sven's exact yes is in Evidence and in `policies/POL25.yml` `sven_yes`.
+**Trigger:** `workflow_dispatch` first. The 30 minute poll is a named ask, recorded in `policies/POL25.yml` `sven_yes` before it exists.
 ## Steps
-1. Add `workflows/p14-board-pick-up.md` with `schedule: '*/30 * * * *'` disabled until B5 gate.
+1. Add `workflows/p14-board-pick-up.md` with `workflow_dispatch` only.
 2. Pre-step GraphQL with `BOARD_TOKEN` (deterministic step only, never the agent job): Ready column items without linked PR; noop when empty.
 3. For each eligible item (max 1 per day): call P04 assign path with issue number from linked issue.
 4. Enforce WIP 1 open auto-fix PR per repo shared with P04 and M05.

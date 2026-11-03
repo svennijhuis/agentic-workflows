@@ -14,7 +14,7 @@ On label `plan` or human `/plan`, draft a full PBI from [docs/pbi/_template.md](
 [LP01](../loops/LP01-delivery-loop.md) plan step. Label actor must be human with write ([LP02](../loops/LP02-event-map.md)). One-way tokens. Does not move board cards.
 **Trigger:** `workflow_dispatch` first. Label `plan` and `/plan` are named asks, recorded in `policies/POL25.yml` `sven_yes` before they exist.
 ## Steps
-1. Add `workflows/p12-planning.md` with `issues: labeled plan` and `/plan` command trigger.
+1. Add `workflows/p12-planning.md` with `workflow_dispatch` only.
 2. Agent reads `_template.md` and issue context; outputs one comment with all required PBI sections.
 3. Cap `max-daily-ai-credits` to enforce 3 runs per day.
 4. Staged comment-only first; promote after 3 audited runs and Sven yes.

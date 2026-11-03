@@ -20,7 +20,7 @@ Wave W6 later workflow. PR 0 documents intent only. Ratings: Like Strategy room:
 
 **Better than example:** No auto-implementation; clear handoff section for Builder.
 
-**Trigger:** workflow_dispatch and slash `/plan` when R03 lands.
+**Trigger:** `workflow_dispatch` first. Slash `/plan` is a named ask, recorded in `policies/POL25.yml` `sven_yes` before it exists.
 
 **Safe outputs:** Discussion comment or issue with plan template.
 
@@ -31,7 +31,7 @@ Wave W6 later workflow. PR 0 documents intent only. Ratings: Like Strategy room:
 - `timeout-minutes:` 20
 - Trigger: `workflow_dispatch` only (POL25). Schedule, `issues`, slash, or other triggers are named asks for Sven, recorded in `policies/POL25.yml` `sven_yes` first.
 ## Steps
-1. Add `workflows/plan.md`; import `shared/defaults.md` and `shared/security.md`.
+1. Add `workflows/plan.md` with `workflow_dispatch` only; import `shared/defaults.md` and `shared/security.md`.
 2. Set frontmatter security: read-only `permissions`, `safe-outputs` with a `max` per output and `staged: true`, `timeout-minutes`, `workflow_dispatch` only (POL25).
 3. Add deterministic pre-check returning `noop` when nothing to do.
 4. Run `make compile`; commit `workflows/plan.lock.yml`.

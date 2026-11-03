@@ -20,7 +20,7 @@ Wave W6 later workflow. PR 0 documents intent only. Ratings: Keeps GLOSSARY or d
 
 **Better than example:** Path allowlist, `shared/reporting.md` footer style, deduped weekly PR.
 
-**Trigger:** workflow_dispatch; push trigger only after staged pass.
+**Trigger:** `workflow_dispatch` first. A `push` trigger is a named ask, recorded in `policies/POL25.yml` `sven_yes` before it exists.
 
 **Safe outputs:** PR touching glossary paths only.
 
@@ -31,7 +31,7 @@ Wave W6 later workflow. PR 0 documents intent only. Ratings: Keeps GLOSSARY or d
 - `timeout-minutes:` 15
 - Trigger: `workflow_dispatch` only (POL25). Schedule, `issues`, slash, or other triggers are named asks for Sven, recorded in `policies/POL25.yml` `sven_yes` first.
 ## Steps
-1. Add `workflows/glossary-maintainer.md`; import `shared/defaults.md` and `shared/security.md`.
+1. Add `workflows/glossary-maintainer.md` with `workflow_dispatch` only; import `shared/defaults.md` and `shared/security.md`.
 2. Set frontmatter security: read-only `permissions`, `safe-outputs` with a `max` per output and `staged: true`, `timeout-minutes`, `workflow_dispatch` only (POL25).
 3. Add deterministic pre-check returning `noop` when nothing to do.
 4. Run `make compile`; commit `workflows/glossary-maintainer.lock.yml`.

@@ -30,6 +30,7 @@ user-rate-limit:
   max-runs-per-window: 5
   window: 60
   events: [workflow_dispatch]
+  ignored-roles: []
 concurrency:
   group: r01-review-${{ github.event.inputs.pr }}
   cancel-in-progress: true
