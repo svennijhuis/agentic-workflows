@@ -7,6 +7,7 @@ Library of [GitHub Agentic Workflows](https://github.github.com/gh-aw/) by svenn
 | [`aw.yml`](aw.yml) | Package manifest for `gh aw add` |
 | [`workflows/`](workflows/) | Installable workflows, flows and diagrams in [workflows/README.md](workflows/README.md) |
 | [`workflows/shared/`](workflows/shared/) | Importable fragments, including local skill copies in [`shared/skills/`](workflows/shared/skills/) |
+| [`docs/examples/`](docs/examples/) | Copilot instruction templates a target repo copies (`.github/copilot-instructions.md`, `.github/instructions/*.instructions.md`) |
 
 ## Validate
 

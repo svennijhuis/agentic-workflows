@@ -15,10 +15,10 @@ Each file **must** have an `on:` trigger. Kebab-case stem becomes the `gh aw add
 
 | Workflow | Purpose |
 | --- | --- |
-| [issue-triage.md](issue-triage.md) | Label `triage`: sets `bug` or `wayfinder` with one reason comment |
+| [issue-triage.md](issue-triage.md) | Label `triage`: sets `bug` or `wayfinder` (plus `security` or `needs-info`), or `duplicate`, with one reason comment |
 | [bug-fix.md](bug-fix.md) | Label `agent-fix`: blocker check, then start the builder |
 | [builder.md](builder.md) | Build an issue into a PR on `builder/*`, or fix a PR in a review round. Starts the reviewer |
-| [reviewer.md](reviewer.md) | Part of the build loop: reviews a builder PR on three axes. Clean, send back (max 2), or `needs-help`. Started by the builder, not by hand |
+| [reviewer.md](reviewer.md) | Part of the build loop: reviews a builder PR on four axes, plus security on a trust-boundary diff. Clean, send back (max 2), or `needs-help`. Started by the builder, not by hand |
 | [retro.md](retro.md) | After a builder PR is merged: read the run logs, open a core issue when the flow can do better |
 | [wf-to-spec.md](wf-to-spec.md), [wf-spec.md](wf-spec.md), [wf-plan.md](wf-plan.md), [wf-delivery.md](wf-delivery.md) | Wayfinder chain: map to spec, tickets, builder per ticket |
 | [agents-md-sync.md](agents-md-sync.md) | Write or update AGENTS.md from main commits |
@@ -32,6 +32,7 @@ Shared fragments: [shared/](shared/). Validate in the layout of a target repo: `
 flowchart TD
   T[label triage] --> TR[issue-triage<br/>label + reason comment]
   TR -->|bug| B[label bug]
+  TR -->|needs-info or duplicate| NI[questions or #dup in comment<br/>wait for a maintainer]
   TR -->|wayfinder<br/>in doubt: wayfinder| W[label wayfinder]
   W -->|A maintainer runs /wayfinder locally<br/>sets wayfinder:map + decisions| WM[wayfinder:map]
   B -->|A maintainer adds agent-fix| IF[bug-fix<br/>blocker check]
@@ -39,7 +40,7 @@ flowchart TD
   CH -->|dispatch| DL[wf-delivery<br/>next unblocked ticket]
   IF --> BU[builder<br/>PR on builder/*, label builder]
   DL --> BU
-  BU --> RV[reviewer<br/>standards, spec, deslop]
+  BU --> RV[reviewer<br/>standards, spec, deslop, blast radius<br/>security when gated]
   RV -->|findings, round 1 or 2| BU
   RV -->|findings, round 3| NH[label needs-help<br/>comment why, stop]
   RV -->|clean| OK[COMMENT: ready to merge<br/>PR already open, no label]
@@ -57,7 +58,7 @@ Auth and secrets, names only:
 - Engine: built for an org. Every workflow sets `copilot-requests: write`, so Copilot runs on the Actions `GITHUB_TOKEN` and is billed to the org. Needs org Copilot policy "Allow use of Copilot CLI billed to the organization". `COPILOT_GITHUB_TOKEN` is then ignored for inference and not needed.
 - `AW_CORE_ISSUES_TOKEN`: only for `retro`, a fine-grained token with Issues read and write on `svennijhuis/agentic-workflows`.
 
-Labels: `triage`, `bug`, `wayfinder`, `agent-fix`, `blocked`, `wayfinder:map`, `to-spec`, `specced`, `to-tickets`, `planned`, `ready-for-agent`, plus `builder` (on every builder PR) and `needs-help` (set by the reviewer after round 3). Create `builder` and `needs-help` in the target repo once. There is no "ready for merge" label: a clean review is the comment review `Reviewer: ready to merge.` on the PR, and the PR already exists by then.
+Labels: `triage`, `bug`, `wayfinder`, `security`, `needs-info`, `duplicate`, `agent-fix`, `blocked`, `wayfinder:map`, `to-spec`, `specced`, `to-tickets`, `planned`, `ready-for-agent`, plus `builder` (on every builder PR) and `needs-help` (set by the reviewer after round 3). Create `builder`, `needs-help`, `security`, `needs-info` and `duplicate` in the target repo once. There is no "ready for merge" label: a clean review is the comment review `Reviewer: ready to merge.` on the PR, and the PR already exists by then.
 
 ### Handoffs
 
@@ -80,13 +81,13 @@ Visible lines at the start of a comment or review body, written by `github-actio
 
 | Workflow | `max-ai-credits` per run | `max-daily-ai-credits` | `max-turns` | `timeout-minutes` |
 | --- | --- | --- | --- | --- |
-| issue-triage | 50 | 500 | 20 | 10 |
+| issue-triage | 75 | 750 | 30 | 10 |
 | bug-fix, wf-to-spec | 75 | 750 | 30 | 10 |
 | wf-delivery | 200 | 2000 | 60 | 20 |
 | wf-spec | 500 | 3000 | 100 | 30 |
 | wf-plan | 500 | 3000 | 120 | 40 |
 | builder | 1000 | 6000 | 200 | 50 |
-| reviewer (three sub-agents) | 600 | 4000 | 120 | 30 |
+| reviewer (four or five sub-agents) | 800 | 5000 | 160 | 30 |
 | retro | 300 | 1500 | 60 | 20 |
 | agents-md-sync | 300 | 900 | 80 | 20 |
 | token-audit | 150 | 300 | 40 | 15 |
@@ -97,7 +98,13 @@ Empty runs cost nothing: `if:` filters on the event (bot comments never start wf
 
 ## issue-triage
 
-[issue-triage.md](issue-triage.md) runs on the label `triage` (or manually with an issue number). It picks `bug` or `wayfinder`, sets that label and posts one comment with the reason. For a bug it asks for repro steps when they are missing. It starts nothing: no tokens spent until a maintainer adds the next label.
+[issue-triage.md](issue-triage.md) runs on the label `triage` (or manually with an issue number). It picks `bug` or `wayfinder` and posts one comment with the reason, an agent-fit line and up to three related issues. Adapted from the gh-aw gallery `ai-issue-triage`.
+
+- `needs-info`: a bug without steps, expected and actual, or a request without problem and outcome. The comment asks the specific questions.
+- `duplicate`: only at high confidence, instead of `bug` or `wayfinder`. Search covers open issues and issues closed in the last 90 days.
+- `security`: next to `bug` or `wayfinder`. The comment asks the reporter to move exploit details to a private security advisory and repeats none of them.
+
+It starts nothing: no tokens spent until a maintainer adds the next label.
 
 ## bug-fix
 
@@ -130,7 +137,9 @@ flowchart LR
 
 Builder:
 
-- Skills: `implement`, `tdd`, `pr` (imported from [shared/skills/](shared/skills/)).
+- Skills: `implement`, `tdd`, `diagnosing-bugs`, `pr` (imported from [shared/skills/](shared/skills/)).
+- Standards: `AGENTS.md`, `.github/copilot-instructions.md`, and `.github/instructions/*.instructions.md` whose `applyTo` matches a changed file. Templates in [docs/examples](../docs/examples/).
+- Bug path (label `bug`): a command that goes red on the bug before any change, root cause per `diagnosing-bugs`, the failing test committed before the fix, red-then-green output in Evidence. With `security` too: fix at the trust boundary, no exploit detail in commits or PR text.
 - Mode A (issue number): smallest change, the repo's own tests and build, one non-draft PR on `builder/issue-<n>` with label `builder`. Body per the `pr` skill plus `Fixes #n`, and `Parent: #map` for wayfinder tickets. Asks one question on the issue (`Builder question:`) instead of guessing. wf-delivery restarts it after a human answer; for a bug, a maintainer re-adds `agent-fix`.
 - Mode B (PR number plus round): reads the latest `Reviewer: changes needed, round <n>.` review, pushes the fix to the same branch, posts a round comment.
 - Always starts the reviewer at the end. The PR is emitted before the dispatch, and a failed PR cancels the dispatch.
@@ -138,7 +147,7 @@ Builder:
 
 Reviewer:
 
-- Three axes, each in its own inline sub-agent with a fresh context: **Standards** (`code-review` skill, repo rules plus smell baseline), **Spec** (`code-review` skill, does the diff do what the issue or ticket asks, not more), **Deslop** (`deslop` skill). Parallel when the engine allows, otherwise one after another in the same run.
+- Axes, each in its own inline sub-agent with a fresh context: **Standards** (`code-review` skill, repo rules including Copilot instruction files plus smell baseline), **Spec** (`code-review` skill, does the diff do what the issue or ticket asks, not more), **Deslop** (`deslop` skill, plus: a comment stays only for a non-obvious why), **Blast radius** (what breaks outside the diff, and the one fact the change is safe because of, proven or unproven), and **Security** only when the diff touches a trust boundary (endpoint, auth, permissions or scopes, workflow files, dependencies, secrets or config, shell, file paths, network, deserialization): OWASP Top 10 plus widened scope, findings only with `path:line` evidence. Parallel when the engine allows, otherwise one after another in the same run.
 - Rounds: 1 after the build, 2 and 3 after fix rounds. So the builder gets at most two send-backs: at most 3 builder runs and 3 reviewer runs per PR.
 - No endless loop: an `if:` on both workflows lets the builder start only for a new build or fix round 1 or 2, and the reviewer only for round 1 to 3. On top, both count the reviewer's earlier `Reviewer: changes needed` reviews instead of trusting the round input.
 - Every review is a `COMMENT` (`allowed-events: [COMMENT]`). The builder opens the PR as `github-actions[bot]` and the reviewer reviews as the same account; GitHub rejects `REQUEST_CHANGES` on your own PR. Reviews therefore never block a merge in branch protection: a maintainer is the gate.
@@ -152,6 +161,7 @@ PRs opened with `GITHUB_TOKEN` do not trigger `pull_request` workflows, which is
 - Skills: `retro` and `writing-for-agents`.
 - Input: the run logs (`agentic-workflows` tools `logs` and `audit`, `actions: read`) of the whole flow for that PR: triage, bug-fix or the wf-* chain, every builder and reviewer round, plus the PR timeline.
 - Looks at navigation, automated checks, coding standards, tool use, missing information and AGENTS.md.
+- A mistake seen twice gets a check (test, lint, type or CI step) as proposal before a text rule.
 - Output: no comment on the merged PR. When the core can do better, one issue in `svennijhuis/agentic-workflows` with per finding what went wrong, the run link, the part to fix and a proposal. Otherwise `noop`.
 
 ## wayfinder chain

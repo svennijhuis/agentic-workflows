@@ -1,5 +1,5 @@
 ---
-description: Review one builder PR on three axes (standards, spec, deslop), each in a fresh sub-agent. Every review is a COMMENT. Clean says ready to merge, findings in round 1 or 2 send it back to the builder, findings in round 3 set needs-help. Never merges.
+description: Review one builder PR on four axes (standards, spec, deslop, blast radius) plus security on a trust-boundary diff, each in a fresh sub-agent. Every review is a COMMENT. Clean says ready to merge, findings in round 1 or 2 send it back to the builder, findings in round 3 set needs-help. Never merges.
 on:
   workflow_dispatch:
     inputs:
@@ -19,9 +19,9 @@ on:
 # Hard loop cap: review rounds 1 to 3 only, so the builder gets at most two send-backs.
 if: >-
   github.event.inputs.round == '1' || github.event.inputs.round == '2' || github.event.inputs.round == '3'
-max-ai-credits: 600
-max-daily-ai-credits: 4000
-max-turns: 120
+max-ai-credits: 800
+max-daily-ai-credits: 5000
+max-turns: 160
 timeout-minutes: 30
 concurrency:
   group: reviewer-${{ github.event.inputs.issue_number }}${{ github.event.inputs.pr_number }}
@@ -80,17 +80,20 @@ Use the PR number when given. Otherwise find the open PR with label `builder` wh
 
 All branches are fetched at checkout. The fixed point for the review is the merge base with the PR base branch. Note the head SHA.
 
-## 2. Three axes, each in a fresh sub-agent
+## 2. Axes, each in a fresh sub-agent
 
-Start the three sub-agents below. Run them in parallel when the engine allows, otherwise one after another. Give each one only what it needs:
+Start the sub-agents below: always `standards`, `spec`, `deslop` and `blast-radius`, and `security` only when the security gate holds. Run them in parallel when the engine allows, otherwise one after another. Give each one only what it needs:
 
-- `standards`: the diff command, commit list, the standards files of the repo (`AGENTS.md`, `CODING_STANDARDS.md`, `CONTRIBUTING.md` and any other file that says how code is written) and the smell baseline from `Skill: code-review` step 3, pasted in full.
+- `standards`: the diff command, commit list, the standards files of the repo (`AGENTS.md`, `.github/copilot-instructions.md`, every `.github/instructions/*.instructions.md` whose `applyTo` matches a changed file, `CODING_STANDARDS.md`, `CONTRIBUTING.md` and any other file that says how code is written) and the smell baseline from `Skill: code-review` step 3, pasted in full.
 - `spec`: the diff command, commit list, and the issue body plus comments. When the PR body has `Parent: #<n>`, add the spec comment (`wf-spec:v1`) of that parent and the ticket.
 - `deslop`: the diff command and the Focus Areas and Guardrails of `Skill: deslop`, pasted in full.
+- `blast-radius`: the diff command, commit list, and the issue or ticket.
+- `security`: the diff command and the list of changed files that hit the gate.
 
-Collect the three reports. Keep them under their own heading (`Standards`, `Spec`, `Deslop`), do not merge or rerank them (`Skill: code-review` step 5).
+Security gate: the diff touches a trust boundary. That is an endpoint or API route, auth or session code, permissions or token scopes, `.github/workflows/*`, dependency manifests or lockfiles, secrets or config loading, shell or process calls, file paths from input, outbound network calls, or deserialization of outside data. No hit: skip `security` and say so in the review body.
+Collect the reports. Keep them under their own heading (`Standards`, `Spec`, `Deslop`, `Blast radius`, `Security`), do not merge or rerank them (`Skill: code-review` step 5).
 
-A finding counts when it is concrete and on a changed line: a hard standards breach, a missing or wrong requirement, scope creep, or slop. A baseline smell counts only when the fix is clear and small. Drop the rest.
+A finding counts when it is concrete and on a changed line: a hard standards breach, a missing or wrong requirement, scope creep, slop, a confirmed break outside the diff, or a security flaw with evidence. A baseline smell counts only when the fix is clear and small. Drop the rest.
 
 ## 3. Outcome
 
@@ -122,5 +125,19 @@ You review one diff on the Spec axis. Report: (a) requirements the issue or tick
 ---
 description: Finds AI slop in a diff
 ---
-You review one diff on the Deslop axis, using the focus areas and guardrails you are given. Report each piece of slop on a changed line: extra comments that repeat the code or do not match local style, defensive checks or try/catch that the trusted path does not need, casts to `any` to dodge types, deep nesting that an early return fixes, anything that does not match the surrounding file. Give `path:line`, what it is and the smallest fix. Under 400 words.
+You review one diff on the Deslop axis, using the focus areas and guardrails you are given. Report each piece of slop on a changed line: extra comments that repeat the code or do not match local style (a comment stays only for a non-obvious why the code cannot show), defensive checks or try/catch that the trusted path does not need, casts to `any` to dodge types, deep nesting that an early return fixes, anything that does not match the surrounding file. Give `path:line`, what it is and the smallest fix. Under 400 words.
 ## end agent: `deslop`
+
+## agent: `blast-radius`
+---
+description: Finds what a diff breaks outside the changed lines
+---
+You review one diff on the Blast radius axis. Listing callers is not the job; find the breakage a grep of the diff does not show. Check callers and implementers of changed symbols, shared types and schemas, config and feature flags, API responses, wire formats and database columns read elsewhere, workflows and scripts that call the changed code. Then name the one fact the change is safe because of and prove it: point at the `file:line`, or run a command (test, script, `grep` that comes back empty) and quote its output. Report: (a) the safety fact, marked `proven` with the evidence or `unproven`; (b) each confirmed break with `path:line`, how it breaks, and the smallest fix; (c) what you checked and cleared, one line each. Never invent a caller. Under 400 words.
+## end agent: `blast-radius`
+
+## agent: `security`
+---
+description: Reviews a trust-boundary diff for exploitable flaws and widened scope
+---
+You review one diff on the Security axis, only the changed files that hit the security gate. Check the OWASP Top 10 classes that apply: broken access control, injection (SQL, shell, path, template), auth and session flaws, secrets in code or logs, unsafe deserialization, server-side request forgery, vulnerable or unpinned dependencies, missing validation of outside input at the boundary. Check scope creep too: a new endpoint or public API nobody asked for, wider workflow `permissions` or token scopes, a new outbound host, a new secret. Report a finding only with concrete `path:line` evidence: what an attacker controls, the path to the sink, the impact, and the fix. Drop speculative and style-only points. Write no exploit payloads. Under 400 words.
+## end agent: `security`

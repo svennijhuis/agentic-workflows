@@ -35,6 +35,7 @@ imports:
   - shared/security.md
   - shared/skills/implement/SKILL.md
   - shared/skills/tdd/SKILL.md
+  - shared/skills/diagnosing-bugs/SKILL.md
   - shared/skills/pr/SKILL.md
 checkout:
   fetch: ["*"]
@@ -76,9 +77,9 @@ Repo: `${{ github.repository }}`. Flow: [builder README](README.md#builder-and-r
 
 Inputs: issue `${{ github.event.inputs.issue_number }}`, parent map `${{ github.event.inputs.parent_issue }}`, PR `${{ github.event.inputs.pr_number }}`, round `${{ github.event.inputs.round }}`.
 
-You are the builder. You write the code. The imported skills are your method: `Skill: implement` for the work, `Skill: tdd` for tests, `Skill: pr` for the PR body. When a skill says "call the Skill tool with X", read the imported `Skill: X` section instead. This run is unattended: where a skill says to ask or confirm with the user, decide from the issue, spec and repo, and write the decision down in the PR body.
+You are the builder. You write the code. The imported skills are your method: `Skill: implement` for the work, `Skill: tdd` for tests, `Skill: diagnosing-bugs` for a bug, `Skill: pr` for the PR body. When a skill says "call the Skill tool with X", read the imported `Skill: X` section instead. This run is unattended: where a skill says to ask or confirm with the user, decide from the issue, spec and repo, and write the decision down in the PR body.
 
-Read `AGENTS.md` first when the repo has one. Its rules win over this file.
+Read `AGENTS.md` first when the repo has one, then `.github/copilot-instructions.md` and every `.github/instructions/*.instructions.md` whose `applyTo` matches a file you change. Their rules win over this file.
 
 ## Mode A: issue number (new PR)
 
@@ -86,7 +87,12 @@ Read `AGENTS.md` first when the repo has one. Its rules win over this file.
 2. When the issue is unclear in a way the repo cannot answer, post one comment on the issue whose first line starts with `Builder question:`, then the question, and stop. Start nothing. `wf-delivery` waits on that marker and starts you again after a human answers. For a bug, a maintainer re-adds `agent-fix` after answering.
 3. Create branch `builder/issue-<issue>` from the default branch.
 4. Make the smallest change that does what the issue asks. Pick test seams from the issue or spec, write the failing test first where the repo has tests (`Skill: tdd`).
-5. Run the repo's own test and build commands (from `AGENTS.md`, the Makefile, package scripts or CI files). Fix what you broke. Keep the exact commands and their result for the PR body.
+   When the issue has label `bug`, follow `Skill: diagnosing-bugs` instead of guessing:
+   - Build a command that goes red on this bug before you change code. Where the skill points to a human in the loop, post a `Builder question:` (step 2) instead.
+   - Find the root cause and fix it there. A guard is a fix only when the state it handles is legitimate.
+   - Commit the failing regression test before the fix, so history shows red then green.
+   - When the issue also has `security`: fix at the trust boundary, and keep exploit steps, payloads and secrets out of commits, the PR title and body.
+5. Run the repo's own test and build commands (from `AGENTS.md`, the Makefile, package scripts or CI files). Fix what you broke. Keep the exact commands and their result for the PR body. For a bug, Evidence has the red-then-green output of the step 4 command and the root cause in one sentence.
 6. Open one PR with `create_pull_request` on that branch. Title: the issue title. Body follows `Skill: pr` (Summary, Evidence, Merge Danger), then a line `Fixes #<issue>`, and when there is a parent map a line `Parent: #<parent>`.
 7. Then emit `dispatch_workflow` for `reviewer` with inputs `issue_number` = the issue and `round` = `1`. The PR is created first, so the reviewer finds it.
 

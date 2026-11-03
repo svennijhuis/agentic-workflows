@@ -2,8 +2,6 @@
 description: 'Skill deslop, local copy of cursor/plugins/cursor-team-kit/skills/deslop@ae5650f.'
 ---
 
-<!-- Source: cursor/plugins/cursor-team-kit/skills/deslop@ae5650febf4320793844c12c4adaa937f417f8da (no license file in source repo). Body copied verbatim from SKILL.md, frontmatter dropped. To update: copy the new SKILL.md body here and bump the SHA. -->
-
 # Skill: deslop
 
 _Remove AI-generated code slop and clean up code style_

@@ -78,6 +78,6 @@ Otherwise create one issue in `svennijhuis/agentic-workflows`, findings in order
 - **What went wrong**: one or two sentences, with the PR and the target repo.
 - **Run**: link to the run (and step) that shows it.
 - **Part to fix**: the workflow, skill or fragment from step 2.
-- **Proposal**: the concrete change, as a one-line rule, a check, or a short diff sketch.
+- **Proposal**: the concrete change, as a one-line rule, a check, or a short diff sketch. For a mistake that happened twice or more (in this flow or an earlier retro issue), propose a check first: a test, lint, type, or CI step that fails on it. A text rule only when no check can catch it, and say why.
 
 Title: the worst finding in a few words.

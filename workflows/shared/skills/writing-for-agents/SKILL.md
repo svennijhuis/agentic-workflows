@@ -2,8 +2,6 @@
 description: 'Skill writing-for-agents, local copy of mattpocock/skills/skills/productivity/writing-for-agents@4ae2317.'
 ---
 
-<!-- Source: mattpocock/skills/skills/productivity/writing-for-agents@4ae2317ddb22b046e26455e4f9c9b3aaaf62212d (MIT License, Copyright (c) 2026 Matt Pocock). Body copied verbatim from SKILL.md, frontmatter dropped. SKILL-MECHANICS.md appended below as sections. To update: copy the new SKILL.md body here and bump the SHA. -->
-
 # Skill: writing-for-agents
 
 _Writing documents for agents. Use when creating or editing skills, or modifying AGENTS.md or CLAUDE.md._
