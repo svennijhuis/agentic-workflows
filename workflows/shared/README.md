@@ -18,6 +18,8 @@ gh-aw v0.93.4 requires shared files under `workflows/shared/` (imports outside `
 | [security.md](security.md) | Network and safety baseline |
 | [reporting.md](reporting.md) | Fixed issue/PR report shape |
 | [skills/](skills/) | Local skill copies (mattpocock/skills, cursor/plugins), imported by builder, reviewer, retro, wf-spec, wf-plan (map below). `diagnosing-bugs` (mattpocock/skills) drives the builder's bug path. Source, commit and license in [Skill sources](#skill-sources) |
+| [nuget-auth.md](nuget-auth.md) | C# repos: pre-agent step adds the private NuGet feed with a secret token and restores. Skips without a `.sln`/`.csproj`. Not imported by default (keeps secrets and the `dotnet` network out of non-C# repos): add `shared/nuget-auth.md` under `imports:` in your copy of issue-builder. See [install guide](../../docs/install.md#private-nuget-feed-c-repos) |
+| [csharp-mcp.md](csharp-mcp.md) | Local C# MCP server over stdio. Not imported by default: import with `with:` for `name`, `project`, `purpose`. See [install guide](../../docs/install.md#custom-mcp-server) |
 | [has-work.md](has-work.md) | Pre-agent step: `noop` without starting the engine when no open issue carries the labels the workflow needs |
 
 Configure consumers with `import-schema` `with:` only; unknown keys fail compile.

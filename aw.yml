@@ -5,11 +5,11 @@ description: Catalog of installable GitHub Agentic Workflows and shared fragment
 includes:
   - workflows/agents-md-sync.md
   - workflows/bug-fix.md
-  - workflows/builder.md
+  - workflows/issue-builder.md
   - workflows/issue-triage.md
   - workflows/retro.md
-  - workflows/reviewer.md
-  - workflows/token-audit.md
+  - workflows/pr-reviewer.md
+  - workflows/agentic-token-audit.md
   - workflows/wf-delivery.md
   - workflows/wf-plan.md
   - workflows/wf-spec.md
