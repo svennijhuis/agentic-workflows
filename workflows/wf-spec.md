@@ -1,6 +1,4 @@
 ---
-# Source: pascalvanderheiden/turbo-agent-skills-cli/.github/workflows/wayfinder-spec.md@122b266d451eb8d06a8b96a0933c788c2fb0ac98
-# Copied as is. Changed only: renamed to wf-* (file, concurrency group, markers), skill to-spec from local copy shared/skills/to-spec.md, schedule removed (Sven house rules).
 description: Spec labelled issues and hand completed specifications to ticket planning.
 intent: Convert explicitly queued issues or resolved wayfinder maps into one traceable implementation spec and recover incomplete planning handoffs without duplicating specs.
 on:

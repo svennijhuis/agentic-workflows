@@ -1,6 +1,4 @@
 ---
-# Source: pascalvanderheiden/turbo-agent-skills-cli/.github/workflows/wayfinder-to-spec.md@122b266d451eb8d06a8b96a0933c788c2fb0ac98
-# Copied as is. Changed only: renamed to wf-* (file, concurrency group, markers), schedule removed (Sven house rules).
 description: Label resolved wayfinder maps ready for specification.
 intent: Keep wayfinder maps open until a spec is published by adding a single-use to-spec gate after all decision sub-issues are closed.
 on:

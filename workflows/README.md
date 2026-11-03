@@ -118,7 +118,16 @@ PRs opened with `GITHUB_TOKEN` do not trigger `pull_request` workflows, which is
 
 ## wayfinder chain
 
-Four workflows copied from [pascalvanderheiden/turbo-agent-skills-cli](https://github.com/pascalvanderheiden/turbo-agent-skills-cli/tree/122b266d451eb8d06a8b96a0933c788c2fb0ac98/.github/workflows) at `122b266`, renamed to [wf-to-spec.md](wf-to-spec.md), [wf-spec.md](wf-spec.md), [wf-plan.md](wf-plan.md), [wf-delivery.md](wf-delivery.md). Labels are the contract between the four. Each file has a `# Source:` line with path and SHA. That repo has no license; Sven confirmed copying is fine (2026-11-03).
+Four workflows copied from [pascalvanderheiden/turbo-agent-skills-cli](https://github.com/pascalvanderheiden/turbo-agent-skills-cli/tree/122b266d451eb8d06a8b96a0933c788c2fb0ac98/.github/workflows) at `122b266`, renamed to [wf-to-spec.md](wf-to-spec.md), [wf-spec.md](wf-spec.md), [wf-plan.md](wf-plan.md), [wf-delivery.md](wf-delivery.md). Labels are the contract between the four. Source per file (all at `122b266`, the workflow files carry no source header):
+
+| File | Source in the upstream repo |
+| --- | --- |
+| [wf-to-spec.md](wf-to-spec.md) | `.github/workflows/wayfinder-to-spec.md` |
+| [wf-spec.md](wf-spec.md) | `.github/workflows/wayfinder-spec.md` |
+| [wf-plan.md](wf-plan.md) | `.github/workflows/wayfinder-plan.md` |
+| [wf-delivery.md](wf-delivery.md) | `.github/workflows/wayfinder-delivery.md` |
+
+That repo has no license; Sven confirmed copying is fine (2026-11-03).
 
 ```mermaid
 flowchart LR
@@ -133,8 +142,9 @@ flowchart LR
 
 Labels you set: `wayfinder:map` on the parent issue (with decision sub-issues, made with the `wayfinder` skill locally), or `to-spec` on an ordinary issue to skip the decision step. The workflows set the rest.
 
-Changed from the source:
+Changed from the source (house rules, applied to all four):
 
+- Renamed to `wf-*`: file, concurrency group and markers (`wf-spec:v1`, `wf-plan:v1`).
 - `schedule: every 30 minutes` removed from all four. Event triggers and `workflow_dispatch` stay.
 - `wf-spec` and `wf-plan` import `to-spec` and `to-tickets` from [shared/skills/](shared/skills/).
 - `wf-delivery`: starts the builder per ticket (`issue_number`, `parent_issue`). The gate for a ticket is a clean reviewer review (`Reviewer: klaar voor Sven.`) on the current head, then it waits for Sven's merge. A `needs-help` PR waits for Sven. The Copilot assignment, draft-to-ready, Copilot code review wait and merge text are gone.
