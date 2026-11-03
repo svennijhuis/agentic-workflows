@@ -46,7 +46,7 @@ Org level first, then each target repo.
 cd <target-repo>
 gh aw add svennijhuis/agentic-workflows/workflows/issue-builder.md@<tag>
 gh aw add svennijhuis/agentic-workflows/workflows/issue-triage.md@<tag>
-gh aw compile
+gh aw compile            # first time: --approve for new secrets, see section 3
 git add .github
 git commit -m "add agentic workflows"
 git push
@@ -57,6 +57,19 @@ git push
 - Upgrading from `builder`, `reviewer` or `token-audit`: delete the old `.github/workflows/{builder,reviewer,token-audit}.md` and `.lock.yml` files after adding the renamed ones, and re-run `gh aw add` for `bug-fix` and `wf-delivery` so they dispatch `issue-builder`. Otherwise two builders exist. `agentic-token-audit` starts a fresh `memory/agentic-token-audit` branch, so the old trend on `memory/token-audit` is not carried over: delete that branch or keep it as an archive.
 - Commit everything under `.github/workflows/`, including `shared/` and the `*.lock.yml` files. Imports are read at runtime from there.
 - Commit `.github/aw/actions-lock.json` if `gh aw compile` creates or changes it.
+
+### Builder network
+
+`issue-builder` installs dependencies and runs the repo's tests, but its network allows only the gh-aw `defaults`. Package registries are blocked until you add the repo's ecosystem. In your copy of `issue-builder.md`:
+
+```yaml
+network:
+  allowed:
+    - defaults
+    - node        # or python, dotnet, go, java, rust, ruby; list each the repo needs
+```
+
+Then `gh aw compile`. A private registry host goes in the same list. Without it the builder cannot restore packages, tests stay red and it opens no PR.
 
 Workflow sets (pick what you need):
 
@@ -71,10 +84,48 @@ Workflow sets (pick what you need):
 | Name | Needed by | Required | Where it lives |
 | --- | --- | --- | --- |
 | `GITHUB_TOKEN` | every workflow | yes, automatic | Provided by Actions. Nothing to create |
+| `APP_ID` (variable), `APP_PRIVATE_KEY` (secret) | `issue-builder` | recommended: without it builder PRs start no CI | Repo or org Actions variable and secret |
 | `AW_CORE_ISSUES_TOKEN` | `retro` only | only if you install `retro` | Repo or org Actions secret |
 | `NUGET_FEED_TOKEN` | `issue-builder` in C# repos | only with a private NuGet feed | Repo or org Actions secret |
 | `NUGET_FEED_URL`, `NUGET_FEED_USER` | `issue-builder` in C# repos | only with a private NuGet feed | Repo or org Actions variables (not secret) |
 | `COPILOT_GITHUB_TOKEN` | nothing | no | Not used, see above |
+
+### GitHub App (builder PRs run CI)
+
+Every write runs on the Actions `GITHUB_TOKEN`, and GitHub starts no workflow from an event made with that token. So a builder PR gets no `pull_request` run of the repo's own CI: required status checks stay on *Expected — waiting for status* and the PR cannot be merged without an admin bypass. `issue-builder` therefore takes an org GitHub App, as gh-aw recommends ([Triggering CI](https://github.github.com/gh-aw/reference/triggering-ci/)): its safe outputs mint a short-lived app token, open the PR and push as the app, and push one extra empty commit so CI starts. No app configured: it falls back to `GITHUB_TOKEN` and works as before, without CI.
+
+Create the app once per org (org owner):
+
+1. `https://github.com/organizations/<org>/settings/apps/new`. Org **Settings** → left sidebar bottom **Developer settings** → **GitHub Apps** → **New GitHub App**.
+2. **GitHub App name**: for example `<org>-agent-builder`. **Homepage URL**: the org URL.
+3. **Webhook**: untick **Active**. The app needs no events.
+4. **Repository permissions**, set exactly these (gh-aw requests them when it mints the token; a missing one fails the mint):
+   - **Actions**: Read and write (starts `pr-reviewer` by dispatch)
+   - **Administration**: Read-only
+   - **Contents**: Read and write (branch, commits)
+   - **Issues**: Read and write (comments)
+   - **Pull requests**: Read and write (open the PR, labels)
+   - **Metadata**: Read-only (added automatically)
+5. **Where can this GitHub App be installed?**: **Only on this account**. Click **Create GitHub App**.
+6. On the app page note the **Client ID** (`Iv23...`). Scroll to **Private keys** → **Generate a private key**. A `.pem` file downloads.
+7. Left sidebar **Install App** → **Install** next to the org → **Only select repositories** → pick the target repos → **Install**.
+
+Store them in the target repo (or at org level with `--org <org> --repos ...`). The variable keeps the gh-aw name `APP_ID` but holds the Client ID:
+
+```bash
+gh variable set APP_ID --repo <org>/<target-repo> --body "<client-id>"
+gh secret set APP_PRIVATE_KEY --repo <org>/<target-repo> < path/to/key.pem
+```
+
+Then delete the local `.pem`. Rotate by generating a new key on the app page, `gh secret set` again, and deleting the old key there.
+
+`gh aw compile` stops on `issue-builder` with *New restricted secret(s): APP_PRIVATE_KEY*. Check it is only used by the `Generate GitHub App token` steps in the `.lock.yml`, then `gh aw compile --approve` and commit.
+
+What changes:
+
+- The builder's PR, pushes, comments (`Builder question:`) and dispatches show the app as author instead of `github-actions[bot]`. The other workflows treat both as bot accounts.
+- Events made by the app do start workflows. That is the point for CI; `wf-delivery` ignores bot comments, so no loop starts.
+- Check it: on a builder PR the **Checks** tab shows your CI. In the repo **Actions** tab the CI run for the last (empty) commit has the app as actor, not `github-actions[bot]`. Not verified against a live run here.
 
 ### `AW_CORE_ISSUES_TOKEN` (only for `retro`)
 
@@ -91,6 +142,8 @@ Create the token (click path: your avatar top right → **Settings** → left si
 5. **Permissions**: click **Add permissions** (or expand **Repository permissions**), find **Issues**, set **Read and write**. Leave the rest. **Metadata: Read** is added automatically.
 6. Click **Generate token**. Copy the `github_pat_...` value now: GitHub shows it once.
 7. Org may require approval for fine-grained tokens: an org owner approves it at `https://github.com/organizations/<org>/settings/personal-access-tokens/pending_requests` (only when the resource owner is that org).
+
+`gh aw compile` stops on `retro` with *safe update mode detected unapproved changes, New restricted secret(s): AW_CORE_ISSUES_TOKEN*. That is the expected gate for a new secret: check that `AW_CORE_ISSUES_TOKEN` is only used as `github-token` of `create-issue` in `retro.md`, then run `gh aw compile --approve` and commit the `.lock.yml`.
 
 Store it as a secret. `gh` asks for the value, so it never lands in shell history or a file.
 
@@ -165,7 +218,7 @@ The flow uses labels as state. Create the ones that are not there yet. By hand: 
 
 ```bash
 for l in triage bug wayfinder security needs-info duplicate agent-fix blocked \
-         wayfinder:map to-spec specced to-tickets planned ready-for-agent \
+         wayfinder:map to-spec specced to-tickets planned to-plan ready-for-agent \
          builder needs-help ready-to-merge; do
   gh label create "$l" --repo <org>/<target-repo> 2>/dev/null || true
 done
@@ -186,7 +239,7 @@ Add these files in the repo root via **Add file → Create new file** on the rep
 ## 6. Check it works
 
 1. Repo **Issues** tab → **New issue**. Describe a small bug, **Submit new issue**. In the right sidebar click **Labels**, pick `triage`. `issue-triage` should comment and set `bug`.
-2. A maintainer adds `agent-fix` the same way (right sidebar **Labels**). `bug-fix` starts `issue-builder`, which opens a PR on `builder/issue-<n>` (see the **Pull requests** tab), then `reviewer` reviews it.
+2. A maintainer adds `agent-fix` the same way (right sidebar **Labels**). `bug-fix` starts `issue-builder`, which opens a PR on `builder/issue-<n>` (see the **Pull requests** tab), then `pr-reviewer` reviews it.
 3. Runs: repo **Actions** tab, pick the workflow in the left list, click a run for logs. Nothing listed: the compiled `.lock.yml` files are not on the default branch yet.
 4. Start one by hand: **Actions** → pick the workflow (for example `issue-builder`) → **Run workflow** button (right) → fill the inputs → green **Run workflow**. `agentic-token-audit` writes a daily cost report.
 
@@ -198,6 +251,8 @@ A maintainer always merges. Nothing here merges or approves.
 | --- | --- |
 | Run fails at the Copilot step with a billing or policy error | Org policy *Allow use of Copilot CLI billed to the organization* is off, or the org has no Copilot plan |
 | Builder finishes but no PR | *Allow GitHub Actions to create and approve pull requests* is off |
+| Builder PR shows no CI checks | No builder app: `APP_ID` or `APP_PRIVATE_KEY` unset, so it fell back to `GITHUB_TOKEN`. Or the app is not installed on this repo |
+| Builder run fails at *Generate GitHub App token* | Wrong Client ID or key, or the app lacks one of the permissions in [GitHub App](#github-app-builder-prs-run-ci) |
 | A label set by one workflow does not start the next | Expected: events made with `GITHUB_TOKEN` start nothing. The flow hands off by `workflow_dispatch` instead |
 | `retro` fails on `create-issue` | `AW_CORE_ISSUES_TOKEN` missing, expired, or lacks Issues write on the target repo |
 | `gh aw compile` complains about `dispatch-workflow` | Dispatch targets are not all in `.github/workflows/`. Install both `issue-builder` and `pr-reviewer` |

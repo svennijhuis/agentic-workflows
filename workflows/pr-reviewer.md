@@ -50,8 +50,8 @@ safe-outputs:
     max: 20
   submit-pull-request-review:
     target: "*"
-    # COMMENT only: builder PRs and reviews share the github-actions[bot] identity, and GitHub
-    # rejects REQUEST_CHANGES on your own PR. Findings are marked in the body instead.
+    # COMMENT only: without the builder app, builder PRs and reviews share the github-actions[bot]
+    # identity and GitHub rejects REQUEST_CHANGES on your own PR. A maintainer is the merge gate.
     allowed-events: [COMMENT]
     max: 1
   add-labels:

@@ -83,7 +83,7 @@ independent plans. Use native sub-issues and dependency edges as source of truth
 
 These visible lines are the contract with the builder and reviewer. Match them
 at the start of a comment or review body, written by a bot account
-(`github-actions[bot]`), never by a human:
+(`github-actions[bot]`, or the org's builder app for builder comments), never by a human:
 
 - `Builder started:` a builder run was dispatched for this ticket. Written by
   this workflow, with the run link of this delivery run.
