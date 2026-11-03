@@ -19,6 +19,11 @@ concurrency:
   group: wf-delivery
   queue: max
   job-discriminator: ${{ github.run_id }}
+# gh aw add follows dispatch-workflow one level deep; builder's reviewer and its skills come through resources.
+resources:
+  - reviewer.md
+  - shared/skills/code-review.md
+  - shared/skills/deslop.md
 permissions:
   copilot-requests: write
   actions: read

@@ -10,6 +10,11 @@ on:
         description: Issue number to hand to the builder
         required: true
         type: string
+# gh aw add follows dispatch-workflow one level deep; builder's reviewer and its skills come through resources.
+resources:
+  - reviewer.md
+  - shared/skills/code-review.md
+  - shared/skills/deslop.md
 permissions:
   copilot-requests: write
   contents: read
