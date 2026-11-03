@@ -1,6 +1,6 @@
 ---
 # Source: pascalvanderheiden/turbo-agent-skills-cli/.github/workflows/wayfinder-delivery.md@122b266d451eb8d06a8b96a0933c788c2fb0ac98
-# Copied as is. Changed only: schedule removed, merge-pull-request removed (Sven house rules).
+# Copied as is. Changed only: renamed to wf-* (file, concurrency group, markers), schedule removed, merge-pull-request removed (Sven house rules).
 description: Dispatch ordered implementation tickets to Copilot and finish completed wayfinder maps.
 intent: Keep planned delivery moving in dependency order, resolve recorded blockers, obtain current Copilot code review, and merge only completed reviewed work before closing the parent.
 on:
@@ -24,7 +24,7 @@ if: >-
   (github.event.pull_request.head.repo.full_name == github.repository &&
    startsWith(github.event.pull_request.head.ref, 'copilot/'))
 concurrency:
-  group: wayfinder-delivery
+  group: wf-delivery
   queue: max
   job-discriminator: ${{ github.run_id }}
 permissions:

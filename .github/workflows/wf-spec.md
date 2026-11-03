@@ -1,6 +1,6 @@
 ---
 # Source: pascalvanderheiden/turbo-agent-skills-cli/.github/workflows/wayfinder-spec.md@122b266d451eb8d06a8b96a0933c788c2fb0ac98
-# Copied as is. Changed only: schedule removed (Sven house rules).
+# Copied as is. Changed only: renamed to wf-* (file, concurrency group, markers), schedule removed (Sven house rules).
 description: Spec labelled issues and hand completed specifications to ticket planning.
 intent: Convert explicitly queued issues or resolved wayfinder maps into one traceable implementation spec and recover incomplete planning handoffs without duplicating specs.
 on:
@@ -10,7 +10,7 @@ on:
     types: [created]
   workflow_dispatch:
 concurrency:
-  group: wayfinder-spec
+  group: wf-spec
   queue: max
   job-discriminator: ${{ github.run_id }}
 permissions:
@@ -62,7 +62,7 @@ a blocker. Actual unresolved product choices block synthesis; report the exact
 missing decision once on the issue rather than repeatedly silently skipping it.
 
 Before writing, inspect the issue body and all comments for an existing complete
-spec. Recognize `<!-- wayfinder-spec:v1 -->` OR the complete `to-spec` template:
+spec. Recognize `<!-- wf-spec:v1 -->` OR the complete `to-spec` template:
 `## Problem Statement`, `## Solution`, `## User Stories`,
 `## Implementation Decisions`, `## Testing Decisions`, `## Out of Scope`, and
 `## Further Notes`. GitHub may strip HTML comment markers, so the marker is not
@@ -80,7 +80,7 @@ specification format, with this workflow-specific publishing override:
 - do not create a separate spec issue or add `ready-for-agent` to the parent;
 - do not interview the user;
 - publish the complete spec as one comment on the selected issue/map;
-- begin the comment with `<!-- wayfinder-spec:v1 -->`;
+- begin the comment with `<!-- wf-spec:v1 -->`;
 - include the chosen testing seams in `## Testing Decisions`; and
 - emit the spec comment first, then one `add-labels` operation adding BOTH
   `specced` and `to-tickets` (the limit is two labels, not one). Finally remove

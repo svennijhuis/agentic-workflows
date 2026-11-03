@@ -26,7 +26,7 @@ flowchart TD
   TR -->|bug: broken, reproducible,<br/>one PR, no design| B[label bug]
   TR -->|wayfinder: new, choices,<br/>or more than one PR.<br/>In doubt: wayfinder| W[label wayfinder]
   B -->|Sven adds agent-fix| IF[issue-fix<br/>blocker check, assign Copilot]
-  W -->|Sven adds to-spec<br/>or wayfinder:map| CH[wayfinder chain<br/>to-spec, spec, plan, delivery]
+  W -->|Sven adds to-spec<br/>or wayfinder:map| CH[wf chain<br/>wf-to-spec, wf-spec, wf-plan, wf-delivery]
   IF --> M[Copilot PR, Sven merges]
   CH --> M
 ```
@@ -56,14 +56,16 @@ flowchart LR
 
 ## wayfinder chain (copied)
 
-Four workflows copied as is from [pascalvanderheiden/turbo-agent-skills-cli](https://github.com/pascalvanderheiden/turbo-agent-skills-cli/tree/122b266d451eb8d06a8b96a0933c788c2fb0ac98/.github/workflows) at `122b266`, into `.github/workflows/`. Each file has a `# Source:` line with path and SHA. `release.yml` and `pages.yml` belong to that project and are left out. That repo has no license; Sven confirmed copying is fine (2026-11-03).
+Four workflows copied as is from [pascalvanderheiden/turbo-agent-skills-cli](https://github.com/pascalvanderheiden/turbo-agent-skills-cli/tree/122b266d451eb8d06a8b96a0933c788c2fb0ac98/.github/workflows) at `122b266`, into `.github/workflows/`. Renamed to `wf-to-spec.md`, `wf-spec.md`, `wf-plan.md`, `wf-delivery.md` (concurrency groups `wf-*`, markers `wf-spec:v1` and `wf-plan:v1`). Labels stay the same, they are the contract between the four. Each file has a `# Source:` line with path and SHA.
+
+Skills needed (copied as is, with `Source:` line): [.agents/skills/to-spec](../.agents/skills/to-spec/SKILL.md) for `wf-spec` and [.agents/skills/to-tickets](../.agents/skills/to-tickets/SKILL.md) for `wf-plan`. Without them the chain does not work. `release.yml` and `pages.yml` belong to that project and are left out. That repo has no license; Sven confirmed copying is fine (2026-11-03).
 
 ```mermaid
 flowchart LR
-  M[issue: wayfinder:map<br/>decision sub-issues] -->|all decisions closed| TS[wayfinder-to-spec<br/>adds to-spec]
-  TS --> SP[wayfinder-spec<br/>spec comment<br/>adds specced + to-tickets]
-  SP --> PL[wayfinder-plan<br/>ordered sub-issues<br/>ready-for-agent + blocked_by<br/>to-tickets to planned]
-  PL --> DL[wayfinder-delivery<br/>first unblocked ticket<br/>assign to Copilot]
+  M[issue: wayfinder:map<br/>decision sub-issues] -->|all decisions closed| TS[wf-to-spec<br/>adds to-spec]
+  TS --> SP[wf-spec<br/>spec comment<br/>adds specced + to-tickets]
+  SP --> PL[wf-plan<br/>ordered sub-issues<br/>ready-for-agent + blocked_by<br/>to-tickets to planned]
+  PL --> DL[wf-delivery<br/>first unblocked ticket<br/>assign to Copilot]
   DL --> PR[Copilot PR on copilot/**<br/>Copilot code review<br/>@copilot follow-ups]
   PR --> SV[Sven merges]
   SV --> DL
@@ -74,7 +76,7 @@ Labels you set: `wayfinder:map` on the parent issue (with decision sub-issues), 
 Changed from the source, nothing else:
 
 - `schedule: every 30 minutes` removed from all four. Event triggers and `workflow_dispatch` stay. To put it back, add `  schedule: every 30 minutes` under `on:` again.
-- `merge-pull-request` removed from `wayfinder-delivery`, so Sven merges. The prompt text still talks about merging; without the safe-output the agent cannot do it. To put it back, add the block from the source file under `safe-outputs:`.
+- `merge-pull-request` removed from `wf-delivery`, so Sven merges. The prompt text still talks about merging; without the safe-output the agent cannot do it. To put it back, add the block from the source file under `safe-outputs:`.
 
 Tokens Sven sets as Actions secrets: `GH_AW_AGENT_TOKEN` (Copilot assignment and Copilot code review in delivery) and the engine token `COPILOT_GITHUB_TOKEN`. Needs the Copilot cloud agent enabled on the repo, and every assignment costs Copilot premium requests.
 

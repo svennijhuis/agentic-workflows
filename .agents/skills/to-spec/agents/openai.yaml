@@ -1,0 +1,6 @@
+# Source: pascalvanderheiden/turbo-agent-skills-cli/.agents/skills/to-spec/agents/openai.yaml@122b266d451eb8d06a8b96a0933c788c2fb0ac98
+interface:
+  display_name: "To Spec"
+  short_description: "Turn a conversation into a spec"
+policy:
+  allow_implicit_invocation: false

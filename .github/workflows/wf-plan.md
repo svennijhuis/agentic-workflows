@@ -1,6 +1,6 @@
 ---
 # Source: pascalvanderheiden/turbo-agent-skills-cli/.github/workflows/wayfinder-plan.md@122b266d451eb8d06a8b96a0933c788c2fb0ac98
-# Copied as is. Changed only: schedule removed (Sven house rules).
+# Copied as is. Changed only: renamed to wf-* (file, concurrency group, markers), schedule removed (Sven house rules).
 description: Split queued specifications into ordered implementation tickets.
 intent: Publish a dependency-aware implementation plan whose tickets are traceable to the completed wayfinder map and immediately usable by coding agents.
 on:
@@ -10,7 +10,7 @@ on:
     types: [created]
   workflow_dispatch:
 concurrency:
-  group: wayfinder-plan
+  group: wf-plan
   queue: max
   job-discriminator: ${{ github.run_id }}
 permissions:
@@ -63,7 +63,7 @@ must recover missed or bot-generated label events. Ordinary issues as well as
 wayfinder maps are supported.
 
 Read the complete spec from its body/comments. Recognize the marker
-`<!-- wayfinder-spec:v1 -->` OR all seven `to-spec` template headings (Problem
+`<!-- wf-spec:v1 -->` OR all seven `to-spec` template headings (Problem
 Statement, Solution, User Stories, Implementation Decisions, Testing Decisions,
 Out of Scope, Further Notes); HTML markers can be stripped during publishing.
 
@@ -95,7 +95,7 @@ required native dependency edges; report the exact repair needed.
 
 Emit every `create-issue` output first. Then emit one concise plan-index comment
 to the parent, listing tickets in execution order with their blockers and the
-stable marker `wayfinder-plan:v1`. Emit the
+stable marker `wf-plan:v1`. Emit the
 `replace-label` output after all creation/index outputs, replacing the present
 queue label (`to-tickets`, or `to-plan` for legacy issues) with `planned`.
 The replacement tool accepts ONE label to add and ONE to remove, not arrays.
