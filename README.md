@@ -42,6 +42,19 @@ gh aw add svennijhuis/agentic-workflows/pr-review@v1.0.0
 
 Full guide: [docs/how-to/consume.md](docs/how-to/consume.md). Pin tags or SHAs in production, never a branch ref.
 
+## Org examples (gallery)
+
+Manual only (`workflow_dispatch`), targets `svennijhuis` repos, copyable to an org by changing the `repos` input.
+
+| Workflow | Does |
+| --- | --- |
+| [security-review](workflows/security-review.md) | Report-only security scan as code scanning alerts |
+| [code-quality](workflows/code-quality.md) | Side repo checks out a target repo, opens `[quality]` issues |
+| [dependabot-rollout-orchestrator](workflows/dependabot-rollout-orchestrator.md) + [worker](workflows/dependabot-rollout.md) | Dispatch per repo, worker opens a `dependabot.yml` PR |
+| [org-rollout-orchestrator](workflows/org-rollout-orchestrator.md) + [worker](workflows/org-rollout.md) | Roll a pinned central workflow out to target repos via PR |
+
+Flow, add to one repo, update, rollback and the tokens to set: [docs/how-to/org-flow.md](docs/how-to/org-flow.md).
+
 ## Docs
 
 - [AGENTS.md](AGENTS.md)

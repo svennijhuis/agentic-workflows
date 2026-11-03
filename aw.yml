@@ -3,3 +3,9 @@ name: Agentic Workflows
 description: Catalog of installable GitHub Agentic Workflows and shared fragments (owner svennijhuis).
 includes:
   - workflows/pr-review.md
+  - workflows/security-review.md
+  - workflows/code-quality.md
+  - workflows/dependabot-rollout-orchestrator.md
+  - workflows/dependabot-rollout.md
+  - workflows/org-rollout-orchestrator.md
+  - workflows/org-rollout.md
