@@ -1,6 +1,4 @@
 ---
-# Source: pascalvanderheiden/turbo-agent-skills-cli/.github/workflows/wayfinder-delivery.md@122b266d451eb8d06a8b96a0933c788c2fb0ac98
-# Changed: renamed to wf-* (file, concurrency group), schedule and merge removed, Copilot cloud agent and Copilot code review replaced by the builder and reviewer workflows (Sven house rules).
 description: Start the builder on ordered implementation tickets and finish completed wayfinder maps. Sven merges.
 intent: Keep planned delivery moving in dependency order, one builder ticket at a time, gated on a clean reviewer review of the current head, and close the parent once every ticket is merged.
 on:
