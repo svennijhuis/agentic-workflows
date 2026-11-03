@@ -2,6 +2,40 @@
 
 How to use this library in a GitHub org: what to switch on, which tokens and secrets exist, where to get them, and how to check it works. Workflow behavior is in [workflows/README.md](../workflows/README.md).
 
+## Quick start
+
+The shortest path to a working bug-to-PR flow. Each step links to the details below. Everything else is in [Later improvements](#later-improvements).
+
+### Do now
+
+| # | Step | Who | Time |
+| --- | --- | --- | --- |
+| 1 | **Copilot billing.** Org **Settings** → **Copilot** → **Policies**: set **Copilot CLI** and **Allow use of Copilot CLI billed to the organization** to **Enabled**. [Details](#option-a-copilot-billed-to-the-org-default) | Org owner | 1 min |
+| 2 | **PRs from Actions.** Org and repo **Settings** → **Actions** → **General** → **Workflow permissions**: tick **Allow GitHub Actions to create and approve pull requests**. [Details](#actions) | Org owner, then repo admin | 2 min |
+| 3 | **Install.** In the target repo: `gh aw add` for `issue-triage`, `bug-fix`, `issue-builder`, `pr-reviewer`, then `gh aw compile`, commit and push. [Details](#2-install-into-a-target-repo) | You | 5 min |
+| 4 | **Builder network.** Add the repo's ecosystem (`node`, `dotnet`, ...) under `network.allowed` in `issue-builder.md`, compile again. Without it the builder cannot install packages. [Details](#builder-network) | You | 2 min |
+| 5 | **Labels.** Run the label loop once. [Details](#4-labels-once-per-target-repo) | You | 1 min |
+| 6 | **CI on builder PRs.** Fine-grained PAT with **Contents: Read and write** on the repo, stored as `GH_AW_CI_TRIGGER_TOKEN`. Skip it and CI does not run on builder PRs: then close and reopen a PR by hand. [Details](#builder-ci-personal-token) | You, approval by org owner if required | 5 min |
+| 7 | **Test.** New issue with label `triage`, then `agent-fix`. [Details](#6-check-it-works) | You | — |
+
+So you ask an org owner for steps 1 and 2 (and to approve the token in step 6). You need no other token: Copilot runs on the Actions `GITHUB_TOKEN`. Do not create `COPILOT_GITHUB_TOKEN`, `APP_ID`, `APP_PRIVATE_KEY` or `AW_CORE_ISSUES_TOKEN` for the quick start.
+
+No org owner for step 1? Use [option B](#option-b-personal-token-copilot_github_token): your own Copilot token. It costs one extra edit per workflow.
+
+### Later improvements
+
+None of these block the quick start. Do them when the flow runs.
+
+| Improvement | Why | Details |
+| --- | --- | --- |
+| GitHub App instead of the personal CI token | Does not hang on one person, short-lived tokens, builder acts as the app | [Next improvement: GitHub App](#next-improvement-github-app) |
+| Service account for tokens | A token on your own account stops when you leave or it expires | [Builder CI](#builder-ci-personal-token) |
+| Repo rules (`AGENTS.md`, Copilot instructions) | Builder and reviewer follow your standards | [Repo rules](#5-repo-rules-optional-recommended) |
+| Wayfinder flow (plan to PRs) | Bigger work split into tickets | [Workflow sets](#2-install-into-a-target-repo) |
+| `agentic-token-audit` | Daily cost report, to tune the caps | [workflows/README.md](../workflows/README.md#agentic-token-audit) |
+| `retro` | Learns from each merged PR, needs `AW_CORE_ISSUES_TOKEN` | [AW_CORE_ISSUES_TOKEN](#aw_core_issues_token-only-for-retro) |
+| C# extras: private NuGet feed, `dotnet format` hook, custom MCP server | Only for C# repos | [Private NuGet feed](#private-nuget-feed-c-repos) |
+
 ## What you need
 
 | Need | Why |
