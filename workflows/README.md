@@ -1,10 +1,15 @@
 # Installable workflows
 
-Markdown here is what other repositories install:
+This folder is the library. Every workflow lives here, other repositories install from it. In the target repo:
 
 ```bash
-gh aw add svennijhuis/agentic-workflows/<file-stem>@v1.0.0
+gh aw add svennijhuis/agentic-workflows/workflows/<name>.md@<tag>
+gh aw compile
+git add .github/workflows/<name>.md .github/workflows/<name>.lock.yml
+git commit -m "add <name>"
 ```
+
+Commit both the `.md` and the `.lock.yml` in the target repo. This repo ships only the `.md`.
 
 Each file **must** have an `on:` trigger. Kebab-case stem becomes the `gh aw add` id.
 
@@ -13,6 +18,11 @@ Block 1: catalog workflows are **`workflow_dispatch` only** until Sven enables m
 | Workflow | Purpose |
 | --- | --- |
 | [pr-review.md](pr-review.md) | Report-only PR review (F01). `workflow_dispatch` only |
+| [issue-triage.md](issue-triage.md) | Label `triage`: sets `bug` or `wayfinder` with one reason comment |
+| [issue-fix.md](issue-fix.md) | Label `agent-fix`: blocker check, then assign to Copilot |
+| [pr-check.md](pr-check.md) | Copilot PR: deslop check, inline comments, request changes |
+| [agents-md-sync.md](agents-md-sync.md) | Write or update AGENTS.md from main commits |
+| [wf-to-spec.md](wf-to-spec.md), [wf-spec.md](wf-spec.md), [wf-plan.md](wf-plan.md), [wf-delivery.md](wf-delivery.md) | Wayfinder chain: map to spec, tickets, Copilot delivery |
 
 Shared fragments: [shared/](shared/). Authoring: [.github/instructions/aw.instructions.md](../.github/instructions/aw.instructions.md). Verify: `make verify`.
 
@@ -60,7 +70,7 @@ flowchart LR
 
 ## wayfinder chain (copied)
 
-Four workflows copied as is from [pascalvanderheiden/turbo-agent-skills-cli](https://github.com/pascalvanderheiden/turbo-agent-skills-cli/tree/122b266d451eb8d06a8b96a0933c788c2fb0ac98/.github/workflows) at `122b266`, into `.github/workflows/`. Renamed to `wf-to-spec.md`, `wf-spec.md`, `wf-plan.md`, `wf-delivery.md` (concurrency groups `wf-*`, markers `wf-spec:v1` and `wf-plan:v1`). Labels stay the same, they are the contract between the four. Each file has a `# Source:` line with path and SHA.
+Four workflows copied as is from [pascalvanderheiden/turbo-agent-skills-cli](https://github.com/pascalvanderheiden/turbo-agent-skills-cli/tree/122b266d451eb8d06a8b96a0933c788c2fb0ac98/.github/workflows) at `122b266`, into `workflows/` next to the others. Renamed to [wf-to-spec.md](wf-to-spec.md), [wf-spec.md](wf-spec.md), [wf-plan.md](wf-plan.md), [wf-delivery.md](wf-delivery.md) (concurrency groups `wf-*`, markers `wf-spec:v1` and `wf-plan:v1`). Labels stay the same, they are the contract between the four. Each file has a `# Source:` line with path and SHA.
 
 Skills come remote from [mattpocock/skills](https://github.com/mattpocock/skills/tree/4ae2317ddb22b046e26455e4f9c9b3aaaf62212d/skills/engineering) (MIT), pinned at `4ae2317ddb22b046e26455e4f9c9b3aaaf62212d`, as gh-aw cross-repo imports (`owner/repo/path@ref`, fetched at compile time): `skills/engineering/to-spec/SKILL.md` in `wf-spec` and `skills/engineering/to-tickets/SKILL.md` in `wf-plan`. No copy in this repo. To update: bump the SHA in both imports and recompile. To make the map issue yourself, use the `skills/engineering/wayfinder` skill from the same repo. `release.yml` and `pages.yml` belong to that project and are left out. That repo has no license; Sven confirmed copying is fine (2026-11-03).
 
