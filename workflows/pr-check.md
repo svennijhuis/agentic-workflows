@@ -1,5 +1,5 @@
 ---
-description: When Copilot opens a PR, check the diff with the skills in .github/skills/ and post findings as a review with @copilot so Copilot fixes them. No merge, no push.
+description: When Copilot opens a PR, check the diff with the deslop skill (remote import) and post findings as a review with @copilot so Copilot fixes them. No merge, no push.
 on:
   pull_request:
     types: [opened, ready_for_review]
@@ -13,6 +13,8 @@ if: ${{ github.event_name == 'workflow_dispatch' || github.event.pull_request.us
 permissions:
   contents: read
   pull-requests: read
+imports:
+  - cursor/plugins/cursor-team-kit/skills/deslop/SKILL.md@ae5650febf4320793844c12c4adaa937f417f8da
 network:
   allowed: []
 tools:
@@ -34,7 +36,7 @@ PR: `${{ github.event.pull_request.number || github.event.inputs.pr_number }}` i
 
 Only Copilot PRs start this run (the `if:` above), so other PRs cost nothing.
 
-1. Read every `SKILL.md` under `.github/skills/` on the default branch. These are the rules (for example deslop).
+1. The rules are the imported deslop skill (`cursor/plugins` at `ae5650f`). To add a skill, add another `imports:` line with a SHA pin.
 2. Read the PR diff. Check only changed lines against those rules.
 3. Each finding: one inline review comment on the line, naming the skill and the concrete fix. Max 10.
 4. Submit one review:

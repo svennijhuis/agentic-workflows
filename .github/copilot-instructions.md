@@ -37,6 +37,4 @@ Every workflow PBI must meet Bar H. Details live in the links, not in this file.
 - [aw.instructions.md](instructions/aw.instructions.md)
 - [aw-author agent](agents/aw-author.agent.md)
 
-Volg altijd de skills in `.github/skills/` (deslop voor elke PR).
-
 Never merge. Never force push. No secrets in files.
