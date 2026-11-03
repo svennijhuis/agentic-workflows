@@ -33,6 +33,8 @@ Same for `security-review` or `code-quality`. The `source:` line in the added fi
 2. Run the orchestrator: `gh workflow run org-rollout-orchestrator.lock.yml -f workflow=pr-review -f ref=v1.1.0 -f repos=svennijhuis/repo-a,svennijhuis/repo-b`.
 3. Each target repo gets one `[agentic-workflows]` PR with the new pin. The maintainer reviews, runs `gh aw compile`, merges.
 
+`only_existing` defaults to `true`: repos that do not have `.github/workflows/<workflow>.md` yet are skipped, so only repos that already use the workflow get an update PR. Pass `-f only_existing=false` to also install it in repos that do not have it.
+
 In a single repo you can also skip the orchestrator: `gh aw update pr-review` then `gh aw compile`.
 
 ## Roll back
