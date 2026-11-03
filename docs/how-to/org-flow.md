@@ -1,11 +1,11 @@
 # Org flow: central workflows, one repo, rollout updates
 
-This repo is the **control repo**. It is the single source of truth for `pr-review`, `security-review` and `code-quality`. Target repos never edit a copy; they pin a ref from here. Today the targets are `svennijhuis` repos. For an org, change only the owner in the `repos` input and the token scope.
+This repo is the **control repo**. It is the single source of truth for `pr-review` and `security-review` (templates in `workflows/`). The orchestrators, workers and `code-quality` run here in `.github/workflows/`. Target repos never edit a copy; they pin a ref from here. Today the targets are `svennijhuis` repos. For an org, change only the owner in the `repos` input and the token scope.
 
 ```mermaid
 flowchart LR
   subgraph control["Control repo: svennijhuis/agentic-workflows"]
-    WF[workflows/pr-review.md<br/>security-review.md<br/>code-quality.md] --> TAG[tag v1.x.y]
+    WF[workflows/pr-review.md<br/>security-review.md] --> TAG[tag v1.x.y]
     TAG --> ORCH[org-rollout-orchestrator<br/>workflow_dispatch]
   end
   ORCH -->|dispatch per repo| W1[org-rollout worker]
@@ -27,13 +27,15 @@ gh aw compile
 git add .github/workflows && git commit -m "add pr-review v1.0.0" && git push
 ```
 
-Same for `security-review` or `code-quality`. The `source:` line in the added file is the pin.
+Same for `security-review`. The `source:` line in the added file is the pin.
 
 ## Roll out an update
 
 1. Change the workflow here, merge, tag a new version (see [CHANGELOG](../../CHANGELOG.md)).
 2. Run the orchestrator (Actions tab, or `gh workflow run org-rollout-orchestrator.lock.yml -f workflow=pr-review -f ref=v1.1.0`). Leave `repos` empty to find every svennijhuis repo that has the workflow, or pass `-f repos=svennijhuis/repo-a,svennijhuis/repo-b`.
 3. Each target repo gets one `[agentic-workflows]` PR with the new pin and the compiled `.lock.yml` (the worker runs `gh aw compile` in Actions with a pinned gh-aw version, so every lock file comes from the same compiler). The maintainer only reviews and merges.
+
+`.github/` is a protected path for `create-pull-request` in gh-aw. The worker sets `protected-files: { policy: request-review, exclude: [".github/workflows/"] }`, so only `.github/workflows/` is allowed in its PR. Any other protected file (for example `README.md` or `package.json`) still gets a REQUEST_CHANGES review.
 
 `only_existing` defaults to `true`: repos that do not have `.github/workflows/<workflow>.md` yet are skipped, so only repos that already use the workflow get an update PR. Pass `-f only_existing=false` to also install it in repos that do not have it.
 
@@ -47,8 +49,8 @@ Revert the update PR in the target repo, or rerun the orchestrator with the prev
 
 | Workflow | Pattern |
 | --- | --- |
-| [dependabot-rollout-orchestrator](../../workflows/dependabot-rollout-orchestrator.md) + [dependabot-rollout](../../workflows/dependabot-rollout.md) | Orchestrator dispatches a worker per repo, worker opens a `dependabot.yml` PR |
-| [code-quality](../../workflows/code-quality.md) | Side repo checks out one target repo and opens `[quality]` issues there |
+| [dependabot-rollout-orchestrator](../../.github/workflows/dependabot-rollout-orchestrator.md) + [dependabot-rollout](../../.github/workflows/dependabot-rollout.md) | Orchestrator dispatches a worker per repo, worker opens a `dependabot.yml` PR |
+| [code-quality](../../.github/workflows/code-quality.md) | Side repo checks out one target repo and opens `[quality]` issues there |
 | [security-review](../../workflows/security-review.md) | Report-only code scanning alerts, installed per repo |
 
 ## Tokens Sven sets (not in the repo)

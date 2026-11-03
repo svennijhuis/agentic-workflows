@@ -41,11 +41,14 @@ safe-outputs:
     target-repo: ${{ github.event.inputs.target_repo }}
     title-prefix: "[agentic-workflows] "
     max: 1
+    protected-files:
+      policy: request-review
+      exclude: [".github/workflows/"]
 ---
 
 # Org Rollout Worker
 
-Flow: [docs/how-to/org-flow.md](../docs/how-to/org-flow.md).
+Flow: [docs/how-to/org-flow.md](../../docs/how-to/org-flow.md).
 
 Stop if the owner of `${{ github.event.inputs.target_repo }}` is not `svennijhuis`.
 

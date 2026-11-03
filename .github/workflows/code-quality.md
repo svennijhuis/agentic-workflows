@@ -9,6 +9,7 @@ on:
         type: string
 permissions:
   contents: read
+  pull-requests: read
 checkout:
   repository: ${{ github.event.inputs.target_repo }}
   github-token: ${{ secrets.GH_AW_MAIN_REPO_TOKEN }}
