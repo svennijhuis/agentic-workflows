@@ -23,10 +23,10 @@ on:
 if: >-
   (github.event.inputs.issue_number != '' && github.event.inputs.pr_number == '' && github.event.inputs.round == '') ||
   (github.event.inputs.pr_number != '' && (github.event.inputs.round == '1' || github.event.inputs.round == '2'))
-max-ai-credits: 50
-max-daily-ai-credits: 200
-max-turns: 60
-timeout-minutes: 30
+max-ai-credits: 1000
+max-daily-ai-credits: 6000
+max-turns: 200
+timeout-minutes: 50
 concurrency:
   group: builder-${{ github.event.inputs.issue_number }}${{ github.event.inputs.pr_number }}
   job-discriminator: ${{ github.run_id }}
@@ -46,6 +46,7 @@ permissions:
   pull-requests: read
 tools:
   github:
+    mode: gh-proxy
     toolsets: [repos, issues, pull_requests]
   edit:
   bash: [":*"]
@@ -82,7 +83,7 @@ Read `AGENTS.md` first when the repo has one. Its rules win over this file.
 ## Mode A: issue number (new PR)
 
 1. Read the issue, its comments and, when given, the parent map and its spec comment (`wf-spec:v1`). Stop when an open PR with label `builder` already closes this issue: post one comment on the issue with its link.
-2. When the issue is unclear in a way the repo cannot answer, post one question on the issue and stop. Start nothing.
+2. When the issue is unclear in a way the repo cannot answer, post one comment on the issue whose first line starts with `Builder question:`, then the question, and stop. Start nothing. `wf-delivery` waits on that marker and starts you again after a human answers. For a bug, a maintainer re-adds `agent-fix` after answering.
 3. Create branch `builder/issue-<issue>` from the default branch.
 4. Make the smallest change that does what the issue asks. Pick test seams from the issue or spec, write the failing test first where the repo has tests (`Skill: tdd`).
 5. Run the repo's own test and build commands (from `AGENTS.md`, the Makefile, package scripts or CI files). Fix what you broke. Keep the exact commands and their result for the PR body.
@@ -91,7 +92,7 @@ Read `AGENTS.md` first when the repo has one. Its rules win over this file.
 
 ## Mode B: PR number plus round (fix)
 
-1. Read the PR, its diff and the latest `REQUEST_CHANGES` review from the reviewer with its inline comments. Those findings are the work list for this round. Count the reviewer's `REQUEST_CHANGES` reviews on this PR: when that count is not equal to the round, post one PR comment with both numbers and stop.
+1. Read the PR, its diff and the reviewer's latest review whose body starts with `Reviewer: changes needed, round <round>.`, with its inline comments. Those findings are the work list for this round. Count the reviewer's reviews on this PR whose body starts with `Reviewer: changes needed`: when that count is not equal to the round, post one PR comment with both numbers and stop.
 2. Check out the PR head branch (`git checkout <head>`, all branches are fetched).
 3. Fix each finding with the smallest change. A finding you think is wrong: leave the code and explain why in the PR comment of step 5.
 4. Run the repo's test and build commands again.

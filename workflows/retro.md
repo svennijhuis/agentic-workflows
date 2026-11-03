@@ -13,9 +13,9 @@ if: >-
   github.event_name == 'workflow_dispatch' ||
   (github.event.pull_request.merged == true &&
    contains(github.event.pull_request.labels.*.name, 'builder'))
-max-ai-credits: 50
-max-daily-ai-credits: 200
-max-turns: 40
+max-ai-credits: 300
+max-daily-ai-credits: 1500
+max-turns: 60
 timeout-minutes: 20
 concurrency:
   group: retro-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
@@ -33,6 +33,7 @@ permissions:
   pull-requests: read
 tools:
   github:
+    mode: gh-proxy
     toolsets: [repos, issues, pull_requests, actions]
   agentic-workflows:
 safe-outputs:
@@ -64,7 +65,7 @@ Read the PR timeline too: reviews, inline comments, builder round comments, and 
 
 ## 2. Find where the flow went wrong
 
-Look per category of `Skill: retro` step 3: navigation, automated checks, coding standards, tool economy, no-ops, information access, AGENTS.md. Typical signals: a reviewer round that sent work back, a finding the reviewer missed and Sven fixed by hand, a builder that searched long for a file or command, a failed or retried tool call, missing context on the issue, a step that cost many turns.
+Look per category of `Skill: retro` step 3: navigation, automated checks, coding standards, tool economy, no-ops, information access, AGENTS.md. Typical signals: a reviewer round that sent work back, a finding the reviewer missed and a maintainer fixed by hand, a builder that searched long for a file or command, a failed or retried tool call, missing context on the issue, a step that cost many turns.
 
 For each candidate, decide which part of the core should change: `builder`, `reviewer`, `retro`, `issue-triage`, `bug-fix`, a `wf-*` workflow, a skill under `workflows/shared/skills/`, or a shared fragment. A problem that lives only in the target repo (its own AGENTS.md, tests or CI) is not a core issue; mention it in the issue only when a core change would have caught it.
 

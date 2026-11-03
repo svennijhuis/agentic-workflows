@@ -13,6 +13,12 @@ on:
 concurrency:
   group: issue-triage-${{ github.event.issue.number || github.event.inputs.issue_number }}
   job-discriminator: ${{ github.run_id }}
+max-ai-credits: 50
+max-daily-ai-credits: 500
+max-turns: 20
+timeout-minutes: 10
+imports:
+  - shared/defaults.md
 permissions:
   copilot-requests: write
   contents: read
@@ -21,6 +27,7 @@ network:
   allowed: []
 tools:
   github:
+    mode: gh-proxy
     toolsets: [repos, issues]
 safe-outputs:
   add-labels:
@@ -48,8 +55,8 @@ Read the issue (title, body, comments) and choose exactly one label.
 
 1. Add the label `bug` or `wayfinder`.
 2. Post one comment: the label, the reason in two or three sentences, and the next step:
-   - bug: "Sven adds `agent-fix` to hand it to the builder."
-   - wayfinder: "Sven adds `to-spec` (or makes it a `wayfinder:map` with decision sub-issues) to start the chain."
+   - bug: "A maintainer adds `agent-fix` to hand it to the builder."
+   - wayfinder: "A maintainer adds `to-spec` (or makes it a `wayfinder:map` with decision sub-issues) to start the chain."
 3. For a bug without clear reproduction steps, ask for them in the same comment (steps, expected, actual).
 
-Never assign the issue, never add `agent-fix`, `to-spec` or `wayfinder:map`, and change no code. Nothing starts without Sven's label.
+Never assign the issue, never add `agent-fix`, `to-spec` or `wayfinder:map`, and change no code. Nothing starts without a maintainer's label.

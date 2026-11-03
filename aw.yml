@@ -9,6 +9,7 @@ includes:
   - workflows/issue-triage.md
   - workflows/retro.md
   - workflows/reviewer.md
+  - workflows/token-audit.md
   - workflows/wf-delivery.md
   - workflows/wf-plan.md
   - workflows/wf-spec.md

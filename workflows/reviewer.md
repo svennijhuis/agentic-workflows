@@ -1,5 +1,5 @@
 ---
-description: Review one builder PR on three axes (standards, spec, deslop), each in a fresh sub-agent. Clean gives a COMMENT for Sven, findings in round 1 or 2 send it back to the builder, findings in round 3 set needs-help. Never merges.
+description: Review one builder PR on three axes (standards, spec, deslop), each in a fresh sub-agent. Every review is a COMMENT. Clean says ready to merge, findings in round 1 or 2 send it back to the builder, findings in round 3 set needs-help. Never merges.
 on:
   workflow_dispatch:
     inputs:
@@ -19,10 +19,10 @@ on:
 # Hard loop cap: review rounds 1 to 3 only, so the builder gets at most two send-backs.
 if: >-
   github.event.inputs.round == '1' || github.event.inputs.round == '2' || github.event.inputs.round == '3'
-max-ai-credits: 50
-max-daily-ai-credits: 200
-max-turns: 40
-timeout-minutes: 20
+max-ai-credits: 600
+max-daily-ai-credits: 4000
+max-turns: 120
+timeout-minutes: 30
 concurrency:
   group: reviewer-${{ github.event.inputs.issue_number }}${{ github.event.inputs.pr_number }}
   job-discriminator: ${{ github.run_id }}
@@ -41,6 +41,7 @@ permissions:
   pull-requests: read
 tools:
   github:
+    mode: gh-proxy
     toolsets: [repos, issues, pull_requests]
   bash: ["git:*", "cat", "ls", "grep", "head", "tail", "wc", "find"]
 safe-outputs:
@@ -49,8 +50,9 @@ safe-outputs:
     max: 20
   submit-pull-request-review:
     target: "*"
-    allowed-events: [COMMENT, REQUEST_CHANGES]
-    supersede-older-reviews: true
+    # COMMENT only: builder PRs and reviews share the github-actions[bot] identity, and GitHub
+    # rejects REQUEST_CHANGES on your own PR. Findings are marked in the body instead.
+    allowed-events: [COMMENT]
     max: 1
   add-labels:
     allowed: [needs-help]
@@ -92,11 +94,13 @@ A finding counts when it is concrete and on a changed line: a hard standards bre
 
 ## 3. Outcome
 
-Read earlier reviews on this PR from this workflow to see what was asked before. The round is the larger of the input and the number of this workflow's earlier `REQUEST_CHANGES` reviews plus 1, so a wrong input cannot reset the count.
+Every review is a `COMMENT` review. Its first line is the marker the builder and `wf-delivery` read, so write it exactly.
 
-1. **Clean** (no findings): submit a `COMMENT` review whose body starts with `Reviewer: klaar voor Sven.`, then the head SHA, the round, and one line per axis. No inline comments.
-2. **Findings in round 1 or 2**: one inline review comment per finding on its line, naming the axis and the concrete fix (max 20). Submit `REQUEST_CHANGES` with a short list per axis. Then emit `dispatch_workflow` for `builder` with inputs `pr_number` = the PR and `round` = this round.
-3. **Findings in round 3**: add label `needs-help` to the PR and post one PR comment with: the open points per axis, per round what the builder tried (from its round comments and pushes), and what is needed from Sven to finish. Submit no review and start nothing.
+Read earlier reviews on this PR from this workflow to see what was asked before. The round is the larger of the input and the number of this workflow's earlier reviews whose body starts with `Reviewer: changes needed` plus 1, so a wrong input cannot reset the count.
+
+1. **Clean** (no findings): submit a `COMMENT` review whose body starts with `Reviewer: ready to merge.`, then the head SHA, the round, and one line per axis. No inline comments.
+2. **Findings in round 1 or 2**: one inline review comment per finding on its line, naming the axis and the concrete fix (max 20). Submit a `COMMENT` review whose body starts with `Reviewer: changes needed, round <round>.`, then the head SHA and a short list per axis. Then emit `dispatch_workflow` for `builder` with inputs `pr_number` = the PR and `round` = this round.
+3. **Findings in round 3**: add label `needs-help` to the PR and post one PR comment with: the open points per axis, per round what the builder tried (from its round comments and pushes), and what is needed from a maintainer to finish. Submit no review and start nothing.
 
 Never approve, never merge, never push.
 

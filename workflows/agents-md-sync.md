@@ -1,10 +1,16 @@
 ---
-description: Write AGENTS.md when it is missing, or update it from the commits on main since the last sync marker. One PR with only AGENTS.md, Sven merges.
+description: Write AGENTS.md when it is missing, or update it from the commits on main since the last sync marker. One PR with only AGENTS.md, a maintainer merges.
 on:
   workflow_dispatch:
 concurrency:
   group: agents-md-sync
   job-discriminator: ${{ github.run_id }}
+max-ai-credits: 300
+max-daily-ai-credits: 900
+max-turns: 80
+timeout-minutes: 20
+imports:
+  - shared/defaults.md
 permissions:
   copilot-requests: write
   contents: read
@@ -13,6 +19,7 @@ network:
   allowed: []
 tools:
   github:
+    mode: gh-proxy
     toolsets: [repos]
 safe-outputs:
   create-pull-request:
