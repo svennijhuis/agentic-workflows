@@ -53,26 +53,20 @@ tools:
   edit:
   bash: [":*"]
 safe-outputs:
-  # PRs and pushes made with GITHUB_TOKEN start no CI. An org GitHub App pushes one extra empty
-  # commit so the repo's pull_request checks run. Missing app keys: falls back to GITHUB_TOKEN, no CI.
-  # No app: set both github-token-for-extra-empty-commit lines to ${{ secrets.GH_AW_CI_TRIGGER_TOKEN }}
-  # (docs/install.md, "Builder CI without an app").
-  github-app:
-    client-id: ${{ vars.APP_ID }}
-    private-key: ${{ secrets.APP_PRIVATE_KEY }}
-    ignore-if-missing: true
+  # PRs and pushes made with GITHUB_TOKEN start no CI. gh-aw pushes one extra empty commit with the
+  # magic secret GH_AW_CI_TRIGGER_TOKEN (a PAT) when it is set, so the repo's pull_request checks run.
+  # Secret not set: no CI. Next improvement: an org GitHub App (docs/install.md, "Next improvement: GitHub App").
+  # https://github.github.io/gh-aw/reference/triggering-ci
   create-pull-request:
     title-prefix: "[builder] "
     labels: [builder]
     draft: false
     allowed-branches: ["builder/*"]
     auto-close-issue: false
-    github-token-for-extra-empty-commit: app
     max: 1
   push-to-pull-request-branch:
     target: "*"
     required-labels: [builder]
-    github-token-for-extra-empty-commit: app
     max: 1
   add-comment:
     target: "*"

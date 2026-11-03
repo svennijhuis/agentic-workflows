@@ -128,16 +128,52 @@ Workflow sets (pick what you need):
 | Name | Needed by | Required | Where it lives |
 | --- | --- | --- | --- |
 | `GITHUB_TOKEN` | every workflow | yes, automatic | Provided by Actions. Nothing to create |
-| `APP_ID` (variable), `APP_PRIVATE_KEY` (secret) | `issue-builder` | recommended: without it builder PRs start no CI | Repo or org Actions variable and secret |
-| `GH_AW_CI_TRIGGER_TOKEN` | `issue-builder` | only instead of the app, see [Builder CI without an app](#builder-ci-without-an-app) | Repo Actions secret |
+| `GH_AW_CI_TRIGGER_TOKEN` | `issue-builder` | recommended: without it builder PRs start no CI | Repo Actions secret. See [Builder CI](#builder-ci-personal-token) |
 | `AW_CORE_ISSUES_TOKEN` | `retro` only | only if you install `retro` | Repo or org Actions secret |
 | `NUGET_FEED_TOKEN` | `issue-builder` in C# repos | only with a private NuGet feed | Repo or org Actions secret |
 | `NUGET_FEED_URL`, `NUGET_FEED_USER` | `issue-builder` in C# repos | only with a private NuGet feed | Repo or org Actions variables (not secret) |
 | `COPILOT_GITHUB_TOKEN` | every workflow, option B only | only with option B | Repo Actions secret. Ignored with option A, see [Copilot auth](#copilot-auth-pick-one-option) |
 
-### GitHub App (builder PRs run CI)
+| `APP_ID` (variable), `APP_PRIVATE_KEY` (secret) | `issue-builder` | no: only for the [next improvement](#next-improvement-github-app) | Repo or org Actions variable and secret |
 
-Every write runs on the Actions `GITHUB_TOKEN`, and GitHub starts no workflow from an event made with that token. So a builder PR gets no `pull_request` run of the repo's own CI: required status checks stay on *Expected — waiting for status* and the PR cannot be merged without an admin bypass. `issue-builder` therefore takes an org GitHub App, as gh-aw recommends ([Triggering CI](https://github.github.com/gh-aw/reference/triggering-ci/)): its safe outputs mint a short-lived app token, open the PR and push as the app, and push one extra empty commit so CI starts. No app configured: it falls back to `GITHUB_TOKEN` and works as before, without CI. No org owner for an app: see [Builder CI without an app](#builder-ci-without-an-app).
+### Builder CI: personal token
+
+Every write runs on the Actions `GITHUB_TOKEN`, and GitHub starts no workflow from an event made with that token. So a builder PR gets no `pull_request` run of the repo's own CI: required status checks stay on *Expected — waiting for status* and the PR cannot be merged without an admin bypass. gh-aw fixes this by pushing one extra empty commit with a token whose events do start workflows. See [Triggering CI](https://github.github.io/gh-aw/reference/triggering-ci) in the gh-aw docs.
+
+`issue-builder` uses the gh-aw magic secret `GH_AW_CI_TRIGGER_TOKEN` for that commit. It needs no frontmatter: set the secret and CI runs. Secret not set: the builder works as before, without CI. The PR itself is still opened by `github-actions[bot]`. No GitHub App and no **Administration** permission needed.
+
+1. Create a fine-grained token: your avatar top right → **Settings** → **Developer settings** → **Personal access tokens** → **Fine-grained tokens** → **Generate new token**. Direct link: <https://github.com/settings/personal-access-tokens/new>.
+   - **Token name**: for example `aw-ci-trigger-<target-repo>`.
+   - **Resource owner**: the org that owns the target repo.
+   - **Expiration**: set one and note the date. After it expires builder PRs start no CI again.
+   - **Repository access**: **Only select repositories** → the target repo.
+   - **Permissions** → **Repository permissions** → **Contents**: **Read and write**. Leave the rest. **Metadata: Read** is added automatically.
+   - **Generate token**, copy the `github_pat_...` value.
+2. Org requires approval for fine-grained tokens: the token stays *pending* until an org owner approves it at `https://github.com/organizations/<org>/settings/personal-access-tokens/pending_requests`. That is one click for the owner.
+3. Store it in the target repo. `gh` asks for the value:
+
+   ```bash
+   gh secret set GH_AW_CI_TRIGGER_TOKEN --repo <org>/<target-repo>
+   ```
+
+4. Nothing to change in `issue-builder.md`. Run `gh aw compile`. If it stops on a new secret, check that `GH_AW_CI_TRIGGER_TOKEN` is only used for the extra empty commit in the `.lock.yml`, then `gh aw compile --approve`. Commit.
+
+Check it: on a builder PR the **Checks** tab shows your CI, and in the repo **Actions** tab the CI run for the last (empty) commit has the token owner as actor, not `github-actions[bot]`. Not verified against a live run here.
+
+What it does not change: the PR, comments and dispatches stay on `github-actions[bot]`, so the builder, reviewer and `wf-delivery` treat them as before. The empty commit starts no agentic workflow (none listens to `push` or `pull_request` `opened`/`synchronize`), only the repo's own CI. `wf-delivery` accepts a reviewer review on the commit before the empty commit as a review of the head.
+
+The empty commit carries the token owner's name, and CI stops when that account leaves or the token expires. Use a service account when the org has one. Rotate by creating a new token and running the same `gh secret set` again.
+
+#### No token: reopen by hand
+
+Without the secret, a maintainer can start CI on a builder PR by clicking **Close pull request** at the bottom of the PR and then **Reopen pull request**. A reopen by a person fires `pull_request` (`reopened`), so CI starts.
+
+- Works only when the repo's CI listens to the default `pull_request` events (`opened`, `synchronize`, `reopened`). A CI with `types: [opened]` only does not start.
+- Each new builder push (fix round) needs another close and reopen.
+
+### Next improvement: GitHub App
+
+The personal token works but hangs on one account. The next step is an org GitHub App, as gh-aw recommends in [Triggering CI](https://github.github.io/gh-aw/reference/triggering-ci): it does not depend on a person, its tokens live minutes, and the builder's PR, pushes, comments and dispatches all run as the app. It needs an org owner once. Not part of the default setup yet.
 
 Create the app once per org (org owner):
 
@@ -164,55 +200,28 @@ gh secret set APP_PRIVATE_KEY --repo <org>/<target-repo> < path/to/key.pem
 
 Then delete the local `.pem`. Rotate by generating a new key on the app page, `gh secret set` again, and deleting the old key there.
 
-`gh aw compile` stops on `issue-builder` with *New restricted secret(s): APP_PRIVATE_KEY*. Check it is only used by the `Generate GitHub App token` steps in the `.lock.yml`, then `gh aw compile --approve` and commit.
+Switch `issue-builder.md` to the app. Under `safe-outputs:` add the `github-app:` block, and add `github-token-for-extra-empty-commit: app` under both `create-pull-request` and `push-to-pull-request-branch`:
+
+```yaml
+safe-outputs:
+  github-app:
+    client-id: ${{ vars.APP_ID }}
+    private-key: ${{ secrets.APP_PRIVATE_KEY }}
+    ignore-if-missing: true
+  create-pull-request:
+    # ...existing fields
+    github-token-for-extra-empty-commit: app
+  push-to-pull-request-branch:
+    # ...existing fields
+    github-token-for-extra-empty-commit: app
+```
+
+`gh aw compile` stops with *New restricted secret(s): APP_PRIVATE_KEY*. Check it is only used by the `Generate GitHub App token` steps in the `.lock.yml`, then `gh aw compile --approve` and commit. Delete the `GH_AW_CI_TRIGGER_TOKEN` secret and its token afterwards. Once tested, this belongs in the library's `issue-builder.md` as the default.
 
 What changes:
 
 - The builder's PR, pushes, comments (`Builder question:`) and dispatches show the app as author instead of `github-actions[bot]`. The other workflows treat both as bot accounts.
 - Events made by the app do start workflows. That is the point for CI; `wf-delivery` ignores bot comments, so no loop starts.
-- Check it: on a builder PR the **Checks** tab shows your CI. In the repo **Actions** tab the CI run for the last (empty) commit has the app as actor, not `github-actions[bot]`. Not verified against a live run here.
-
-### Builder CI without an app
-
-The app is the team option: it does not depend on one person and needs no per-PR work. When no org owner can create it, pick one of these. Neither needs a GitHub App or the **Administration** permission.
-
-#### Option 1: personal token (`GH_AW_CI_TRIGGER_TOKEN`)
-
-gh-aw pushes the extra empty commit with a personal token instead of the app. Events made with a personal token do start workflows, so CI runs. The PR itself is still opened by `github-actions[bot]`.
-
-1. Create a fine-grained token: your avatar top right → **Settings** → **Developer settings** → **Personal access tokens** → **Fine-grained tokens** → **Generate new token**. Direct link: <https://github.com/settings/personal-access-tokens/new>.
-   - **Token name**: for example `aw-ci-trigger-<target-repo>`.
-   - **Resource owner**: the org that owns the target repo.
-   - **Expiration**: set one and note the date. After it expires builder PRs start no CI again.
-   - **Repository access**: **Only select repositories** → the target repo.
-   - **Permissions** → **Repository permissions** → **Contents**: **Read and write**. Leave the rest. **Metadata: Read** is added automatically.
-   - **Generate token**, copy the `github_pat_...` value.
-2. Org requires approval for fine-grained tokens: the token stays *pending* until an org owner approves it at `https://github.com/organizations/<org>/settings/personal-access-tokens/pending_requests`. That is one click for the owner, not an app setup.
-3. Store it in the target repo. `gh` asks for the value:
-
-   ```bash
-   gh secret set GH_AW_CI_TRIGGER_TOKEN --repo <org>/<target-repo>
-   ```
-
-4. In your copy of `issue-builder.md`, under `safe-outputs`, change both lines `github-token-for-extra-empty-commit: app` (under `create-pull-request` and `push-to-pull-request-branch`) to:
-
-   ```yaml
-   github-token-for-extra-empty-commit: ${{ secrets.GH_AW_CI_TRIGGER_TOKEN }}
-   ```
-
-   Leave the `github-app:` block: with `APP_ID` unset it is skipped (`ignore-if-missing: true`).
-5. `gh aw compile`. It stops on the new secret: check that `GH_AW_CI_TRIGGER_TOKEN` is only used for the extra empty commit in the `.lock.yml`, then `gh aw compile --approve` and commit. `gh aw update` brings `app` back: change the two lines again after each update.
-
-Check it: on a builder PR the **Checks** tab shows your CI, and the CI run for the last (empty) commit has your account as actor.
-
-The empty commit carries the token owner's name, and CI stops when that account leaves or the token expires. Use a service account when the org has one.
-
-#### Option 2: nothing to set up, reopen by hand
-
-Leave the builder on `GITHUB_TOKEN`. When a builder PR needs CI, a maintainer clicks **Close pull request** at the bottom of the PR and then **Reopen pull request**. A reopen by a person fires `pull_request` (`reopened`), so CI starts.
-
-- Works only when the repo's CI listens to the default `pull_request` events (`opened`, `synchronize`, `reopened`). A CI with `types: [opened]` only does not start.
-- Each new builder push (fix round) needs another close and reopen.
 
 ### `AW_CORE_ISSUES_TOKEN` (only for `retro`)
 
@@ -339,8 +348,8 @@ A maintainer always merges. Nothing here merges or approves.
 | Run fails at the Copilot step with a billing or policy error (option A) | Org policy *Copilot CLI* or *Allow use of Copilot CLI billed to the organization* is off, or the org has no Copilot plan. Or switch to option B |
 | Run fails at the Copilot step with an auth error (option B) | `COPILOT_GITHUB_TOKEN` missing, expired, not fine-grained, or lacks **Copilot Requests**. Or `copilot-requests: write` is still in the workflow, so the token is ignored |
 | Builder finishes but no PR | *Allow GitHub Actions to create and approve pull requests* is off |
-| Builder PR shows no CI checks | No builder app: `APP_ID` or `APP_PRIVATE_KEY` unset, so it fell back to `GITHUB_TOKEN`. Or the app is not installed on this repo. With option 1: `GH_AW_CI_TRIGGER_TOKEN` missing, expired, still *pending* approval, or the two `github-token-for-extra-empty-commit` lines still say `app` |
-| Builder run fails at *Generate GitHub App token* | Wrong Client ID or key, or the app lacks one of the permissions in [GitHub App](#github-app-builder-prs-run-ci) |
+| Builder PR shows no CI checks | `GH_AW_CI_TRIGGER_TOKEN` missing, expired, still *pending* org approval, or without **Contents: Read and write** on this repo. With the app: `APP_ID` or `APP_PRIVATE_KEY` unset, or the app is not installed on this repo |
+| Builder run fails at *Generate GitHub App token* (app only) | Wrong Client ID or key, or the app lacks one of the permissions in [Next improvement: GitHub App](#next-improvement-github-app) |
 | A label set by one workflow does not start the next | Expected: events made with `GITHUB_TOKEN` start nothing. The flow hands off by `workflow_dispatch` instead |
 | `retro` fails on `create-issue` | `AW_CORE_ISSUES_TOKEN` missing, expired, or lacks Issues write on the target repo |
 | `gh aw compile` complains about `dispatch-workflow` | Dispatch targets are not all in `.github/workflows/`. Install both `issue-builder` and `pr-reviewer` |

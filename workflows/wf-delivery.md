@@ -150,8 +150,9 @@ closes the ticket and references the parent map (`Parent: #<map>`).
 - It has the label `needs-help`: wait via `noop` naming the pull request. A
   maintainer takes over.
 - Its latest review from the reviewer workflow starts with
-  `Reviewer: ready to merge.` and its `commit_id` equals the current head SHA:
-  the ticket is ready. Post one deduplicated comment on the parent map that the
+  `Reviewer: ready to merge.` and its `commit_id` equals the current head SHA,
+  or every commit after that `commit_id` is an empty commit (no changed files;
+  gh-aw pushes one to start CI): the ticket is ready. Post one deduplicated comment on the parent map that the
   pull request waits for a maintainer's merge, then stop.
 - Otherwise the builder and reviewer are still working on it: wait via `noop`.
 
