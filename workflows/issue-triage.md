@@ -10,6 +10,9 @@ on:
         description: Issue number to triage
         required: true
         type: string
+concurrency:
+  group: issue-triage-${{ github.event.issue.number || github.event.inputs.issue_number }}
+  job-discriminator: ${{ github.run_id }}
 permissions:
   copilot-requests: write
   contents: read
@@ -37,7 +40,7 @@ Read the issue (title, body, comments) and choose exactly one label.
 
 ## Rules
 
-- **bug**: something that already worked or is described is broken now. It can be reproduced, fits in one PR, and needs no design. Goes to `issue-fix`.
+- **bug**: something that already worked or is described is broken now. It can be reproduced, fits in one PR, and needs no design. Goes to `bug-fix`.
 - **wayfinder**: something new, or there are choices to make, or it will be more than one PR. Goes to the wayfinder chain (map, spec, plan, delivery).
 - **In doubt: wayfinder.** Thinking too much is cheaper than a builder PR going the wrong way.
 

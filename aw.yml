@@ -1,5 +1,15 @@
 manifest-version: "1"
 name: Agentic Workflows
+min-version: v0.93.4
 description: Catalog of installable GitHub Agentic Workflows and shared fragments (owner svennijhuis).
 includes:
-  - workflows/pr-review.md
+  - workflows/agents-md-sync.md
+  - workflows/bug-fix.md
+  - workflows/builder.md
+  - workflows/issue-triage.md
+  - workflows/retro.md
+  - workflows/reviewer.md
+  - workflows/wf-delivery.md
+  - workflows/wf-plan.md
+  - workflows/wf-spec.md
+  - workflows/wf-to-spec.md

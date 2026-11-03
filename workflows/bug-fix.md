@@ -10,6 +10,9 @@ on:
         description: Issue number to hand to the builder
         required: true
         type: string
+concurrency:
+  group: bug-fix-${{ github.event.issue.number || github.event.inputs.issue_number }}
+  job-discriminator: ${{ github.run_id }}
 # gh aw add follows dispatch-workflow one level deep; builder's reviewer and its skills come through resources.
 resources:
   - reviewer.md
@@ -36,7 +39,7 @@ safe-outputs:
 
 # Issue Fix
 
-Issue: `${{ github.event.issue.number || github.event.inputs.issue_number }}` in `${{ github.repository }}`. Flow: [issue-fix README](README.md#issue-fix).
+Issue: `${{ github.event.issue.number || github.event.inputs.issue_number }}` in `${{ github.repository }}`. Flow: [bug-fix README](README.md#bug-fix).
 
 This workflow writes no code. The builder workflow does the implementation.
 

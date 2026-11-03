@@ -16,13 +16,12 @@ Each file **must** have an `on:` trigger. Kebab-case stem becomes the `gh aw add
 | Workflow | Purpose |
 | --- | --- |
 | [issue-triage.md](issue-triage.md) | Label `triage`: sets `bug` or `wayfinder` with one reason comment |
-| [issue-fix.md](issue-fix.md) | Label `agent-fix`: blocker check, then start the builder |
+| [bug-fix.md](bug-fix.md) | Label `agent-fix`: blocker check, then start the builder |
 | [builder.md](builder.md) | Build an issue into a PR on `builder/*`, or fix a PR in a review round. Starts the reviewer |
-| [reviewer.md](reviewer.md) | Review a builder PR on three axes. Clean, send back (max 2), or `needs-help` |
+| [reviewer.md](reviewer.md) | Part of the build loop: reviews a builder PR on three axes. Clean, send back (max 2), or `needs-help`. Started by the builder, not by hand |
 | [retro.md](retro.md) | After a builder PR is merged: read the run logs, open a core issue when the flow can do better |
 | [wf-to-spec.md](wf-to-spec.md), [wf-spec.md](wf-spec.md), [wf-plan.md](wf-plan.md), [wf-delivery.md](wf-delivery.md) | Wayfinder chain: map to spec, tickets, builder per ticket |
 | [agents-md-sync.md](agents-md-sync.md) | Write or update AGENTS.md from main commits |
-| [pr-review.md](pr-review.md) | Report-only PR review with the agentPacks squad skill. `workflow_dispatch` only |
 
 Shared fragments: [shared/](shared/). Validate in the layout of a target repo: `gh aw compile --dir workflows` fails on `dispatch-workflow`, because the compiler looks for dispatch targets in `.github/workflows/`. See the root [README](../README.md#validate).
 
@@ -34,7 +33,7 @@ flowchart TD
   TR -->|bug| B[label bug]
   TR -->|wayfinder<br/>in doubt: wayfinder| W[label wayfinder]
   W -->|Sven runs /wayfinder locally<br/>sets wayfinder:map + decisions| WM[wayfinder:map]
-  B -->|Sven adds agent-fix| IF[issue-fix<br/>blocker check]
+  B -->|Sven adds agent-fix| IF[bug-fix<br/>blocker check]
   WM -->|decisions closed| CH[wf-to-spec, wf-spec, wf-plan]
   CH --> DL[wf-delivery<br/>next unblocked ticket]
   IF --> BU[builder<br/>PR on builder/*, label builder]
@@ -54,7 +53,7 @@ Sven always merges. Nothing in this folder merges, approves, or assigns Copilot.
 
 Auth and secrets, names only:
 
-- Engine: built for an org. Every workflow (except `pr-review`) sets `copilot-requests: write`, so Copilot runs on the Actions `GITHUB_TOKEN` and is billed to the org. Needs org Copilot policy "Allow use of Copilot CLI billed to the organization". `COPILOT_GITHUB_TOKEN` is then ignored for inference and not needed.
+- Engine: built for an org. Every workflow sets `copilot-requests: write`, so Copilot runs on the Actions `GITHUB_TOKEN` and is billed to the org. Needs org Copilot policy "Allow use of Copilot CLI billed to the organization". `COPILOT_GITHUB_TOKEN` is then ignored for inference and not needed.
 - `AW_CORE_ISSUES_TOKEN`: only for `retro`, a fine-grained token with Issues read and write on `svennijhuis/agentic-workflows`.
 
 Labels: `triage`, `bug`, `wayfinder`, `agent-fix`, `blocked`, `wayfinder:map`, `to-spec`, `specced`, `to-tickets`, `planned`, `ready-for-agent`, plus `builder` (on every builder PR) and `needs-help` (set by the reviewer after round 3). Create `builder` and `needs-help` in the target repo once. There is no "ready for merge" label: a clean review is the comment `Reviewer: klaar voor Sven.` on the PR, and the PR already exists by then.
@@ -63,9 +62,9 @@ Labels: `triage`, `bug`, `wayfinder`, `agent-fix`, `blocked`, `wayfinder:map`, `
 
 [issue-triage.md](issue-triage.md) runs on the label `triage` (or manually with an issue number). It picks `bug` or `wayfinder`, sets that label and posts one comment with the reason. For a bug it asks for repro steps when they are missing. It starts nothing: no tokens spent until Sven adds the next label.
 
-## issue-fix
+## bug-fix
 
-[issue-fix.md](issue-fix.md) checks one issue for blockers and starts the builder.
+[bug-fix.md](bug-fix.md) checks one issue for blockers and starts the builder.
 
 ```mermaid
 flowchart LR
@@ -79,7 +78,7 @@ flowchart LR
 
 ## builder and reviewer
 
-[builder.md](builder.md) writes the code, [reviewer.md](reviewer.md) reviews it. Both start only through `workflow_dispatch`: issue-fix, wf-delivery or the other one starts them.
+[builder.md](builder.md) writes the code, [reviewer.md](reviewer.md) reviews it. Both start only through `workflow_dispatch`: bug-fix, wf-delivery or the other one starts them.
 
 ```mermaid
 flowchart LR
@@ -113,7 +112,7 @@ PRs opened with `GITHUB_TOKEN` do not trigger `pull_request` workflows, which is
 [retro.md](retro.md) runs when Sven merges a PR with label `builder` (or manually with a PR number).
 
 - Skills: `retro` and `writing-for-agents`.
-- Input: the run logs (`agentic-workflows` tools `logs` and `audit`, `actions: read`) of the whole flow for that PR: triage, issue-fix or the wf-* chain, every builder and reviewer round, plus the PR timeline.
+- Input: the run logs (`agentic-workflows` tools `logs` and `audit`, `actions: read`) of the whole flow for that PR: triage, bug-fix or the wf-* chain, every builder and reviewer round, plus the PR timeline.
 - Looks at navigation, automated checks, coding standards, tool use, missing information and AGENTS.md.
 - Output: no comment on the merged PR. When the core can do better, one issue in `svennijhuis/agentic-workflows` with per finding what went wrong, the run link, the part to fix and a proposal. Otherwise `noop`.
 
