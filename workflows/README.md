@@ -53,7 +53,7 @@ flowchart TD
 
 A maintainer always merges. Nothing in this folder merges, approves, or assigns Copilot.
 
-Auth and secrets, names only:
+Auth and secrets, names only (steps in [docs/install.md](../docs/install.md)):
 
 - Engine: built for an org. Every workflow sets `copilot-requests: write`, so Copilot runs on the Actions `GITHUB_TOKEN` and is billed to the org. Needs org Copilot policy "Allow use of Copilot CLI billed to the organization". `COPILOT_GITHUB_TOKEN` is then ignored for inference and not needed.
 - `AW_CORE_ISSUES_TOKEN`: only for `retro`, a fine-grained token with Issues read and write on `svennijhuis/agentic-workflows`.
@@ -138,7 +138,7 @@ flowchart LR
 Builder:
 
 - Skills: `implement`, `tdd`, `codebase-design`, `diagnosing-bugs`, `pr` (imported from [shared/skills/](shared/skills/)).
-- Standards: `AGENTS.md`, `.github/copilot-instructions.md`, and `.github/instructions/*.instructions.md` whose `applyTo` matches a changed file. Templates in [docs/examples](../docs/examples/).
+- Standards: `AGENTS.md`, `.github/copilot-instructions.md`, and `.github/instructions/*.instructions.md` whose `applyTo` matches a changed file.
 - Bug path (label `bug`): a command that goes red on the bug before any change, root cause per `diagnosing-bugs`, the failing test committed before the fix, red-then-green output in Evidence. With `security` too: fix at the trust boundary, no exploit detail in commits or PR text.
 - Mode A (issue number): smallest change, the repo's own tests and build, one non-draft PR on `builder/issue-<n>` with label `builder`. Body per the `pr` skill plus `Fixes #n`, and `Parent: #map` for wayfinder tickets. Asks one question on the issue (`Builder question:`) instead of guessing. wf-delivery restarts it after a human answer; for a bug, a maintainer re-adds `agent-fix`.
 - Mode B (PR number plus round): reads the latest `Reviewer: changes needed, round <n>.` review, pushes the fix to the same branch, posts a round comment.
