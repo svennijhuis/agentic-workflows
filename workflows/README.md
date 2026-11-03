@@ -32,6 +32,7 @@ flowchart TD
   CP --> PC[pr-check<br/>diff vs deslop<br/>review with @copilot]
   PC -->|findings| CP
   PC -->|clean| M[Sven merges]
+  AS[agents-md-sync<br/>workflow_dispatch] -->|PR: only AGENTS.md| M
 ```
 
 ## issue-fix
@@ -90,6 +91,28 @@ Tokens Sven sets as Actions secrets: `GH_AW_AGENT_TOKEN` (Copilot assignment and
 The gh-aw setup action is pinned in [.github/aw/actions-lock.json](../.github/aw/actions-lock.json): `github/gh-aw-actions/setup@v0.93.4` at commit `40fb427c047bb9f77324054adeb574e04c9481aa`. Compile uses that SHA, so every lock file gets the same setup action.
 
 To update: pick the new tag, get its commit with `gh api repos/github/gh-aw-actions/git/ref/tags/<tag>` (for an annotated tag, follow `.object.sha` with `gh api repos/github/gh-aw-actions/git/tags/<sha>`), put version and sha in the file, then recompile.
+
+## agents-md-sync
+
+[agents-md-sync.md](agents-md-sync.md) keeps `AGENTS.md` up to date. Start: manual (`workflow_dispatch`), no schedule.
+
+```mermaid
+flowchart LR
+  A[workflow_dispatch] --> B{AGENTS.md exists?}
+  B -->|no| C[write from repo:<br/>structure, build/test/lint,<br/>conventions, docs]
+  B -->|yes| D[commits on main since<br/>marker agents-md-sync: sha]
+  D -->|none| X[stop, no PR]
+  D -->|commits| E[update only lines<br/>that are wrong or new,<br/>keep handwritten text]
+  C --> F[set marker to main SHA]
+  E --> F
+  F --> G[one PR, only AGENTS.md<br/>table: commit to change]
+  G --> H[Sven merges]
+```
+
+- Marker: last line `<!-- agents-md-sync: <sha> -->`. No marker yet: the file counts as handwritten, the agent only adds what is missing.
+- The PR may only change `AGENTS.md` (`allowed-files`). `AGENTS.md` is a protected file in gh-aw, so the PR gets a caution block and a request-changes review: expected, Sven reviews and merges.
+- Nothing changed: no PR.
+- Not compiled: run `gh aw compile` before it can run.
 
 ## pr-check
 
