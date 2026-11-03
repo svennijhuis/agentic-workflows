@@ -55,6 +55,8 @@ tools:
 safe-outputs:
   # PRs and pushes made with GITHUB_TOKEN start no CI. An org GitHub App pushes one extra empty
   # commit so the repo's pull_request checks run. Missing app keys: falls back to GITHUB_TOKEN, no CI.
+  # No app: set both github-token-for-extra-empty-commit lines to ${{ secrets.GH_AW_CI_TRIGGER_TOKEN }}
+  # (docs/install.md, "Builder CI without an app").
   github-app:
     client-id: ${{ vars.APP_ID }}
     private-key: ${{ secrets.APP_PRIVATE_KEY }}
