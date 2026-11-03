@@ -82,6 +82,8 @@ All branches are fetched at checkout. The fixed point for the review is the merg
 
 ## 2. Axes, each in a fresh sub-agent
 
+This run is unattended: where `Skill: code-review` says to ask the user for the fixed point or the spec, use the PR base and the issue or ticket instead; with none, the `spec` agent reports "no spec available".
+
 Start the sub-agents below: always `standards`, `spec`, `deslop` and `blast-radius`, and `security` only when the security gate holds. Run them in parallel when the engine allows, otherwise one after another. Give each one only what it needs:
 
 - `standards`: the diff command, commit list, the standards files of the repo (`AGENTS.md`, `.github/copilot-instructions.md`, every `.github/instructions/*.instructions.md` whose `applyTo` matches a changed file, `CODING_STANDARDS.md`, `CONTRIBUTING.md` and any other file that says how code is written) and the smell baseline from `Skill: code-review` step 3, pasted in full.

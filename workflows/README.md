@@ -137,7 +137,7 @@ flowchart LR
 
 Builder:
 
-- Skills: `implement`, `tdd`, `diagnosing-bugs`, `pr` (imported from [shared/skills/](shared/skills/)).
+- Skills: `implement`, `tdd`, `codebase-design`, `diagnosing-bugs`, `pr` (imported from [shared/skills/](shared/skills/)).
 - Standards: `AGENTS.md`, `.github/copilot-instructions.md`, and `.github/instructions/*.instructions.md` whose `applyTo` matches a changed file. Templates in [docs/examples](../docs/examples/).
 - Bug path (label `bug`): a command that goes red on the bug before any change, root cause per `diagnosing-bugs`, the failing test committed before the fix, red-then-green output in Evidence. With `security` too: fix at the trust boundary, no exploit detail in commits or PR text.
 - Mode A (issue number): smallest change, the repo's own tests and build, one non-draft PR on `builder/issue-<n>` with label `builder`. Body per the `pr` skill plus `Fixes #n`, and `Parent: #map` for wayfinder tickets. Asks one question on the issue (`Builder question:`) instead of guessing. wf-delivery restarts it after a human answer; for a bug, a maintainer re-adds `agent-fix`.

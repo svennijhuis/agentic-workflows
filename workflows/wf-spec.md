@@ -94,7 +94,7 @@ needed to identify stable test seams. Apply the imported `to-spec` skill (sectio
 specification format, with this workflow-specific publishing override:
 
 - do not create a separate spec issue or add `ready-for-agent` to the parent;
-- do not interview the user;
+- do not interview the user, and do not ask to confirm the testing seams: pick them, record them;
 - publish the complete spec as one comment on the selected issue/map;
 - begin the comment with `<!-- wf-spec:v1 -->`;
 - include the chosen testing seams in `## Testing Decisions`; and
