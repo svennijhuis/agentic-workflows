@@ -15,6 +15,8 @@ flowchart LR
   R2 -->|maintainer merges| RUN2[runs pinned version]
 ```
 
+Everything runs in GitHub Actions. Nothing has to run on a laptop. `gh workflow run` only starts the Action; the Actions tab "Run workflow" button does the same.
+
 ## Add to one repo
 
 ```bash
@@ -30,8 +32,8 @@ Same for `security-review` or `code-quality`. The `source:` line in the added fi
 ## Roll out an update
 
 1. Change the workflow here, merge, tag a new version (see [CHANGELOG](../../CHANGELOG.md)).
-2. Run the orchestrator: `gh workflow run org-rollout-orchestrator.lock.yml -f workflow=pr-review -f ref=v1.1.0 -f repos=svennijhuis/repo-a,svennijhuis/repo-b`.
-3. Each target repo gets one `[agentic-workflows]` PR with the new pin. The maintainer reviews, runs `gh aw compile`, merges.
+2. Run the orchestrator (Actions tab, or `gh workflow run org-rollout-orchestrator.lock.yml -f workflow=pr-review -f ref=v1.1.0`). Leave `repos` empty to find every svennijhuis repo that has the workflow, or pass `-f repos=svennijhuis/repo-a,svennijhuis/repo-b`.
+3. Each target repo gets one `[agentic-workflows]` PR with the new pin and the compiled `.lock.yml` (the worker runs `gh aw compile` in Actions). The maintainer only reviews and merges.
 
 `only_existing` defaults to `true`: repos that do not have `.github/workflows/<workflow>.md` yet are skipped, so only repos that already use the workflow get an update PR. Pass `-f only_existing=false` to also install it in repos that do not have it.
 
@@ -62,3 +64,17 @@ Fine-grained PATs, scoped to the target repos only, stored as Actions secrets in
 | `COPILOT_GITHUB_TOKEN` | Copilot Requests: Read | every workflow (engine) |
 
 All triggers are `workflow_dispatch`. No schedules.
+
+## Option (not enabled): rollout on release
+
+To start the rollout automatically on a new tag, add a release trigger to `org-rollout-orchestrator.md` and recompile:
+
+```yaml
+on:
+  workflow_dispatch:
+    # inputs as today
+  release:
+    types: [published]
+```
+
+The orchestrator then uses the release tag as `ref` and an empty `repos` (all repos that have the workflow). This is off today; only `workflow_dispatch` is active.

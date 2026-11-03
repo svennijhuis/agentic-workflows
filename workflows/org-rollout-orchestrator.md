@@ -12,8 +12,9 @@ on:
         required: true
         type: string
       repos:
-        description: Comma separated owner/repo list (svennijhuis repos only)
-        required: true
+        description: Comma separated owner/repo list (svennijhuis only). Empty = find all svennijhuis repos that have the workflow
+        required: false
+        default: ""
         type: string
       only_existing:
         description: Only update repos that already have the workflow (no new installs)
@@ -36,9 +37,9 @@ safe-outputs:
 
 Flow: [docs/how-to/org-flow.md](../docs/how-to/org-flow.md).
 
-Roll `svennijhuis/agentic-workflows/${{ github.event.inputs.workflow }}@${{ github.event.inputs.ref }}` out to `${{ github.event.inputs.repos }}`.
+Roll `svennijhuis/agentic-workflows/${{ github.event.inputs.workflow }}@${{ github.event.inputs.ref }}` out to the target repos.
 
-1. Keep only repos owned by `svennijhuis`.
+1. Targets: `repos` is `${{ github.event.inputs.repos }}`. When it is empty, list all repos of the `svennijhuis` user (skip archived and forks) and keep those that have `.github/workflows/${{ github.event.inputs.workflow }}.md`. Keep only repos owned by `svennijhuis` in both cases. Never this control repo.
 2. For each repo read `.github/workflows/${{ github.event.inputs.workflow }}.md`. Skip repos already pinned to this ref. `only_existing` is `${{ github.event.inputs.only_existing }}`: when `true`, also skip repos without that file, so only repos that already have the workflow get an update PR. When `false`, repos without it get a new install PR.
 3. Dispatch the `org-rollout` worker with `target_repo`, `workflow` and `ref` for each remaining repo (max 5).
 4. Summarize: per repo new install, update from old ref, or skipped.

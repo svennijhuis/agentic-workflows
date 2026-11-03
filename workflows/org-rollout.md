@@ -24,7 +24,14 @@ checkout:
   current: true
 permissions:
   contents: read
+steps:
+  - name: Install gh-aw
+    run: gh extension install github/gh-aw
+    env:
+      GH_TOKEN: ${{ github.token }}
 tools:
+  bash: ["gh aw compile *", "git status", "git diff *", "cat *", "ls *"]
+  edit:
   github:
     github-token: ${{ secrets.GH_AW_READ_ORG_TOKEN }}
     toolsets: [repos]
@@ -44,4 +51,5 @@ Stop if the owner of `${{ github.event.inputs.target_repo }}` is not `svennijhui
 
 1. Fetch `workflows/${{ github.event.inputs.workflow }}.md` from `svennijhuis/agentic-workflows` at `${{ github.event.inputs.ref }}`.
 2. Write it to `.github/workflows/${{ github.event.inputs.workflow }}.md` in the target repo with `source: svennijhuis/agentic-workflows/workflows/${{ github.event.inputs.workflow }}.md@${{ github.event.inputs.ref }}` in the frontmatter, so `gh aw update` keeps working.
-3. Open one PR titled "${{ github.event.inputs.workflow }} @ ${{ github.event.inputs.ref }}". Body: old ref (or new install), new ref, link to the changelog, and the rollback line from docs/how-to/org-flow.md. Remind the maintainer to run `gh aw compile` and commit the `.lock.yml`.
+3. Run `gh aw compile ${{ github.event.inputs.workflow }}` in the target repo, so `.github/workflows/${{ github.event.inputs.workflow }}.lock.yml` is generated. Stop and report the error if compile fails; open no PR then.
+4. Open one PR titled "${{ github.event.inputs.workflow }} @ ${{ github.event.inputs.ref }}" with both the `.md` and the `.lock.yml`. Body: old ref (or new install), new ref, link to the changelog, and the rollback line from docs/how-to/org-flow.md. The maintainer only reviews and merges.
