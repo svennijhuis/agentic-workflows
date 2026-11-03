@@ -27,8 +27,12 @@ flowchart TD
   TR -->|wayfinder: new, choices,<br/>or more than one PR.<br/>In doubt: wayfinder| W[label wayfinder]
   B -->|Sven adds agent-fix| IF[issue-fix<br/>blocker check, assign Copilot]
   W -->|Sven adds to-spec<br/>or wayfinder:map| CH[wf chain<br/>wf-to-spec, wf-spec, wf-plan, wf-delivery]
-  IF --> M[Copilot PR, Sven merges]
-  CH --> M
+  IF --> CP[Copilot opens PR]
+  CH --> CP
+  CP --> PC[pr-check<br/>diff vs .github/skills<br/>review with @copilot]
+  PC -->|findings| CP
+  PC -->|clean| M[Sven merges]
+  SS[skills-sync<br/>workflow_dispatch] -->|PR: add or update<br/>.github/skills| M
 ```
 
 ## issue-fix
@@ -87,3 +91,44 @@ Tokens Sven sets as Actions secrets: `GH_AW_AGENT_TOKEN` (Copilot assignment and
 The gh-aw setup action is pinned in [.github/aw/actions-lock.json](../.github/aw/actions-lock.json): `github/gh-aw-actions/setup@v0.93.4` at commit `40fb427c047bb9f77324054adeb574e04c9481aa`. Compile uses that SHA, so every lock file gets the same setup action.
 
 To update: pick the new tag, get its commit with `gh api repos/github/gh-aw-actions/git/ref/tags/<tag>` (for an annotated tag, follow `.object.sha` with `gh api repos/github/gh-aw-actions/git/tags/<sha>`), put version and sha in the file, then recompile.
+
+## skills-sync
+
+[skills-sync.md](skills-sync.md) keeps `.github/skills/` in line with the list in [.github/skills-sources.json](../.github/skills-sources.json) (name, source `owner/repo`, path, pinned SHA). Start: manual (`workflow_dispatch`), no schedule.
+
+```mermaid
+flowchart LR
+  A[workflow_dispatch] --> B[read skills-sources.json]
+  B --> C{per skill}
+  C -->|folder missing| D[add from source main]
+  C -->|commits on path<br/>since pinned SHA| E[update, bump SHA]
+  C -->|no commits| F[skip]
+  D --> G[one PR: old SHA, new SHA,<br/>commit list]
+  E --> G
+  G --> H[Sven merges]
+```
+
+- Only commits on the source `main` that touch the skill path count.
+- The PR may only change `.github/skills/**` and `.github/skills-sources.json` (`allowed-files`). `.github/` is protected by default, so gh-aw adds a caution block and a request-changes review on the PR: that is expected, Sven reviews and merges.
+- Nothing changed: no PR.
+- To add a skill: add an entry to the JSON and run it. To add a schedule later: `schedule: weekly` under `on:`.
+- First entry: `deslop` from [cursor/plugins](https://github.com/cursor/plugins/tree/ae5650febf4320793844c12c4adaa937f417f8da/cursor-team-kit/skills/deslop) at `ae5650f`. That repo has no license file. Fine in your own repo, check it before using it for work.
+
+## pr-check
+
+[pr-check.md](pr-check.md) runs when a PR is opened or marked ready, only for PRs by Copilot (`if:` on the author), so other PRs cost nothing. Also manual with a PR number.
+
+```mermaid
+flowchart LR
+  A[Copilot PR opened<br/>or ready_for_review] --> B[read .github/skills/*/SKILL.md]
+  B --> C[check diff lines]
+  C -->|findings| D[inline comments +<br/>REQUEST_CHANGES with @copilot]
+  D --> E[Copilot fixes, pushes]
+  C -->|clean| F[COMMENT: skills check clean]
+  F --> G[Sven merges]
+```
+
+- Never merges, pushes or approves.
+- Cost: one agent run per Copilot PR.
+- Copilot also reads `.github/skills/` itself through [.github/copilot-instructions.md](../.github/copilot-instructions.md), so most findings are fixed before pr-check runs.
+- Not compiled: run `gh aw compile` before it can run.
