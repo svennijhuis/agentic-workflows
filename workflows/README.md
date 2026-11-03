@@ -55,9 +55,9 @@ A maintainer always merges. Nothing in this folder merges, approves, or assigns 
 
 Auth and secrets, names only (steps in [docs/install.md](../docs/install.md)):
 
-- Engine: built for an org. Every workflow sets `copilot-requests: write`, so Copilot runs on the Actions `GITHUB_TOKEN` and is billed to the org. Needs org Copilot policy "Allow use of Copilot CLI billed to the organization". `COPILOT_GITHUB_TOKEN` is then ignored for inference and not needed.
+- Engine, two options ([install guide](../docs/install.md#copilot-auth-pick-one-option)). A (default): every workflow sets `copilot-requests: write`, so Copilot runs on the Actions `GITHUB_TOKEN` and is billed to the org. Needs org Copilot policies "Copilot CLI" and "Allow use of Copilot CLI billed to the organization". `COPILOT_GITHUB_TOKEN` is then ignored. B: a fine-grained PAT with Copilot Requests as `COPILOT_GITHUB_TOKEN` secret, billed to its owner; remove `copilot-requests: write` from your copies and compile.
 - `NUGET_FEED_TOKEN` (secret) and `NUGET_FEED_URL`, `NUGET_FEED_USER` (variables): only for C# repos with a private NuGet feed, used by `shared/nuget-auth.md`, which you add to `issue-builder` in C# repos.
-- `APP_ID` (variable) and `APP_PRIVATE_KEY` (secret): org GitHub App for `issue-builder`, so builder PRs run the repo's CI. Optional: without them the builder falls back to `GITHUB_TOKEN` and CI does not start.
+- `CI_TRIGGER_TOKEN` (secret, placeholder name): fine-grained PAT with Contents read and write, used by gh-aw for one extra empty commit on PRs from `issue-builder` and `agents-md-sync` so the repo's CI runs ([Triggering CI](https://github.github.io/gh-aw/reference/triggering-ci)). Not set: no CI on builder PRs. Next improvement: an org GitHub App (`APP_ID`, `APP_PRIVATE_KEY`), see [install guide](../docs/install.md#next-improvement-github-app).
 - `AW_CORE_ISSUES_TOKEN`: only for `retro`, a fine-grained token with Issues read and write on `svennijhuis/agentic-workflows`.
 
 Labels: `triage`, `bug`, `wayfinder`, `security`, `needs-info`, `duplicate`, `agent-fix`, `blocked`, `wayfinder:map`, `to-spec`, `specced`, `to-tickets`, `planned`, `to-plan`, `ready-for-agent`, plus `builder` (on every builder PR) `needs-help` (set by the reviewer after round 3) and `ready-to-merge` (set by the reviewer on a clean review, next to the comment review `Reviewer: ready to merge.`). Create `builder`, `needs-help`, `ready-to-merge`, `security`, `needs-info` and `duplicate` in the target repo once.
@@ -68,7 +68,7 @@ Every write by a workflow uses the Actions `GITHUB_TOKEN`, and GitHub starts no 
 
 ### Markers
 
-Visible lines at the start of a comment or review body, written by `github-actions[bot]` (or the org's builder app, see [install guide](../docs/install.md#github-app-builder-prs-run-ci)), are the contract between the workflows. Not HTML comments: GitHub strips those from review bodies.
+Visible lines at the start of a comment or review body, written by `github-actions[bot]` (or the org's builder app once configured, see [install guide](../docs/install.md#next-improvement-github-app)), are the contract between the workflows. Not HTML comments: GitHub strips those from review bodies.
 
 | Marker | Written by | Read by |
 | --- | --- | --- |
@@ -155,7 +155,7 @@ Reviewer:
 - No endless loop: an `if:` on both workflows lets the builder start only for a new build or fix round 1 or 2, and the reviewer only for round 1 to 3. On top, both count the reviewer's earlier `Reviewer: changes needed` reviews instead of trusting the round input.
 - Every review is a `COMMENT` (`allowed-events: [COMMENT]`). Without the builder app the builder opens the PR as `github-actions[bot]` and the reviewer reviews as the same account; GitHub rejects `REQUEST_CHANGES` on your own PR. With the app it would work, but reviews still never block a merge in branch protection: a maintainer is the gate.
 
-PRs opened with `GITHUB_TOKEN` do not trigger `pull_request` workflows, which is why the builder starts the reviewer through dispatch. The repo's own CI does not start either, unless the org's builder app is configured: then the builder's safe outputs run as the app and push one extra empty commit, so CI runs ([install guide](../docs/install.md#github-app-builder-prs-run-ci)).
+PRs opened with `GITHUB_TOKEN` do not trigger `pull_request` workflows, which is why the builder starts the reviewer through dispatch. The repo's own CI does not start either, unless `CI_TRIGGER_TOKEN` is set: then gh-aw pushes one extra empty commit with that token, so CI runs ([install guide](../docs/install.md#builder-ci-personal-token), [Triggering CI](https://github.github.io/gh-aw/reference/triggering-ci)). The empty commit starts no agentic workflow: none listens to `push` or `pull_request` `opened`/`synchronize`.
 
 ## retro
 

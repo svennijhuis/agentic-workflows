@@ -22,6 +22,7 @@ tools:
     mode: gh-proxy
     toolsets: [repos]
 safe-outputs:
+  # Extra empty commit with the PAT in CI_TRIGGER_TOKEN so the repo's CI runs on this PR (see issue-builder.md).
   create-pull-request:
     title-prefix: "[agents-md-sync] "
     labels: [agents-md-sync]
@@ -29,6 +30,7 @@ safe-outputs:
     if-no-changes: ignore
     allowed-files:
       - "AGENTS.md"
+    github-token-for-extra-empty-commit: ${{ secrets.CI_TRIGGER_TOKEN }}  # placeholder secret name, see docs/install.md
     max: 1
 ---
 
