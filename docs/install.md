@@ -114,7 +114,7 @@ The flow uses labels as state. Create the ones that are not there yet. By hand: 
 ```bash
 for l in triage bug wayfinder security needs-info duplicate agent-fix blocked \
          wayfinder:map to-spec specced to-tickets planned ready-for-agent \
-         builder needs-help; do
+         builder needs-help ready-to-merge; do
   gh label create "$l" --repo <org>/<target-repo> 2>/dev/null || true
 done
 ```
