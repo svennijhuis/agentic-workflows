@@ -6,8 +6,8 @@ How to use this library in a GitHub org: what to switch on, which tokens and sec
 
 | Need | Why |
 | --- | --- |
-| Org owner (or admin on the target repo) | Org Copilot policy, org secrets, Actions settings |
-| GitHub Copilot on the org (Business or Enterprise) | Every workflow runs the `copilot` engine |
+| Org owner (or admin on the target repo) | Org Copilot policy (option A), org secrets, Actions settings |
+| GitHub Copilot on the org (Business or Enterprise), or a personal Copilot license | Every workflow runs the `copilot` engine. See [Copilot auth](#copilot-auth-pick-one-option) |
 | [`gh` CLI](https://cli.github.com/), logged in with `gh auth login` | `gh aw add`, `gh aw compile`, `gh secret`, `gh label` |
 | `gh-aw` extension, pinned to the version in [`aw.yml`](../aw.yml) | Installs and compiles workflows |
 
@@ -17,17 +17,54 @@ gh extension install github/gh-aw --pin v0.93.4
 
 ## 1. Org settings (once per org)
 
-### Copilot billed to the org
+### Copilot auth: pick one option
 
-The workflows set `copilot-requests: write`. Copilot then runs on the Actions `GITHUB_TOKEN` and is billed to the org. No personal token is needed for inference.
+Every workflow runs the `copilot` engine and needs a way to pay for inference. There are two options. Pick one per target repo.
+
+| | Option A: org billing (default) | Option B: personal token |
+| --- | --- | --- |
+| Who pays | The org's Copilot plan | The Copilot license of the account that owns the token |
+| What you set up | Org Copilot policy (org owner) | `COPILOT_GITHUB_TOKEN` repo secret (repo admin) |
+| Workflow change | None: the workflows ship with `copilot-requests: write` | Remove `copilot-requests: write` from your copies, then compile |
+| Use when | The org has Copilot Business or Enterprise and an org owner can switch the policy on | Option A is not possible: no org owner available, policy stays off, or the run fails at the Copilot step |
+
+#### Option A: Copilot billed to the org (default)
+
+The workflows set `copilot-requests: write`. Copilot then runs on the Actions `GITHUB_TOKEN` and is billed to the org. No personal token is needed for inference. This needs an org owner once.
 
 1. Open `https://github.com/<org>`, click **Settings** (top tab row of the org page).
 2. Left sidebar: **Copilot** → **Policies**. Direct link: `https://github.com/organizations/<org>/settings/copilot/policies`.
-3. Find **Allow use of Copilot CLI billed to the organization** and set it to **Enabled**.
+3. Set **Copilot CLI** to **Enabled**.
+4. Find **Allow use of Copilot CLI billed to the organization** and set it to **Enabled**.
 
 No Copilot entry in the sidebar: the org has no Copilot plan. Buy or enable one first under **Settings → Billing and plans**.
 
-`COPILOT_GITHUB_TOKEN` is ignored for inference. Do not create it.
+With `copilot-requests: write` set, `COPILOT_GITHUB_TOKEN` is ignored for inference. Do not create it for option A.
+
+Check it: the first run gets past the Copilot step. When the Actions token has no Copilot access through the org, the run fails at that step (often `403 Forbidden`). Then fix the policy, or switch to option B.
+
+#### Option B: personal token (`COPILOT_GITHUB_TOKEN`)
+
+Copilot runs on a fine-grained personal access token of one account and is billed to that account's Copilot license. Use it when org billing is not available. The account needs an active Copilot license.
+
+1. Create the token: your avatar top right → **Settings** → left sidebar bottom **Developer settings** → **Personal access tokens** → **Fine-grained tokens** → **Generate new token**. Direct link: <https://github.com/settings/personal-access-tokens/new>.
+   - **Token name**: for example `copilot-aw-<target-repo>`.
+   - **Resource owner**: your own user account, not the org.
+   - **Expiration**: set one and note the date. After it expires every workflow fails at the Copilot step.
+   - **Permissions** → **Account permissions** → **Copilot Requests**: **Read**. Leave the rest.
+   - **Generate token** and copy the `github_pat_...` value. GitHub shows it once. A classic or OAuth token (`ghp_`, `gho_`) does not work.
+2. Store it as a secret in the target repo. `gh` asks for the value:
+
+   ```bash
+   gh secret set COPILOT_GITHUB_TOKEN --repo <org>/<target-repo>
+   ```
+
+3. In your copy of every installed workflow under `.github/workflows/`, delete the line `copilot-requests: write` under `permissions:`. Leave the other permissions as they are. While that line is there, the token is ignored.
+4. `gh aw compile` and commit the `.md` and `.lock.yml` files.
+
+`gh aw update` brings `copilot-requests: write` back from the library. Delete it again after each update, before you compile.
+
+Rotate by creating a new token and running the same `gh secret set` again. Usage is billed to the token owner, so use an account that is meant for it, not a colleague's.
 
 ### Actions
 
@@ -88,7 +125,7 @@ Workflow sets (pick what you need):
 | `AW_CORE_ISSUES_TOKEN` | `retro` only | only if you install `retro` | Repo or org Actions secret |
 | `NUGET_FEED_TOKEN` | `issue-builder` in C# repos | only with a private NuGet feed | Repo or org Actions secret |
 | `NUGET_FEED_URL`, `NUGET_FEED_USER` | `issue-builder` in C# repos | only with a private NuGet feed | Repo or org Actions variables (not secret) |
-| `COPILOT_GITHUB_TOKEN` | nothing | no | Not used, see above |
+| `COPILOT_GITHUB_TOKEN` | every workflow, option B only | only with option B | Repo Actions secret. Ignored with option A, see [Copilot auth](#copilot-auth-pick-one-option) |
 
 ### GitHub App (builder PRs run CI)
 
@@ -249,7 +286,8 @@ A maintainer always merges. Nothing here merges or approves.
 
 | Symptom | Likely cause |
 | --- | --- |
-| Run fails at the Copilot step with a billing or policy error | Org policy *Allow use of Copilot CLI billed to the organization* is off, or the org has no Copilot plan |
+| Run fails at the Copilot step with a billing or policy error (option A) | Org policy *Copilot CLI* or *Allow use of Copilot CLI billed to the organization* is off, or the org has no Copilot plan. Or switch to option B |
+| Run fails at the Copilot step with an auth error (option B) | `COPILOT_GITHUB_TOKEN` missing, expired, not fine-grained, or lacks **Copilot Requests**. Or `copilot-requests: write` is still in the workflow, so the token is ignored |
 | Builder finishes but no PR | *Allow GitHub Actions to create and approve pull requests* is off |
 | Builder PR shows no CI checks | No builder app: `APP_ID` or `APP_PRIVATE_KEY` unset, so it fell back to `GITHUB_TOKEN`. Or the app is not installed on this repo |
 | Builder run fails at *Generate GitHub App token* | Wrong Client ID or key, or the app lacks one of the permissions in [GitHub App](#github-app-builder-prs-run-ci) |
@@ -264,4 +302,4 @@ gh aw update
 gh aw compile
 ```
 
-Commit the result. Read the release notes of the new tag first: caps, labels and secrets can change.
+Commit the result. Read the release notes of the new tag first: caps, labels and secrets can change. Option B: delete `copilot-requests: write` again before `gh aw compile`.

@@ -55,7 +55,7 @@ A maintainer always merges. Nothing in this folder merges, approves, or assigns 
 
 Auth and secrets, names only (steps in [docs/install.md](../docs/install.md)):
 
-- Engine: built for an org. Every workflow sets `copilot-requests: write`, so Copilot runs on the Actions `GITHUB_TOKEN` and is billed to the org. Needs org Copilot policy "Allow use of Copilot CLI billed to the organization". `COPILOT_GITHUB_TOKEN` is then ignored for inference and not needed.
+- Engine, two options ([install guide](../docs/install.md#copilot-auth-pick-one-option)). A (default): every workflow sets `copilot-requests: write`, so Copilot runs on the Actions `GITHUB_TOKEN` and is billed to the org. Needs org Copilot policies "Copilot CLI" and "Allow use of Copilot CLI billed to the organization". `COPILOT_GITHUB_TOKEN` is then ignored. B: a fine-grained PAT with Copilot Requests as `COPILOT_GITHUB_TOKEN` secret, billed to its owner; remove `copilot-requests: write` from your copies and compile.
 - `NUGET_FEED_TOKEN` (secret) and `NUGET_FEED_URL`, `NUGET_FEED_USER` (variables): only for C# repos with a private NuGet feed, used by `shared/nuget-auth.md`, which you add to `issue-builder` in C# repos.
 - `APP_ID` (variable) and `APP_PRIVATE_KEY` (secret): org GitHub App for `issue-builder`, so builder PRs run the repo's CI. Optional: without them the builder falls back to `GITHUB_TOKEN` and CI does not start.
 - `AW_CORE_ISSUES_TOKEN`: only for `retro`, a fine-grained token with Issues read and write on `svennijhuis/agentic-workflows`.
