@@ -21,7 +21,7 @@ tools:
     mode: gh-proxy
     toolsets: [default]
 imports:
-  - shared/skills/to-spec.md
+  - shared/skills/to-spec/SKILL.md
 safe-outputs:
   add-comment:
     target: "*"

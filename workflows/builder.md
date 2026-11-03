@@ -33,9 +33,9 @@ concurrency:
 imports:
   - shared/defaults.md
   - shared/security.md
-  - shared/skills/implement.md
-  - shared/skills/tdd.md
-  - shared/skills/pr.md
+  - shared/skills/implement/SKILL.md
+  - shared/skills/tdd/SKILL.md
+  - shared/skills/pr/SKILL.md
 checkout:
   fetch: ["*"]
   fetch-depth: 0

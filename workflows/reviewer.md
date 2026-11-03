@@ -29,8 +29,8 @@ concurrency:
 imports:
   - shared/defaults.md
   - shared/security.md
-  - shared/skills/code-review.md
-  - shared/skills/deslop.md
+  - shared/skills/code-review/SKILL.md
+  - shared/skills/deslop/SKILL.md
 checkout:
   fetch: ["*"]
   fetch-depth: 0

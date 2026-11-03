@@ -21,7 +21,7 @@ tools:
     mode: gh-proxy
     toolsets: [default]
 imports:
-  - shared/skills/to-tickets.md
+  - shared/skills/to-tickets/SKILL.md
 safe-outputs:
   create-issue:
     labels: [ready-for-agent]
