@@ -49,9 +49,9 @@ Manual only (`workflow_dispatch`), targets `svennijhuis` repos, copyable to an o
 | Workflow | Does |
 | --- | --- |
 | [security-review](workflows/security-review.md) | Report-only security scan as code scanning alerts |
-| [code-quality](.github/workflows/code-quality.md) | Side repo checks out a target repo, opens `[quality]` issues |
-| [dependabot-rollout-orchestrator](.github/workflows/dependabot-rollout-orchestrator.md) + [worker](.github/workflows/dependabot-rollout.md) | Dispatch per repo, worker opens a `dependabot.yml` PR |
-| [org-rollout-orchestrator](.github/workflows/org-rollout-orchestrator.md) + [worker](.github/workflows/org-rollout.md) | Roll a pinned central workflow out to target repos via PR |
+| [code-quality](workflows/code-quality.md) | Side repo checks out a target repo, opens `[quality]` issues |
+| [dependabot-rollout-orchestrator](workflows/dependabot-rollout-orchestrator.md) + [worker](workflows/dependabot-rollout.md) | Dispatch per repo, worker opens a `dependabot.yml` PR |
+| [org-rollout-orchestrator](workflows/org-rollout-orchestrator.md) + [worker](workflows/org-rollout.md) | Roll a pinned central workflow out to target repos via PR |
 
 Flow, add to one repo, update, rollback and the tokens to set: [docs/how-to/org-flow.md](docs/how-to/org-flow.md).
 

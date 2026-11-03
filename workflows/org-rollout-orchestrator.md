@@ -1,10 +1,10 @@
 ---
-description: Org rollout orchestrator. Rolls a central workflow (pr-review, security-review) at a fixed ref out to target repos by dispatching the worker per repo. Manual only.
+description: Org rollout orchestrator. Rolls a central workflow (pr-review, security-review, code-quality) at a fixed ref out to target repos by dispatching the worker per repo. Manual only.
 on:
   workflow_dispatch:
     inputs:
       workflow:
-        description: Workflow name in this repo (pr-review, security-review)
+        description: Workflow name in this repo (pr-review, security-review, code-quality)
         required: true
         type: string
       ref:
@@ -35,7 +35,7 @@ safe-outputs:
 
 # Org Rollout Orchestrator
 
-Flow: [docs/how-to/org-flow.md](../../docs/how-to/org-flow.md).
+Flow: [docs/how-to/org-flow.md](../docs/how-to/org-flow.md).
 
 Roll `svennijhuis/agentic-workflows/${{ github.event.inputs.workflow }}@${{ github.event.inputs.ref }}` out to the target repos.
 
