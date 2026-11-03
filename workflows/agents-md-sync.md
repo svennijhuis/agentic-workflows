@@ -2,6 +2,9 @@
 description: Write AGENTS.md when it is missing, or update it from the commits on main since the last sync marker. One PR with only AGENTS.md, Sven merges.
 on:
   workflow_dispatch:
+concurrency:
+  group: agents-md-sync
+  job-discriminator: ${{ github.run_id }}
 permissions:
   copilot-requests: write
   contents: read

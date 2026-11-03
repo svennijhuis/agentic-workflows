@@ -29,4 +29,4 @@ network:
 
 Consumers import `svennijhuis/agentic-workflows/workflows/shared/mcp/roslyn.md@v1` after URLs are real. Until then, leave this directory as documentation only.
 
-IDE stdio config does not belong here; that lives in product repos or agentPacks `mcp.json`.
+IDE stdio config does not belong here; that lives in product repos.
