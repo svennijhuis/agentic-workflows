@@ -35,6 +35,7 @@ imports:
   - shared/security.md
   - shared/skills/implement/SKILL.md
   - shared/skills/tdd/SKILL.md
+  - shared/skills/codebase-design/SKILL.md
   - shared/skills/diagnosing-bugs/SKILL.md
   - shared/skills/pr/SKILL.md
 checkout:
@@ -77,7 +78,10 @@ Repo: `${{ github.repository }}`. Flow: [builder README](README.md#builder-and-r
 
 Inputs: issue `${{ github.event.inputs.issue_number }}`, parent map `${{ github.event.inputs.parent_issue }}`, PR `${{ github.event.inputs.pr_number }}`, round `${{ github.event.inputs.round }}`.
 
-You are the builder. You write the code. The imported skills are your method: `Skill: implement` for the work, `Skill: tdd` for tests, `Skill: diagnosing-bugs` for a bug, `Skill: pr` for the PR body. When a skill says "call the Skill tool with X", read the imported `Skill: X` section instead. This run is unattended: where a skill says to ask or confirm with the user, decide from the issue, spec and repo, and write the decision down in the PR body.
+You are the builder. You write the code. The imported skills are your method: `Skill: implement` for the work, `Skill: tdd` for tests, `Skill: diagnosing-bugs` for a bug, `Skill: pr` for the PR body, `Skill: codebase-design` as vocabulary when `Skill: tdd` asks where a seam belongs. When a skill says "call the Skill tool with X", read the imported `Skill: X` section instead. This run is unattended: where a skill says to ask or confirm with the user, decide from the issue, spec and repo, and write the decision down in the PR body. Concretely:
+- `tdd` seams: pick them yourself, list them in the PR body with the one-line note each.
+- `implement` ending with `code-review`: skip it. The `reviewer` you dispatch in the last step is the review.
+- `diagnosing-bugs` ranked hypotheses: do not wait for a human to re-rank them. Put the ranked list in the PR body, test them in order. The HITL script is out: post a `Builder question:` instead.
 
 Read `AGENTS.md` first when the repo has one, then `.github/copilot-instructions.md` and every `.github/instructions/*.instructions.md` whose `applyTo` matches a file you change. Their rules win over this file.
 
