@@ -16,6 +16,21 @@ Block 1: catalog workflows are **`workflow_dispatch` only** until Sven enables m
 
 Shared fragments: [shared/](shared/). Authoring: [.github/instructions/aw.instructions.md](../.github/instructions/aw.instructions.md). Verify: `make verify`.
 
+## issue-triage
+
+[issue-triage.md](issue-triage.md) runs on the label `triage` (or manually with an issue number). It picks `bug` or `wayfinder`, sets that label and posts one comment with the reason. For a bug it asks for repro steps when they are missing. It assigns nothing: no Copilot tokens until Sven adds the next label.
+
+```mermaid
+flowchart TD
+  T[label triage<br/>or workflow_dispatch] --> TR[issue-triage<br/>label + reason comment]
+  TR -->|bug: broken, reproducible,<br/>one PR, no design| B[label bug]
+  TR -->|wayfinder: new, choices,<br/>or more than one PR.<br/>In doubt: wayfinder| W[label wayfinder]
+  B -->|Sven adds agent-fix| IF[issue-fix<br/>blocker check, assign Copilot]
+  W -->|Sven adds to-spec<br/>or wayfinder:map| CH[wayfinder chain<br/>to-spec, spec, plan, delivery]
+  IF --> M[Copilot PR, Sven merges]
+  CH --> M
+```
+
 ## issue-fix
 
 [issue-fix.md](issue-fix.md) hands one unblocked issue to the **Copilot cloud agent**, which does the implementation. Simple version of [wayfinder-delivery](https://github.com/pascalvanderheiden/turbo-agent-skills-cli/blob/main/.github/workflows/wayfinder-delivery.md).
@@ -41,7 +56,7 @@ flowchart LR
 
 ## wayfinder chain (copied)
 
-Four workflows copied as is from [pascalvanderheiden/turbo-agent-skills-cli](https://github.com/pascalvanderheiden/turbo-agent-skills-cli/tree/122b266d451eb8d06a8b96a0933c788c2fb0ac98/.github/workflows) at `122b266`, into `.github/workflows/`. Each file has a `# Source:` line with path and SHA. `release.yml` and `pages.yml` belong to that project and are left out. That repo has no license: fine in this personal repo, ask Pascal before reuse at work or in public.
+Four workflows copied as is from [pascalvanderheiden/turbo-agent-skills-cli](https://github.com/pascalvanderheiden/turbo-agent-skills-cli/tree/122b266d451eb8d06a8b96a0933c788c2fb0ac98/.github/workflows) at `122b266`, into `.github/workflows/`. Each file has a `# Source:` line with path and SHA. `release.yml` and `pages.yml` belong to that project and are left out. That repo has no license; Sven confirmed copying is fine (2026-11-03).
 
 ```mermaid
 flowchart LR
