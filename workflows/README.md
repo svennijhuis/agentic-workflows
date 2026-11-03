@@ -18,20 +18,25 @@ Shared fragments: [shared/](shared/). Authoring: [.github/instructions/aw.instru
 
 ## issue-fix
 
-[issue-fix.md](issue-fix.md) fixes one issue with one PR, and checks blockers first.
+[issue-fix.md](issue-fix.md) hands one unblocked issue to the **Copilot cloud agent**, which does the implementation. Simple version of [wayfinder-delivery](https://github.com/pascalvanderheiden/turbo-agent-skills-cli/blob/main/.github/workflows/wayfinder-delivery.md).
 
 ```mermaid
 flowchart LR
-  A[label agent-fix<br/>or workflow_dispatch] --> B{blocked?<br/>label, open blocked-by,<br/>open sub-issue}
+  A[label agent-fix<br/>or workflow_dispatch] --> B{blocked?<br/>label, open blocked_by,<br/>unmerged predecessor PR}
   B -->|yes| C[comment with blockers, stop]
-  B -->|no| D[smallest fix]
-  D --> E[one PR: Fixes #issue]
-  E --> F[Sven reviews and merges]
+  B -->|no| D[assign-to-agent: copilot]
+  D --> E[Copilot opens PR<br/>Fixes #issue]
+  E --> F[run again: @copilot comment<br/>for open review points]
+  F --> G[Sven reviews and merges]
 ```
 
 - Start: add the `agent-fix` label to an issue, or run it from the Actions tab with an issue number. No schedule.
-- Blocked: the label `blocked`, an open "blocked by" dependency, or an open sub-issue. The agent only comments and stops. Close the blockers and add `agent-fix` again.
-- Not blocked: one `[issue-fix]` PR with `Fixes #<issue>`. No merge, network closed.
+- Blocked: the label `blocked`, an open `blocked_by` dependency, or a predecessor PR that is not merged. The agent only comments and stops. Clear the blockers and add `agent-fix` again.
+- One active ticket at a time. Not blocked: the issue is assigned to `copilot` with instructions (this ticket only, smallest validation, a PR that closes the issue, ask on the issue when unsure).
+- Follow-ups: run it again and open review points go back as one `@copilot` comment. Optional Copilot code review via `add-reviewer`.
+- No `merge-pull-request`: Sven merges. Network closed.
+- Requirements: the Copilot cloud agent must be enabled on the repo, and every assignment costs Copilot premium requests.
+- Token: `GH_AW_AGENT_TOKEN` (Sven sets it as an Actions secret) is only needed for the optional `add-reviewer`.
 - Not compiled yet: run `gh aw compile issue-fix` before it can run.
 
 ### Version lock

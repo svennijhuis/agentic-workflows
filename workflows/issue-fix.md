@@ -1,5 +1,5 @@
 ---
-description: Fix one issue with a PR, but only when nothing blocks it. Blocked issues get a comment and the run stops. Sven merges.
+description: Hand one unblocked issue to the Copilot cloud agent. Blocked issues get a comment and the run stops. Sven merges.
 on:
   issues:
     types: [labeled]
@@ -7,48 +7,66 @@ on:
   workflow_dispatch:
     inputs:
       issue_number:
-        description: Issue number to fix
+        description: Issue number to hand to Copilot
         required: true
         type: string
 permissions:
   contents: read
   issues: read
   pull-requests: read
+  copilot-requests: write
 network:
   allowed: []
 tools:
   github:
-    toolsets: [repos, issues]
-  edit:
-  bash: true
+    toolsets: [repos, issues, pull_requests]
 safe-outputs:
-  add-comment:
+  assign-to-agent:
+    allowed: [copilot]
+    target: "*"
     max: 1
-  create-pull-request:
-    title-prefix: "[issue-fix] "
+  add-comment:
+    target: "*"
+    max: 1
+  # Optional: ask Copilot code review on the PR. Needs GH_AW_AGENT_TOKEN (Sven sets it).
+  add-reviewer:
+    target: "*"
+    allowed-reviewers: [copilot]
+    github-token: ${{ secrets.GH_AW_AGENT_TOKEN }}
     max: 1
 ---
 
-# Issue Fix
+# Issue Fix (Copilot cloud agent)
 
 Issue: `${{ github.event.issue.number || github.event.inputs.issue_number }}` in `${{ github.repository }}`. Flow: [issue-fix README](README.md#issue-fix).
 
+This workflow writes no code. The implementation agent is the Copilot cloud agent.
+
 ## 1. Blocker check first
 
-Read the issue. It is **blocked** when any of these is true:
+The issue is **blocked** when any of these is true:
 
 - it has the label `blocked`
-- it has an open "blocked by" dependency (an issue it is blocked by that is still open)
-- it has an open sub-issue
+- it has an open `blocked_by` dependency (an issue it is blocked by that is still open)
+- a predecessor issue it depends on has a linked PR that is not merged yet
 
-When blocked: post one comment that lists each blocker (label, or the open issue number and title), says the fix starts once they are closed, and stop. Make no code changes and open no PR.
+When blocked: post one comment that lists each blocker (label, open issue number and title, or unmerged PR), says Copilot starts once they are cleared, and stop. Assign nobody.
 
-## 2. Fix
+Also stop with one comment when Copilot is already assigned to this issue, or another issue with label `agent-fix` already has an open Copilot PR. One active ticket at a time.
 
-Only when nothing blocks:
+## 2. Hand to Copilot
 
-1. Make the smallest change that fixes the issue. Stay inside what the issue asks.
-2. Open one pull request. Title: the issue title. Body: `Fixes #<issue>`, a short summary of the change, and anything you could not do.
-3. Never merge. Sven reviews and merges.
+Only when nothing blocks: assign the issue to `copilot` with these instructions:
 
-If the issue is unclear or too big for one PR, post one comment that says what is missing and stop.
+- Work on this issue only. Stay inside what it asks.
+- Run the smallest validation that proves the change.
+- Open one PR that closes the issue (`Fixes #<issue>`).
+- When something is unclear, ask a question on the issue instead of guessing.
+
+## 3. Follow-ups
+
+When run again for an issue that already has an open Copilot PR:
+
+- Open review points: post one `@copilot` comment on the PR that lists them.
+- Optional: request a Copilot code review with `add-reviewer` (only works when `GH_AW_AGENT_TOKEN` is set).
+- Never merge. Sven reviews and merges.
