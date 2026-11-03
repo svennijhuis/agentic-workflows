@@ -12,6 +12,6 @@ Block 1: catalog workflows are **`workflow_dispatch` only** until Sven enables m
 
 | Workflow | Purpose |
 | --- | --- |
-| [squad-review.md](squad-review.md) | Legacy PR review adapter (removed when F01 ships) |
+| [pr-review.md](pr-review.md) | Report-only PR review (F01). `workflow_dispatch` only |
 
 Shared fragments: [shared/](shared/). Authoring: [.github/instructions/aw.instructions.md](../.github/instructions/aw.instructions.md). Verify: `make verify`.

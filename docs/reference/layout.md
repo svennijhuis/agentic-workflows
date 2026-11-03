@@ -12,8 +12,9 @@ Owner variable: `svennijhuis` today. Only owner strings and org-only settings ch
 ├── README.md
 ├── CONTRIBUTING.md
 ├── workflows/
-│   ├── squad-review.md
-│   ├── squad-review.lock.yml
+│   ├── pr-review.md
+│   ├── pr-review.lock.yml
+│   ├── pr-review.card.yml
 │   └── shared/
 │       ├── defaults.md
 │       ├── security.md
@@ -51,15 +52,17 @@ Install: `gh aw add svennijhuis/agentic-workflows/<workflow-stem>@vX.Y.Z`. Workf
 
 gh-aw v0.93.4 refuses imports outside the workflows folder, for example: `path ../shared/defaults.md must be within workflows folder`. Shared fragments therefore live at `workflows/shared/`, not a top-level `shared/`.
 
-## Post-F01 squad-review removal
+## squad-review removal (F01)
 
-When [F01](../pbi/agent-factory/F01-pr-review.md) ships, delete:
+[F01](../pbi/done/F01-pr-review.md) replaces squad-review. Removed in that PR:
 
 - `workflows/squad-review.md`
 - `workflows/squad-review.lock.yml`
-- `workflows/shared/agentpacks.md` (only if F01 does not reuse it)
+- `workflows/squad-review.card.yml`
 - `docs/reference/squad-review.md`
 - The `workflows/squad-review.md` line in `aw.yml` `includes:`
+
+`workflows/shared/agentpacks.md` stays. `pr-review.md` imports it. The `skills:` pin lives in `workflows/pr-review.md`.
 
 ## See also
 

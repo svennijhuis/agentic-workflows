@@ -12,7 +12,7 @@
 ## Goal
 Close the review-to-fix loop next to [P04](../multi-repo/P04-research-plan-assign-copilot.md): on human review "changes requested", push a fix commit on the PR branch (max 2 fix rounds per PR).
 ## Context
-Upstream reference: `pr-fix` (https://github.com/githubnext/agentics/tree/main/workflows/pr-fix.md). LP00 and LP01: after [F01](F01-pr-review.md) FAIL, F16 runs before re-review. Block 5 with P04 chain.
+Upstream reference: `pr-fix` (https://github.com/githubnext/agentics/tree/main/workflows/pr-fix.md). LP00 and LP01: after [F01](../done/F01-pr-review.md) FAIL, F16 runs before re-review. Block 5 with P04 chain.
 **What it does:** fix commit on PR after changes requested (high risk, staged).
 **Value for Sven repos:** See workflow-ratings.md row; prioritize NOW set for daily maintenance and security.
 **How ours beats the example (Bar H):** Never on default branch; human must merge

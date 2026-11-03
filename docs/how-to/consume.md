@@ -18,17 +18,17 @@ Enable GitHub Actions and Copilot on the repository. Set secrets per [auth.md](.
 ## Install (tag only, never a branch)
 
 ```bash
-gh aw add svennijhuis/agentic-workflows/squad-review@v1.0.0
+gh aw add svennijhuis/agentic-workflows/pr-review@v1.0.0
 ```
 
 What happens:
 
-1. Markdown copies to `.github/workflows/squad-review.md` with `source:` set.
-2. Compiler writes `.github/workflows/squad-review.lock.yml`.
+1. Markdown copies to `.github/workflows/pr-review.md` with `source:` set.
+2. Compiler writes `.github/workflows/pr-review.lock.yml`.
 3. Declared `imports` resolve to pinned SHAs in the lock file.
 
 ```bash
-git add .github/workflows/squad-review.md .github/workflows/squad-review.lock.yml
+git add .github/workflows/pr-review.md .github/workflows/pr-review.lock.yml
 ```
 
 Do not vendor catalog Markdown by copy-paste. You lose `source:` and `gh aw update`.
@@ -51,7 +51,7 @@ Remote imports cache under `.github/aw/imports/` by SHA. Block 2 trial picks com
 ## Update
 
 ```bash
-gh aw update squad-review   # one workflow
+gh aw update pr-review   # one workflow
 gh aw update                # all tracked sources
 ```
 

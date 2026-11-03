@@ -107,7 +107,7 @@ KS[AO03 kill switch, /stop] -.noop.-> M05 & P04
 | AO03 | Kill switch | 2 | two-way | agent-ops | W2 | todo | | Builder | [agent-ops/AO03-kill-switch.md](agent-ops/AO03-kill-switch.md) |
 | D01 | Quick start and consumer guide | 2 | two-way | docs | W2 | todo | D00, C04, L01, X01, G00a, F01 | Cursor CLI | [docs/D01-quick-start-consumer-guide.md](docs/D01-quick-start-consumer-guide.md) |
 | D03 | Governance overview | 2 | two-way | docs | W5 | todo | G01, G02, D00 | Cursor CLI | [docs/D03-governance-overview.md](docs/D03-governance-overview.md) |
-| F01 | PR review (replaces squad-review) | 2, 3 | two-way | agent-factory | W3 | todo | C03, C04, C05, C06, C12, C12b | Builder | [agent-factory/F01-pr-review.md](agent-factory/F01-pr-review.md) |
+| F01 | PR review (replaces squad-review) | 2, 3 | two-way | agent-factory | W3 | done | C03, C04, C05, C06, C12, C12b | Builder | [done/F01-pr-review.md](done/F01-pr-review.md) |
 | G01 | Rollout ladder + human review | 2 | two-way | governance | PR 0 | todo | | Cursor CLI | [governance/G01-rollout-ladder-human-review.md](governance/G01-rollout-ladder-human-review.md) |
 | G02 | RACI | 2 | two-way | governance | PR 0 | todo | G01 | Cursor CLI | [governance/G02-raci.md](governance/G02-raci.md) |
 | G03 | Onboarding + support | 2 | two-way | governance | PR 0 | todo | G02, D01 | Cursor CLI | [governance/G03-onboarding-support.md](governance/G03-onboarding-support.md) |

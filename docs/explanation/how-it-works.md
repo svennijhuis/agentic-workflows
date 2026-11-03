@@ -21,8 +21,8 @@ flowchart TB
     cursor --> packs
   end
   subgraph gha [GitHub Actions in a product repo]
-    md[squad-review.md]
-    lock[squad-review.lock.yml]
+    md[pr-review.md]
+    lock[pr-review.lock.yml]
     agent[Agent job read-only]
     safe[Safe-output jobs]
     md --> lock --> agent --> safe
@@ -48,8 +48,8 @@ Shared names in Block 1: `defaults.md`, `security.md`, `reporting.md`, `agentpac
 In a **consumer** repo after `gh aw add`:
 
 ```text
-.github/workflows/squad-review.md
-.github/workflows/squad-review.lock.yml   # generated; Actions runs this
+.github/workflows/pr-review.md
+.github/workflows/pr-review.lock.yml   # generated; Actions runs this
 ```
 
 In **this catalog**, each installable workflow keeps a committed `.lock.yml` next to the `.md`. `make compile` runs `gh aw compile --strict` and `make verify` fails if locks drift.
