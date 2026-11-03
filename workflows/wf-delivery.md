@@ -38,7 +38,7 @@ imports:
       label-sets: "planned,specced"
 # gh aw add follows dispatch-workflow one level deep; builder's reviewer and its skills come through resources.
 resources:
-  - reviewer.md
+  - pr-reviewer.md
   - shared/skills/code-review/SKILL.md
   - shared/skills/deslop/SKILL.md
 permissions:
@@ -54,7 +54,7 @@ tools:
     toolsets: [repos, issues, pull_requests, actions]
 safe-outputs:
   dispatch-workflow:
-    workflows: [builder]
+    workflows: [issue-builder]
     max: 1
   add-comment:
     target: "*"
@@ -133,7 +133,7 @@ ticket. Do not start the builder on the parent map.
 
 Emit both, in this order, in the same run:
 
-1. `dispatch_workflow` for `builder` with inputs `issue_number` = the ticket
+1. `dispatch_workflow` for `issue-builder` with inputs `issue_number` = the ticket
    and `parent_issue` = the map;
 2. `add_comment` on the ticket: `Builder started: <link to this run>`, then
    the ticket title.

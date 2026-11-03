@@ -24,7 +24,7 @@ max-daily-ai-credits: 5000
 max-turns: 160
 timeout-minutes: 30
 concurrency:
-  group: reviewer-${{ github.event.inputs.issue_number }}${{ github.event.inputs.pr_number }}
+  group: pr-reviewer-${{ github.event.inputs.issue_number }}${{ github.event.inputs.pr_number }}
   job-discriminator: ${{ github.run_id }}
 imports:
   - shared/defaults.md
@@ -62,13 +62,13 @@ safe-outputs:
     target: "*"
     max: 1
   dispatch-workflow:
-    workflows: [builder]
+    workflows: [issue-builder]
     max: 1
 ---
 
 # Reviewer
 
-Repo: `${{ github.repository }}`. Flow: [reviewer README](README.md#builder-and-reviewer).
+Repo: `${{ github.repository }}`. Flow: [reviewer README](README.md#issue-builder-and-pr-reviewer).
 
 Inputs: PR `${{ github.event.inputs.pr_number }}`, issue `${{ github.event.inputs.issue_number }}`, round `${{ github.event.inputs.round }}`.
 
@@ -104,7 +104,7 @@ Every review is a `COMMENT` review. Its first line is the marker the builder and
 Read earlier reviews on this PR from this workflow to see what was asked before. The round is the larger of the input and the number of this workflow's earlier reviews whose body starts with `Reviewer: changes needed` plus 1, so a wrong input cannot reset the count.
 
 1. **Clean** (no findings): submit a `COMMENT` review whose body starts with `Reviewer: ready to merge.`, then the head SHA, the round, and one line per axis. No inline comments. Also add label `ready-to-merge` to the PR so a maintainer can filter for it.
-2. **Findings in round 1 or 2**: one inline review comment per finding on its line, naming the axis and the concrete fix (max 20). Submit a `COMMENT` review whose body starts with `Reviewer: changes needed, round <round>.`, then the head SHA and a short list per axis. Then emit `dispatch_workflow` for `builder` with inputs `pr_number` = the PR and `round` = this round.
+2. **Findings in round 1 or 2**: one inline review comment per finding on its line, naming the axis and the concrete fix (max 20). Submit a `COMMENT` review whose body starts with `Reviewer: changes needed, round <round>.`, then the head SHA and a short list per axis. Then emit `dispatch_workflow` for `issue-builder` with inputs `pr_number` = the PR and `round` = this round.
 3. **Findings in round 3**: add label `needs-help` to the PR and post one PR comment with: the open points per axis, per round what the builder tried (from its round comments and pushes), and what is needed from a maintainer to finish. Submit no review and start nothing.
 
 Never approve, never merge, never push.

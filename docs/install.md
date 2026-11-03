@@ -44,7 +44,7 @@ Org level first, then each target repo.
 
 ```bash
 cd <target-repo>
-gh aw add svennijhuis/agentic-workflows/workflows/builder.md@<tag>
+gh aw add svennijhuis/agentic-workflows/workflows/issue-builder.md@<tag>
 gh aw add svennijhuis/agentic-workflows/workflows/issue-triage.md@<tag>
 gh aw compile
 git add .github
@@ -53,7 +53,8 @@ git push
 ```
 
 - Use a release tag for `<tag>`, not a branch, so updates are deliberate.
-- `gh aw add` also fetches the shared fragments, skill copies and every workflow named in `dispatch-workflow`: `builder` brings `reviewer`, and the other way round.
+- `gh aw add` also fetches the shared fragments, skill copies and every workflow named in `dispatch-workflow`: `issue-builder` brings `pr-reviewer`, and the other way round.
+- Upgrading from `builder`, `reviewer` or `token-audit`: delete the old `.github/workflows/{builder,reviewer,token-audit}.md` and `.lock.yml` files after adding the renamed ones, and re-run `gh aw add` for `bug-fix` and `wf-delivery` so they dispatch `issue-builder`. Otherwise two builders exist. `agentic-token-audit` starts a fresh `memory/agentic-token-audit` branch, so the old trend on `memory/token-audit` is not carried over: delete that branch or keep it as an archive.
 - Commit everything under `.github/workflows/`, including `shared/` and the `*.lock.yml` files. Imports are read at runtime from there.
 - Commit `.github/aw/actions-lock.json` if `gh aw compile` creates or changes it.
 
@@ -61,9 +62,9 @@ Workflow sets (pick what you need):
 
 | Goal | Install |
 | --- | --- |
-| Bug to PR | `issue-triage`, `bug-fix`, `builder`, `reviewer` |
-| Plan to PRs (wayfinder) | `wf-to-spec`, `wf-spec`, `wf-plan`, `wf-delivery`, `builder`, `reviewer` |
-| Extras | `retro`, `agents-md-sync`, `token-audit` |
+| Bug to PR | `issue-triage`, `bug-fix`, `issue-builder`, `pr-reviewer` |
+| Plan to PRs (wayfinder) | `wf-to-spec`, `wf-spec`, `wf-plan`, `wf-delivery`, `issue-builder`, `pr-reviewer` |
+| Extras | `retro`, `agents-md-sync`, `agentic-token-audit` |
 
 ## 3. Tokens and secrets
 
@@ -71,6 +72,8 @@ Workflow sets (pick what you need):
 | --- | --- | --- | --- |
 | `GITHUB_TOKEN` | every workflow | yes, automatic | Provided by Actions. Nothing to create |
 | `AW_CORE_ISSUES_TOKEN` | `retro` only | only if you install `retro` | Repo or org Actions secret |
+| `NUGET_FEED_TOKEN` | `issue-builder` in C# repos | only with a private NuGet feed | Repo or org Actions secret |
+| `NUGET_FEED_URL`, `NUGET_FEED_USER` | `issue-builder` in C# repos | only with a private NuGet feed | Repo or org Actions variables (not secret) |
 | `COPILOT_GITHUB_TOKEN` | nothing | no | Not used, see above |
 
 ### `AW_CORE_ISSUES_TOKEN` (only for `retro`)
@@ -107,6 +110,55 @@ Or in the UI:
 
 Rotate by creating a new token and running the same `gh secret set` again.
 
+### Private NuGet feed (C# repos)
+
+Add [`shared/nuget-auth.md`](../workflows/shared/nuget-auth.md) under `imports:` in your copy of `issue-builder.md` (it is opt-in, so non-C# repos carry no NuGet secret or `dotnet` network). When the repo has a `.sln`, `.slnx` or `.csproj`, a step before the agent adds your feed as a NuGet source with the secret and runs `dotnet restore`, so `dotnet build` and `dotnet test` resolve private packages. No C# project: the step does nothing. Feed variables unset: restore uses public sources only.
+
+1. Create a read-only token for the feed. GitHub Packages: classic PAT with `read:packages`. Azure Artifacts: PAT with Packaging (Read). Use a service account, not a person, and set an expiry.
+2. Store it. `gh` asks for the value:
+
+```bash
+gh secret set NUGET_FEED_TOKEN --repo <org>/<target-repo>
+gh variable set NUGET_FEED_URL --repo <org>/<target-repo> --body "https://nuget.pkg.github.com/<org>/index.json"
+gh variable set NUGET_FEED_USER --repo <org>/<target-repo> --body "<service-account-user>"
+```
+
+3. Allow the feed host. Network is closed except `dotnet` defaults, so add the host under `network.allowed` in your copy of `issue-builder.md` (for example `nuget.pkg.github.com`, or `pkgs.dev.azure.com`), then `gh aw compile`.
+4. Compile asks you to approve the new secret: `gh aw compile --approve`. Read the diff first, then commit the `.lock.yml`.
+
+The token is on the runner only during the pre-agent restore. A `finally` block removes the feed source afterwards, so the agent never sees the token on disk or in its environment. Restored packages stay in the NuGet cache, so build and test work; adding a new private package needs a human PR. Still use a read-only, feed-scoped token on a service account with an expiry. Not verified against a live run: check that the agent's sandbox sees the cache but not the config entry.
+
+### `dotnet format` hook
+
+A Copilot `postToolUse` hook formats each `.cs` file right after the agent edits it. It lives in [`hooks/`](../hooks/README.md), not in a workflow: copy it into the target repo and commit it.
+
+```bash
+mkdir -p .github/hooks
+cp hooks/dotnet-format/dotnet-format.* .github/hooks/
+git add .github/hooks && git commit -m "add dotnet format hook"
+```
+
+`issue-builder` also tells the agent to format after shell rewrites and to run `dotnet format --verify-no-changes` before pushing, as a fallback. Not verified against a live run. For a hard guarantee add `dotnet format --verify-no-changes` to the repo's own CI.
+
+### Custom MCP server
+
+A local C# MCP server (stdio) runs on the runner next to the agent. [`shared/csharp-mcp.md`](../workflows/shared/csharp-mcp.md) registers it and tells the agent what it is for. It is not imported by default, because the project path is yours. In your copy of `issue-builder.md` (and `pr-reviewer.md` if it needs the tools), add it under `imports:`:
+
+```yaml
+imports:
+  - uses: shared/csharp-mcp.md
+    with:
+      name: domain-rules
+      project: tools/MyMcp
+      purpose: it answers domain-rule questions, for example pricing rules.
+```
+
+- It builds from the checked-out repo with `dotnet run --project <project>`, which restores through the feed the NuGet step configured. Add the feed host under `network.allowed` as for the builder.
+- The `purpose` line goes into the prompt. Tool names alone rarely make the agent reach for it, so say when to call it.
+- A server needing a secret cannot take it through `env:`: gh-aw strict mode rejects secrets in agent environment. Give the server read-only access that does not need one, or ask for a design with a pre-agent step.
+- Add any host the server calls under `network.allowed`. A server that only reads the repo needs none.
+- A server hosted elsewhere (HTTP) uses `url:` and `headers:` in your own `mcp-servers:` block instead of this fragment.
+
 ## 4. Labels (once per target repo)
 
 The flow uses labels as state. Create the ones that are not there yet. By hand: open `https://github.com/<org>/<target-repo>/labels` (repo **Issues** tab → **Labels** button), click **New label**, type the name, **Create label**. Or all at once:
@@ -134,9 +186,9 @@ Add these files in the repo root via **Add file → Create new file** on the rep
 ## 6. Check it works
 
 1. Repo **Issues** tab → **New issue**. Describe a small bug, **Submit new issue**. In the right sidebar click **Labels**, pick `triage`. `issue-triage` should comment and set `bug`.
-2. A maintainer adds `agent-fix` the same way (right sidebar **Labels**). `bug-fix` starts `builder`, which opens a PR on `builder/issue-<n>` (see the **Pull requests** tab), then `reviewer` reviews it.
+2. A maintainer adds `agent-fix` the same way (right sidebar **Labels**). `bug-fix` starts `issue-builder`, which opens a PR on `builder/issue-<n>` (see the **Pull requests** tab), then `reviewer` reviews it.
 3. Runs: repo **Actions** tab, pick the workflow in the left list, click a run for logs. Nothing listed: the compiled `.lock.yml` files are not on the default branch yet.
-4. Start one by hand: **Actions** → pick the workflow (for example `builder`) → **Run workflow** button (right) → fill the inputs → green **Run workflow**. `token-audit` writes a daily cost report.
+4. Start one by hand: **Actions** → pick the workflow (for example `issue-builder`) → **Run workflow** button (right) → fill the inputs → green **Run workflow**. `agentic-token-audit` writes a daily cost report.
 
 A maintainer always merges. Nothing here merges or approves.
 
@@ -148,7 +200,7 @@ A maintainer always merges. Nothing here merges or approves.
 | Builder finishes but no PR | *Allow GitHub Actions to create and approve pull requests* is off |
 | A label set by one workflow does not start the next | Expected: events made with `GITHUB_TOKEN` start nothing. The flow hands off by `workflow_dispatch` instead |
 | `retro` fails on `create-issue` | `AW_CORE_ISSUES_TOKEN` missing, expired, or lacks Issues write on the target repo |
-| `gh aw compile` complains about `dispatch-workflow` | Dispatch targets are not all in `.github/workflows/`. Install both `builder` and `reviewer` |
+| `gh aw compile` complains about `dispatch-workflow` | Dispatch targets are not all in `.github/workflows/`. Install both `issue-builder` and `pr-reviewer` |
 
 ## Update
 

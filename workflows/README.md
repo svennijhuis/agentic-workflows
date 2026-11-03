@@ -17,12 +17,12 @@ Each file **must** have an `on:` trigger. Kebab-case stem becomes the `gh aw add
 | --- | --- |
 | [issue-triage.md](issue-triage.md) | Label `triage`: sets `bug` or `wayfinder` (plus `security` or `needs-info`), or `duplicate`, with one reason comment |
 | [bug-fix.md](bug-fix.md) | Label `agent-fix`: blocker check, then start the builder |
-| [builder.md](builder.md) | Build an issue into a PR on `builder/*`, or fix a PR in a review round. Starts the reviewer |
-| [reviewer.md](reviewer.md) | Part of the build loop: reviews a builder PR on four axes, plus security on a trust-boundary diff. Clean, send back (max 2), or `needs-help`. Started by the builder, not by hand |
+| [issue-builder.md](issue-builder.md) | Build an issue into a PR on `builder/*`, or fix a PR in a review round. Starts the reviewer |
+| [pr-reviewer.md](pr-reviewer.md) | Part of the build loop: reviews a builder PR on four axes, plus security on a trust-boundary diff. Clean, send back (max 2), or `needs-help`. Started by the builder, not by hand |
 | [retro.md](retro.md) | After a builder PR is merged: read the run logs, open a core issue when the flow can do better |
 | [wf-to-spec.md](wf-to-spec.md), [wf-spec.md](wf-spec.md), [wf-plan.md](wf-plan.md), [wf-delivery.md](wf-delivery.md) | Wayfinder chain: map to spec, tickets, builder per ticket |
 | [agents-md-sync.md](agents-md-sync.md) | Write or update AGENTS.md from main commits |
-| [token-audit.md](token-audit.md) | Daily AIC report per workflow and per flow, trend in repo-memory |
+| [agentic-token-audit.md](agentic-token-audit.md) | Daily AIC report per workflow and per flow, trend in repo-memory |
 
 Shared fragments: [shared/](shared/). Validate in the layout of a target repo: `gh aw compile --dir workflows` fails on `dispatch-workflow`, because the compiler looks for dispatch targets in `.github/workflows/`. See the root [README](../README.md#validate).
 
@@ -56,6 +56,7 @@ A maintainer always merges. Nothing in this folder merges, approves, or assigns 
 Auth and secrets, names only (steps in [docs/install.md](../docs/install.md)):
 
 - Engine: built for an org. Every workflow sets `copilot-requests: write`, so Copilot runs on the Actions `GITHUB_TOKEN` and is billed to the org. Needs org Copilot policy "Allow use of Copilot CLI billed to the organization". `COPILOT_GITHUB_TOKEN` is then ignored for inference and not needed.
+- `NUGET_FEED_TOKEN` (secret) and `NUGET_FEED_URL`, `NUGET_FEED_USER` (variables): only for C# repos with a private NuGet feed, used by `shared/nuget-auth.md`, which you add to `issue-builder` in C# repos.
 - `AW_CORE_ISSUES_TOKEN`: only for `retro`, a fine-grained token with Issues read and write on `svennijhuis/agentic-workflows`.
 
 Labels: `triage`, `bug`, `wayfinder`, `security`, `needs-info`, `duplicate`, `agent-fix`, `blocked`, `wayfinder:map`, `to-spec`, `specced`, `to-tickets`, `planned`, `ready-for-agent`, plus `builder` (on every builder PR) `needs-help` (set by the reviewer after round 3) and `ready-to-merge` (set by the reviewer on a clean review, next to the comment review `Reviewer: ready to merge.`). Create `builder`, `needs-help`, `ready-to-merge`, `security`, `needs-info` and `duplicate` in the target repo once.
@@ -77,7 +78,7 @@ Visible lines at the start of a comment or review body, written by `github-actio
 
 ### Cost caps
 
-1 AI Credit (AIC) is $0.01, an estimate from public model pricing. gh-aw defaults are 1000 AIC per run and 5000 per workflow per day; these start values sit below that and get tuned from [token-audit](#token-audit) after one or two weeks of real runs.
+1 AI Credit (AIC) is $0.01, an estimate from public model pricing. gh-aw defaults are 1000 AIC per run and 5000 per workflow per day; these start values sit below that and get tuned from [agentic-token-audit](#agentic-token-audit) after one or two weeks of real runs.
 
 | Workflow | `max-ai-credits` per run | `max-daily-ai-credits` | `max-turns` | `timeout-minutes` |
 | --- | --- | --- | --- | --- |
@@ -86,11 +87,11 @@ Visible lines at the start of a comment or review body, written by `github-actio
 | wf-delivery | 200 | 2000 | 60 | 20 |
 | wf-spec | 500 | 3000 | 100 | 30 |
 | wf-plan | 500 | 3000 | 120 | 40 |
-| builder | 1000 | 6000 | 200 | 50 |
-| reviewer (four or five sub-agents) | 800 | 5000 | 160 | 30 |
+| issue-builder | 1000 | 6000 | 200 | 50 |
+| pr-reviewer (four or five sub-agents) | 800 | 5000 | 160 | 30 |
 | retro | 300 | 1500 | 60 | 20 |
 | agents-md-sync | 300 | 900 | 80 | 20 |
-| token-audit | 150 | 300 | 40 | 15 |
+| agentic-token-audit | 150 | 300 | 40 | 15 |
 
 gh-aw skips `max-daily-ai-credits` for a run dispatched by another agentic workflow. For builder, reviewer and the chain steps the per-run cap and the round limit are the real bound.
 
@@ -121,9 +122,9 @@ flowchart LR
 - One active ticket at a time: stops when this or another `agent-fix` issue has an open `builder` PR, a `Builder started:` comment under 90 minutes old without a PR, or an unanswered `Builder question:`.
 - With the dispatch it posts `Builder started: <run>` on the issue.
 
-## builder and reviewer
+## issue-builder and pr-reviewer
 
-[builder.md](builder.md) writes the code, [reviewer.md](reviewer.md) reviews it. Both start only through `workflow_dispatch`: bug-fix, wf-delivery or the other one starts them.
+[issue-builder.md](issue-builder.md) writes the code, [pr-reviewer.md](pr-reviewer.md) reviews it. Both start only through `workflow_dispatch`: bug-fix, wf-delivery or the other one starts them.
 
 ```mermaid
 flowchart LR
@@ -143,7 +144,8 @@ Builder:
 - Mode A (issue number): smallest change, the repo's own tests and build, one non-draft PR on `builder/issue-<n>` with label `builder`. Body per the `pr` skill plus `Fixes #n`, and `Parent: #map` for wayfinder tickets. Asks one question on the issue (`Builder question:`) instead of guessing. wf-delivery restarts it after a human answer; for a bug, a maintainer re-adds `agent-fix`.
 - Mode B (PR number plus round): reads the latest `Reviewer: changes needed, round <n>.` review, pushes the fix to the same branch, posts a round comment.
 - Always starts the reviewer at the end. The PR is emitted before the dispatch, and a failed PR cancels the dispatch.
-- Network: gh-aw defaults. A target repo that installs packages adds its ecosystem (for example `node`) under `network.allowed` in its copy.
+- C#: add [shared/nuget-auth.md](shared/nuget-auth.md) (pre-agent step adds the private feed from `NUGET_FEED_URL`, `NUGET_FEED_USER` variables and the `NUGET_FEED_TOKEN` secret, then `dotnet restore`) (skips in repos without a C# project). The [dotnet-format hook](../hooks/README.md) runs `dotnet format` after each `.cs` edit; copy it into the target repo. Custom MCP server: see [install guide](../docs/install.md#custom-mcp-server).
+- Network: gh-aw defaults plus the `dotnet` ecosystem. The private feed host is added under `network.allowed` in the target repo copy. Other ecosystems (for example `node`) likewise.
 
 Reviewer:
 
@@ -225,11 +227,11 @@ flowchart LR
 - The PR may only change `AGENTS.md` (`allowed-files`). `AGENTS.md` is a protected file in gh-aw, so the PR gets a caution block and a request-changes review: expected, a maintainer reviews and merges.
 - Nothing changed: no PR.
 
-## token-audit
+## agentic-token-audit
 
-[token-audit.md](token-audit.md) reports AI Credit use. Start: daily around 07:00 (fuzzy schedule) and manual. Adapted from gh-aw's own `agentic-token-audit` (origin `githubnext/agentic-ops@c611242`, MIT).
+[agentic-token-audit.md](agentic-token-audit.md) reports AI Credit use. Start: daily around 07:00 (fuzzy schedule) and manual. Adapted from gh-aw's own `agentic-token-audit` (origin `githubnext/agentic-ops@c611242`, MIT).
 
 - A pre-agent step runs `gh aw logs --start-date -1d --json` and aggregates with `jq`: per workflow (runs, total, average and max AIC, turns, failures) and per flow (gh-aw episodes, such as triage to builder to reviewer rounds). No runs in the window: `noop`, no inference.
-- The agent keeps a daily snapshot and a rolling 90-day summary on the branch `memory/token-audit` (repo-memory) and writes one issue `[token-audit] ...`. Older ones are closed; each expires after 7 days.
+- The agent keeps a daily snapshot and a rolling 90-day summary on the branch `memory/agentic-token-audit` (repo-memory) and writes one issue `[agentic-token-audit] ...`. Older ones are closed; each expires after 7 days.
 - Observations: a workflow above 30% of the total, a run at 80% of its cap or more, a workflow that stays under 20% of its cap (the cap can come down), failures. Use those to tune the [cost caps](#cost-caps).
 - Upstream also draws charts with Python (pandas, matplotlib, seaborn from PyPI). Left out here to keep the network closed.

@@ -28,7 +28,7 @@ max-daily-ai-credits: 6000
 max-turns: 200
 timeout-minutes: 50
 concurrency:
-  group: builder-${{ github.event.inputs.issue_number }}${{ github.event.inputs.pr_number }}
+  group: issue-builder-${{ github.event.inputs.issue_number }}${{ github.event.inputs.pr_number }}
   job-discriminator: ${{ github.run_id }}
 imports:
   - shared/defaults.md
@@ -68,13 +68,13 @@ safe-outputs:
     target: "*"
     max: 1
   dispatch-workflow:
-    workflows: [reviewer]
+    workflows: [pr-reviewer]
     max: 1
 ---
 
 # Builder
 
-Repo: `${{ github.repository }}`. Flow: [builder README](README.md#builder-and-reviewer).
+Repo: `${{ github.repository }}`. Flow: [builder README](README.md#issue-builder-and-pr-reviewer).
 
 Inputs: issue `${{ github.event.inputs.issue_number }}`, parent map `${{ github.event.inputs.parent_issue }}`, PR `${{ github.event.inputs.pr_number }}`, round `${{ github.event.inputs.round }}`.
 
@@ -98,7 +98,7 @@ Read `AGENTS.md` first when the repo has one, then `.github/copilot-instructions
    - When the issue also has `security`: fix at the trust boundary, and keep exploit steps, payloads and secrets out of commits, the PR title and body.
 5. Run the repo's own test and build commands (from `AGENTS.md`, the Makefile, package scripts or CI files). Fix what you broke. The unit tests must be green before you open the PR; never open it, or stop, on a red run. Keep the exact commands and their result for the PR body. For a bug, Evidence has the red-then-green output of the step 4 command and the root cause in one sentence.
 6. Open one PR with `create_pull_request` on that branch. Title: the issue title. Body follows `Skill: pr` (Summary, Evidence, Merge Danger), then a line `Fixes #<issue>`, and when there is a parent map a line `Parent: #<parent>`.
-7. Then emit `dispatch_workflow` for `reviewer` with inputs `issue_number` = the issue and `round` = `1`. The PR is created first, so the reviewer finds it.
+7. Then emit `dispatch_workflow` for `pr-reviewer` with inputs `issue_number` = the issue and `round` = `1`. The PR is created first, so the reviewer finds it.
 
 ## Mode B: PR number plus round (fix)
 
@@ -107,11 +107,12 @@ Read `AGENTS.md` first when the repo has one, then `.github/copilot-instructions
 3. Fix each finding with the smallest change. A finding you think is wrong: leave the code and explain why in the PR comment of step 5.
 4. Run the repo's test and build commands again. The unit tests must be green before you push; fix until they are.
 5. Commit and push with `push_to_pull_request_branch` (`pull_request_number` = the PR). Post one PR comment: round number, per finding fixed or not and why, commands run and result.
-6. Then emit `dispatch_workflow` for `reviewer` with inputs `pr_number` = the PR and `round` = round plus 1.
+6. Then emit `dispatch_workflow` for `pr-reviewer` with inputs `pr_number` = the PR and `round` = round plus 1.
 
 ## Always
 
 - One issue, one PR. Stay inside what the issue asks.
 - Run the repo's unit tests as often as needed. Never stop on a red run: green first. When a failure is outside your change and you cannot fix it, say so in the PR body (Mode A) or round comment (Mode B) with the command and output.
+- C# repos with a private NuGet feed: when a pre-agent step already restored it, the feed source is removed again: build and test from the cache, never look for feed credentials, and post a `Builder question:` when a private package is missing. The `dotnet-format` hook formats each `.cs` file you edit. After a shell rewrite (`sed` and the like) run `dotnet format --no-restore --include <files>` yourself, and before you push check with `dotnet format --verify-no-changes --no-restore --include <changed .cs files>`.
 - Normal pushes only. Never merge, never approve, never close issues.
 - Every run ends with the reviewer started, except when you stopped with a question or an existing PR in Mode A step 1 or 2.

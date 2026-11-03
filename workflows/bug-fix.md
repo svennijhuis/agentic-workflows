@@ -21,7 +21,7 @@ imports:
   - shared/defaults.md
 # gh aw add follows dispatch-workflow one level deep; builder's reviewer and its skills come through resources.
 resources:
-  - reviewer.md
+  - pr-reviewer.md
   - shared/skills/code-review/SKILL.md
   - shared/skills/deslop/SKILL.md
 permissions:
@@ -40,7 +40,7 @@ safe-outputs:
     target: "*"
     max: 1
   dispatch-workflow:
-    workflows: [builder]
+    workflows: [issue-builder]
     max: 1
 ---
 
@@ -72,7 +72,7 @@ A `Builder started:` comment of 90 minutes or older without a builder PR is a fa
 
 Only when nothing blocks, emit both, in this order:
 
-1. `dispatch_workflow` for `builder` with input `issue_number` = this issue;
+1. `dispatch_workflow` for `issue-builder` with input `issue_number` = this issue;
 2. `add_comment` on this issue: `Builder started: <link to this run>`.
 
 Never emit one without the other. The builder opens the PR and starts the reviewer. Never merge. A maintainer reviews and merges.
