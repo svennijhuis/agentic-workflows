@@ -54,8 +54,8 @@ tools:
   bash: [":*"]
 safe-outputs:
   # PRs and pushes made with GITHUB_TOKEN start no CI. gh-aw pushes one extra empty commit with the
-  # magic secret GH_AW_CI_TRIGGER_TOKEN (a PAT) when it is set, so the repo's pull_request checks run.
-  # Secret not set: no CI. Next improvement: an org GitHub App (docs/install.md, "Next improvement: GitHub App").
+  # PAT in secret CI_TRIGGER_TOKEN (placeholder name: rename here and in the docs), so the repo's
+  # pull_request checks run. Next improvement: an org GitHub App (docs/install.md, "Next improvement: GitHub App").
   # https://github.github.io/gh-aw/reference/triggering-ci
   create-pull-request:
     title-prefix: "[builder] "
@@ -63,10 +63,12 @@ safe-outputs:
     draft: false
     allowed-branches: ["builder/*"]
     auto-close-issue: false
+    github-token-for-extra-empty-commit: ${{ secrets.CI_TRIGGER_TOKEN }}  # placeholder secret name, see docs/install.md
     max: 1
   push-to-pull-request-branch:
     target: "*"
     required-labels: [builder]
+    github-token-for-extra-empty-commit: ${{ secrets.CI_TRIGGER_TOKEN }}  # placeholder secret name, see docs/install.md
     max: 1
   add-comment:
     target: "*"
