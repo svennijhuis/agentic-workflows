@@ -100,7 +100,7 @@ Empty runs cost nothing: `if:` filters on the event (bot comments never start wf
 
 [issue-triage.md](issue-triage.md) runs on the label `triage` (or manually with an issue number). It picks `bug` or `wayfinder` and posts one comment with the reason, an agent-fit line and up to three related issues. Adapted from the gh-aw gallery `ai-issue-triage`.
 
-- `needs-info`: a bug without steps, expected and actual, or a request without problem and outcome. The comment asks the specific questions.
+- `needs-info`: a bug without steps, expected and actual, or a request without problem and outcome. Also when the issue cannot be classified with confidence or an open gap would change the route. The comment asks the specific questions and, if the route was a guess, names it and which answer would change it.
 - `duplicate`: only at high confidence, instead of `bug` or `wayfinder`. Search covers open issues and issues closed in the last 90 days.
 - `security`: next to `bug` or `wayfinder`. The comment asks the reporter to move exploit details to a private security advisory and repeats none of them.
 

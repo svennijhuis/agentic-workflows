@@ -51,7 +51,7 @@ Read the issue (title, body, comments). Search open issues and issues closed in 
 - **wayfinder**: something new, or there are choices to make, or it will be more than one PR. Goes to the wayfinder chain (map, spec, plan, delivery).
 - **In doubt: wayfinder.** Thinking too much is cheaper than a builder PR going the wrong way.
 - **security**: a vulnerability, a leaked secret, or a trust-boundary flaw. Set it next to `bug` or `wayfinder`.
-- **needs-info**: a bug without steps, expected and actual result, or a request without the problem and the wanted outcome. Set it next to `bug` or `wayfinder`.
+- **needs-info**: a bug without steps, expected and actual result, or a request without the problem and the wanted outcome. Also when you cannot classify the issue with confidence, or an open gap (scope, affected version, a vague symptom) would change the route. Set it next to `bug` or `wayfinder`; when unsure which, `wayfinder` stays the default.
 - **duplicate**: only when an open or recently closed issue clearly describes the same problem. Set it instead of `bug` or `wayfinder`. A related issue is mentioned, not labelled.
 
 ## Output
@@ -65,7 +65,7 @@ Read the issue (title, body, comments). Search open issues and issues closed in 
      - bug: "A maintainer adds `agent-fix` to hand it to the builder."
      - wayfinder: "A maintainer adds `to-spec` (or makes it a `wayfinder:map` with decision sub-issues) to start the chain."
      - duplicate: "A maintainer closes this as a duplicate of #<n>, or removes the label."
-3. With `needs-info`, ask the specific missing questions in the same comment (for a bug: steps, expected, actual) and leave out the next step.
+3. With `needs-info`, ask the specific missing questions in the same comment (for a bug: steps, expected, actual) and leave out the next step. If the route was a guess, say so: name the label you picked and which answer would change it.
 4. With `security`, ask the reporter to move exploit details to a private security advisory (Security tab, Report a vulnerability). Do not repeat exploit details, secrets, or affected endpoints in the comment.
 
 Never assign the issue, never add `agent-fix`, `to-spec` or `wayfinder:map`, and change no code. Nothing starts without a maintainer's label.
