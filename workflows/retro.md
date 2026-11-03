@@ -23,8 +23,8 @@ concurrency:
 imports:
   - shared/defaults.md
   - shared/security.md
-  - shared/skills/retro.md
-  - shared/skills/writing-for-agents.md
+  - shared/skills/retro/SKILL.md
+  - shared/skills/writing-for-agents/SKILL.md
 permissions:
   copilot-requests: write
   actions: read

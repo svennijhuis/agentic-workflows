@@ -18,8 +18,6 @@ gh-aw v0.93.4 requires shared files under `workflows/shared/` (imports outside `
 | [security.md](security.md) | Network and safety baseline |
 | [reporting.md](reporting.md) | Fixed issue/PR report shape |
 | [skills/](skills/) | Local skill copies (mattpocock/skills, cursor/plugins), imported by builder, reviewer, retro, wf-spec, wf-plan. Source and SHA on top of each file |
-| [mcp/](mcp/) | MCP snippets (point at mcp-services; see [mcp/README.md](mcp/README.md)) |
-| [prompts/](prompts/) | Actions-only prompt snippets ([prompts/README.md](prompts/README.md)) |
 
 Configure consumers with `import-schema` `with:` only; unknown keys fail compile.
 

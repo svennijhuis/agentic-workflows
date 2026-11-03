@@ -20,8 +20,8 @@ concurrency:
 # gh aw add follows dispatch-workflow one level deep; builder's reviewer and its skills come through resources.
 resources:
   - reviewer.md
-  - shared/skills/code-review.md
-  - shared/skills/deslop.md
+  - shared/skills/code-review/SKILL.md
+  - shared/skills/deslop/SKILL.md
 permissions:
   copilot-requests: write
   actions: read
