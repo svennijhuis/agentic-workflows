@@ -1,4 +1,0 @@
-# POL25 allowlist for deterministic (non-agentic) workflows that may be called with workflow_call.
-# Map of file name to {triggers, yes: {date, quote}}. Empty: no entry. An entry needs Sven's exact yes.
-# deployment_status is never allowed; agentic workflows never get workflow_call.
-deterministic_triggers: {}
