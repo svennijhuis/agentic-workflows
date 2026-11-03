@@ -32,12 +32,19 @@ Every workflow runs the `copilot` engine and needs a way to pay for inference. T
 
 The workflows set `copilot-requests: write`. Copilot then runs on the Actions `GITHUB_TOKEN` and is billed to the org. No personal token is needed for inference. This needs an org owner once.
 
-1. Open `https://github.com/<org>`, click **Settings** (top tab row of the org page).
-2. Left sidebar: **Copilot** → **Policies**. Direct link: `https://github.com/organizations/<org>/settings/copilot/policies`.
-3. Set **Copilot CLI** to **Enabled**.
-4. Find **Allow use of Copilot CLI billed to the organization** and set it to **Enabled**.
+Only an org owner can do this. Click path:
 
-No Copilot entry in the sidebar: the org has no Copilot plan. Buy or enable one first under **Settings → Billing and plans**.
+1. Your profile picture top right → **Organizations** → pick the org. Or open `https://github.com/<org>`.
+2. Click **Settings** under the org name (top tab row). Not visible: open the **⋯** dropdown at the end of the tab row and click **Settings** there. Still missing: you are not an org owner.
+3. Left sidebar, section **Code, planning, and automation**: click **Copilot**, then **Policies**. Direct link: `https://github.com/organizations/<org>/settings/copilot/policies`.
+4. In the policy list find **Copilot CLI** and set it to **Enabled**. This turns on the Copilot CLI that gh-aw runs on the runner.
+5. Right below, find **Allow use of Copilot CLI billed to the organization** and set it to **Enabled**. With **Copilot CLI** already on, this one is usually on by default: check it anyway.
+6. The page saves each change right away. No save button.
+
+Turn nothing else on or off for the workflows: other Copilot policies (models, coding agent, code review) do not matter here.
+
+- No **Copilot** entry in the sidebar: the org has no Copilot plan. Buy or enable one first under **Settings → Billing and plans**.
+- A policy is greyed out or shows it is set by the enterprise: the org belongs to an enterprise that decides this policy. An enterprise owner turns it on in the enterprise settings under the Copilot policies, or leaves the choice to the org.
 
 With `copilot-requests: write` set, `COPILOT_GITHUB_TOKEN` is ignored for inference. Do not create it for option A.
 
