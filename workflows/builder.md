@@ -32,6 +32,9 @@ imports:
   - shared/skills/implement.md
   - shared/skills/tdd.md
   - shared/skills/pr.md
+checkout:
+  fetch: ["*"]
+  fetch-depth: 0
 permissions:
   copilot-requests: write
   contents: read
@@ -85,7 +88,7 @@ Read `AGENTS.md` first when the repo has one. Its rules win over this file.
 ## Mode B: PR number plus round (fix)
 
 1. Read the PR, its diff and the latest `REQUEST_CHANGES` review from the reviewer with its inline comments. Those findings are the work list for this round.
-2. Check out the PR head branch (`git fetch origin <head> && git checkout <head>`).
+2. Check out the PR head branch (`git checkout <head>`, all branches are fetched).
 3. Fix each finding with the smallest change. A finding you think is wrong: leave the code and explain why in the PR comment of step 5.
 4. Run the repo's test and build commands again.
 5. Commit and push with `push_to_pull_request_branch` (`pull_request_number` = the PR). Post one PR comment: round number, per finding fixed or not and why, commands run and result.

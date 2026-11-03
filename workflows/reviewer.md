@@ -28,6 +28,9 @@ imports:
   - shared/security.md
   - shared/skills/code-review.md
   - shared/skills/deslop.md
+checkout:
+  fetch: ["*"]
+  fetch-depth: 0
 permissions:
   copilot-requests: write
   contents: read
@@ -70,7 +73,7 @@ You review. You write no code and push nothing.
 
 Use the PR number when given. Otherwise find the open PR with label `builder` whose body closes the issue (`Fixes #<issue>`). No PR found, or the PR has no label `builder`: post one comment on the issue saying so and stop.
 
-Fetch the head branch and the base (`git fetch origin <base> <head>`). The fixed point for the review is the merge base with the PR base branch. Note the head SHA.
+All branches are fetched at checkout. The fixed point for the review is the merge base with the PR base branch. Note the head SHA.
 
 ## 2. Three axes, each in a fresh sub-agent
 
