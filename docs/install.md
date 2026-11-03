@@ -15,7 +15,7 @@ The shortest path to a working bug-to-PR flow. Each step links to the details be
 | 3 | **Install.** In the target repo: `gh aw add` for `issue-triage`, `bug-fix`, `issue-builder`, `pr-reviewer`, then `gh aw compile`, commit and push. [Details](#2-install-into-a-target-repo) | You | 5 min |
 | 4 | **Builder network.** Add the repo's ecosystem (`node`, `dotnet`, ...) under `network.allowed` in `issue-builder.md`, compile again. Without it the builder cannot install packages. [Details](#builder-network) | You | 2 min |
 | 5 | **Labels.** Run the label loop once. [Details](#4-labels-once-per-target-repo) | You | 1 min |
-| 6 | **CI on builder PRs.** Fine-grained PAT with **Contents: Read and write** on the repo, stored as `GH_AW_CI_TRIGGER_TOKEN`. Skip it and CI does not run on builder PRs: then close and reopen a PR by hand. [Details](#builder-ci-personal-token) | You, approval by org owner if required | 5 min |
+| 6 | **CI on builder PRs.** Fine-grained PAT with **Contents: Read and write** on the repo, stored as `GH_AW_CI_TRIGGER_TOKEN`. Skip it and CI does not run on builder PRs: then close and reopen a PR by hand. [Details](#builder-ci-personal-token) | You make the token, a repo admin sets the secret, org owner approves if required | 5 min |
 | 7 | **Test.** New issue with label `triage`, then `agent-fix`. [Details](#6-check-it-works) | You | — |
 
 So you ask an org owner for steps 1 and 2 (and to approve the token in step 6). You need no other token: Copilot runs on the Actions `GITHUB_TOKEN`. Do not create `COPILOT_GITHUB_TOKEN`, `APP_ID`, `APP_PRIVATE_KEY` or `AW_CORE_ISSUES_TOKEN` for the quick start.
@@ -184,7 +184,7 @@ Every write runs on the Actions `GITHUB_TOKEN`, and GitHub starts no workflow fr
    - **Permissions** → **Repository permissions** → **Contents**: **Read and write**. Leave the rest. **Metadata: Read** is added automatically.
    - **Generate token**, copy the `github_pat_...` value.
 2. Org requires approval for fine-grained tokens: the token stays *pending* until an org owner approves it at `https://github.com/organizations/<org>/settings/personal-access-tokens/pending_requests`. That is one click for the owner.
-3. Store it in the target repo. `gh` asks for the value:
+3. Store it in the target repo (needs admin on the repo). The token's own name in GitHub can be anything; the secret name must be exactly `GH_AW_CI_TRIGGER_TOKEN`, because gh-aw looks it up by that name. `gh` asks for the value:
 
    ```bash
    gh secret set GH_AW_CI_TRIGGER_TOKEN --repo <org>/<target-repo>
