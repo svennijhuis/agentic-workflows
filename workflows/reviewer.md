@@ -16,6 +16,9 @@ on:
         required: true
         type: string
         default: "1"
+# Hard loop cap: review rounds 1 to 3 only, so the builder gets at most two send-backs.
+if: >-
+  github.event.inputs.round == '1' || github.event.inputs.round == '2' || github.event.inputs.round == '3'
 max-ai-credits: 50
 max-daily-ai-credits: 200
 max-turns: 40
@@ -89,7 +92,7 @@ A finding counts when it is concrete and on a changed line: a hard standards bre
 
 ## 3. Outcome
 
-Read earlier reviews on this PR from this workflow to see what was asked before.
+Read earlier reviews on this PR from this workflow to see what was asked before. The round is the larger of the input and the number of this workflow's earlier `REQUEST_CHANGES` reviews plus 1, so a wrong input cannot reset the count.
 
 1. **Clean** (no findings): submit a `COMMENT` review whose body starts with `Reviewer: klaar voor Sven.`, then the head SHA, the round, and one line per axis. No inline comments.
 2. **Findings in round 1 or 2**: one inline review comment per finding on its line, naming the axis and the concrete fix (max 20). Submit `REQUEST_CHANGES` with a short list per axis. Then emit `dispatch_workflow` for `builder` with inputs `pr_number` = the PR and `round` = this round.

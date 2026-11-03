@@ -19,6 +19,10 @@ on:
         description: Fix round (1 or 2). Only with pr_number.
         required: false
         type: string
+# Hard loop cap: a new build (issue, no round) or fix round 1 or 2 on a PR. Anything else does not start.
+if: >-
+  (github.event.inputs.issue_number != '' && github.event.inputs.pr_number == '' && github.event.inputs.round == '') ||
+  (github.event.inputs.pr_number != '' && (github.event.inputs.round == '1' || github.event.inputs.round == '2'))
 max-ai-credits: 50
 max-daily-ai-credits: 200
 max-turns: 60
@@ -87,7 +91,7 @@ Read `AGENTS.md` first when the repo has one. Its rules win over this file.
 
 ## Mode B: PR number plus round (fix)
 
-1. Read the PR, its diff and the latest `REQUEST_CHANGES` review from the reviewer with its inline comments. Those findings are the work list for this round.
+1. Read the PR, its diff and the latest `REQUEST_CHANGES` review from the reviewer with its inline comments. Those findings are the work list for this round. Count the reviewer's `REQUEST_CHANGES` reviews on this PR: when that count is not equal to the round, post one PR comment with both numbers and stop.
 2. Check out the PR head branch (`git checkout <head>`, all branches are fetched).
 3. Fix each finding with the smallest change. A finding you think is wrong: leave the code and explain why in the PR comment of step 5.
 4. Run the repo's test and build commands again.

@@ -101,7 +101,8 @@ Builder:
 Reviewer:
 
 - Three axes, each in its own inline sub-agent with a fresh context: **Standards** (`code-review` skill, repo rules plus smell baseline), **Spec** (`code-review` skill, does the diff do what the issue or ticket asks, not more), **Deslop** (`deslop` skill). Parallel when the engine allows, otherwise one after another in the same run.
-- Rounds: 1 after the build, 2 and 3 after fix rounds. So the builder gets at most two send-backs.
+- Rounds: 1 after the build, 2 and 3 after fix rounds. So the builder gets at most two send-backs: at most 3 builder runs and 3 reviewer runs per PR.
+- No endless loop: an `if:` on both workflows lets the builder start only for a new build or fix round 1 or 2, and the reviewer only for round 1 to 3. On top, both count the reviewer's earlier `REQUEST_CHANGES` reviews instead of trusting the round input.
 - A clean review supersedes earlier `REQUEST_CHANGES` reviews from this workflow (`supersede-older-reviews`).
 
 PRs opened with `GITHUB_TOKEN` do not trigger `pull_request` workflows, which is why the builder starts the reviewer through dispatch.
