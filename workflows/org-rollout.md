@@ -26,7 +26,7 @@ permissions:
   contents: read
 steps:
   - name: Install gh-aw
-    run: gh extension install github/gh-aw
+    run: gh extension install github/gh-aw --pin v0.93.4
     env:
       GH_TOKEN: ${{ github.token }}
 tools:
