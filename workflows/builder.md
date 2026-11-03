@@ -96,7 +96,7 @@ Read `AGENTS.md` first when the repo has one, then `.github/copilot-instructions
    - Find the root cause and fix it there. A guard is a fix only when the state it handles is legitimate.
    - Commit the failing regression test before the fix, so history shows red then green.
    - When the issue also has `security`: fix at the trust boundary, and keep exploit steps, payloads and secrets out of commits, the PR title and body.
-5. Run the repo's own test and build commands (from `AGENTS.md`, the Makefile, package scripts or CI files). Fix what you broke. Keep the exact commands and their result for the PR body. For a bug, Evidence has the red-then-green output of the step 4 command and the root cause in one sentence.
+5. Run the repo's own test and build commands (from `AGENTS.md`, the Makefile, package scripts or CI files). Fix what you broke. The unit tests must be green before you open the PR; never open it, or stop, on a red run. Keep the exact commands and their result for the PR body. For a bug, Evidence has the red-then-green output of the step 4 command and the root cause in one sentence.
 6. Open one PR with `create_pull_request` on that branch. Title: the issue title. Body follows `Skill: pr` (Summary, Evidence, Merge Danger), then a line `Fixes #<issue>`, and when there is a parent map a line `Parent: #<parent>`.
 7. Then emit `dispatch_workflow` for `reviewer` with inputs `issue_number` = the issue and `round` = `1`. The PR is created first, so the reviewer finds it.
 
@@ -105,12 +105,13 @@ Read `AGENTS.md` first when the repo has one, then `.github/copilot-instructions
 1. Read the PR, its diff and the reviewer's latest review whose body starts with `Reviewer: changes needed, round <round>.`, with its inline comments. Those findings are the work list for this round. Count the reviewer's reviews on this PR whose body starts with `Reviewer: changes needed`: when that count is not equal to the round, post one PR comment with both numbers and stop.
 2. Check out the PR head branch (`git checkout <head>`, all branches are fetched).
 3. Fix each finding with the smallest change. A finding you think is wrong: leave the code and explain why in the PR comment of step 5.
-4. Run the repo's test and build commands again.
+4. Run the repo's test and build commands again. The unit tests must be green before you push; fix until they are.
 5. Commit and push with `push_to_pull_request_branch` (`pull_request_number` = the PR). Post one PR comment: round number, per finding fixed or not and why, commands run and result.
 6. Then emit `dispatch_workflow` for `reviewer` with inputs `pr_number` = the PR and `round` = round plus 1.
 
 ## Always
 
 - One issue, one PR. Stay inside what the issue asks.
+- Run the repo's unit tests as often as needed. Never stop on a red run: green first. When a failure is outside your change and you cannot fix it, say so in the PR body (Mode A) or round comment (Mode B) with the command and output.
 - Normal pushes only. Never merge, never approve, never close issues.
 - Every run ends with the reviewer started, except when you stopped with a question or an existing PR in Mode A step 1 or 2.
