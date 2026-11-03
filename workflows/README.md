@@ -58,7 +58,7 @@ flowchart LR
 
 Four workflows copied as is from [pascalvanderheiden/turbo-agent-skills-cli](https://github.com/pascalvanderheiden/turbo-agent-skills-cli/tree/122b266d451eb8d06a8b96a0933c788c2fb0ac98/.github/workflows) at `122b266`, into `.github/workflows/`. Renamed to `wf-to-spec.md`, `wf-spec.md`, `wf-plan.md`, `wf-delivery.md` (concurrency groups `wf-*`, markers `wf-spec:v1` and `wf-plan:v1`). Labels stay the same, they are the contract between the four. Each file has a `# Source:` line with path and SHA.
 
-Skills needed (copied as is, with `Source:` line): [.agents/skills/to-spec](../.agents/skills/to-spec/SKILL.md) for `wf-spec` and [.agents/skills/to-tickets](../.agents/skills/to-tickets/SKILL.md) for `wf-plan`. Without them the chain does not work. `release.yml` and `pages.yml` belong to that project and are left out. That repo has no license; Sven confirmed copying is fine (2026-11-03).
+Skills come remote from [mattpocock/skills](https://github.com/mattpocock/skills/tree/4ae2317ddb22b046e26455e4f9c9b3aaaf62212d/skills/engineering) (MIT), pinned at `4ae2317ddb22b046e26455e4f9c9b3aaaf62212d`, as gh-aw cross-repo imports (`owner/repo/path@ref`, fetched at compile time): `skills/engineering/to-spec/SKILL.md` in `wf-spec` and `skills/engineering/to-tickets/SKILL.md` in `wf-plan`. No copy in this repo. To update: bump the SHA in both imports and recompile. To make the map issue yourself, use the `skills/engineering/wayfinder` skill from the same repo. `release.yml` and `pages.yml` belong to that project and are left out. That repo has no license; Sven confirmed copying is fine (2026-11-03).
 
 ```mermaid
 flowchart LR

@@ -1,6 +1,6 @@
 ---
 # Source: pascalvanderheiden/turbo-agent-skills-cli/.github/workflows/wayfinder-plan.md@122b266d451eb8d06a8b96a0933c788c2fb0ac98
-# Copied as is. Changed only: renamed to wf-* (file, concurrency group, markers), schedule removed (Sven house rules).
+# Copied as is. Changed only: renamed to wf-* (file, concurrency group, markers), skill import remote from mattpocock/skills, schedule removed (Sven house rules).
 description: Split queued specifications into ordered implementation tickets.
 intent: Publish a dependency-aware implementation plan whose tickets are traceable to the completed wayfinder map and immediately usable by coding agents.
 on:
@@ -23,7 +23,7 @@ tools:
     mode: gh-proxy
     toolsets: [default]
 skills:
-  - .agents/skills/to-tickets
+  - mattpocock/skills/skills/engineering/to-tickets/SKILL.md@4ae2317ddb22b046e26455e4f9c9b3aaaf62212d
 safe-outputs:
   create-issue:
     labels: [ready-for-agent]
