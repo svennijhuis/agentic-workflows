@@ -2,8 +2,6 @@
 description: 'Skill to-tickets, local copy of mattpocock/skills/skills/engineering/to-tickets@4ae2317.'
 ---
 
-<!-- Source: mattpocock/skills/skills/engineering/to-tickets@4ae2317ddb22b046e26455e4f9c9b3aaaf62212d (MIT License, Copyright (c) 2026 Matt Pocock). Body copied verbatim from SKILL.md, frontmatter dropped. To update: copy the new SKILL.md body here and bump the SHA. -->
-
 # Skill: to-tickets
 
 _Break a plan, spec, or the current conversation into a set of tracer-bullet tickets, each declaring its blocking edges, published to the configured tracker (edges as text in one file per ticket locally, or native blocking links on a real tracker)._

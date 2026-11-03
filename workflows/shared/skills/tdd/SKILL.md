@@ -2,8 +2,6 @@
 description: 'Skill tdd, local copy of mattpocock/skills/skills/engineering/tdd@4ae2317.'
 ---
 
-<!-- Source: mattpocock/skills/skills/engineering/tdd@4ae2317ddb22b046e26455e4f9c9b3aaaf62212d (MIT License, Copyright (c) 2026 Matt Pocock). Body copied verbatim from SKILL.md, frontmatter dropped. tests.md, mocking.md appended below as sections. To update: copy the new SKILL.md body here and bump the SHA. -->
-
 # Skill: tdd
 
 _Test-driven development. Use when the user wants to build features or fix bugs test-first, mentions "red-green-refactor", or wants integration tests._

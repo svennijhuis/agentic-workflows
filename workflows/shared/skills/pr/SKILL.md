@@ -2,8 +2,6 @@
 description: 'Skill pr, local copy of mattpocock/skills/skills/engineering/pr@4ae2317.'
 ---
 
-<!-- Source: mattpocock/skills/skills/engineering/pr@4ae2317ddb22b046e26455e4f9c9b3aaaf62212d (MIT License, Copyright (c) 2026 Matt Pocock. Summary visuals credit Dex Horthy (Humanlayer, show-me skill)). Body copied verbatim from SKILL.md, frontmatter dropped. CREDITS.md appended below as sections. To update: copy the new SKILL.md body here and bump the SHA. -->
-
 # Skill: pr
 
 _Use when writing a PR body._

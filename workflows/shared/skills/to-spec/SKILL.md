@@ -2,8 +2,6 @@
 description: 'Skill to-spec, local copy of mattpocock/skills/skills/engineering/to-spec@4ae2317.'
 ---
 
-<!-- Source: mattpocock/skills/skills/engineering/to-spec@4ae2317ddb22b046e26455e4f9c9b3aaaf62212d (MIT License, Copyright (c) 2026 Matt Pocock). Body copied verbatim from SKILL.md, frontmatter dropped. To update: copy the new SKILL.md body here and bump the SHA. -->
-
 # Skill: to-spec
 
 _Turn the current conversation into a spec and publish it to the project issue tracker: no interview, just synthesis of what you've already discussed._
