@@ -43,7 +43,7 @@ flowchart TD
   BU --> RV[reviewer<br/>standards, spec, deslop, blast radius<br/>security when gated]
   RV -->|findings, round 1 or 2| BU
   RV -->|findings, round 3| NH[label needs-help<br/>comment why, stop]
-  RV -->|clean| OK[COMMENT: ready to merge<br/>PR already open, no label]
+  RV -->|clean| OK[COMMENT: ready to merge<br/>label ready-to-merge]
   OK --> M[A maintainer merges]
   NH --> M
   M --> RE[retro<br/>run logs of the whole flow]
@@ -58,7 +58,7 @@ Auth and secrets, names only (steps in [docs/install.md](../docs/install.md)):
 - Engine: built for an org. Every workflow sets `copilot-requests: write`, so Copilot runs on the Actions `GITHUB_TOKEN` and is billed to the org. Needs org Copilot policy "Allow use of Copilot CLI billed to the organization". `COPILOT_GITHUB_TOKEN` is then ignored for inference and not needed.
 - `AW_CORE_ISSUES_TOKEN`: only for `retro`, a fine-grained token with Issues read and write on `svennijhuis/agentic-workflows`.
 
-Labels: `triage`, `bug`, `wayfinder`, `security`, `needs-info`, `duplicate`, `agent-fix`, `blocked`, `wayfinder:map`, `to-spec`, `specced`, `to-tickets`, `planned`, `ready-for-agent`, plus `builder` (on every builder PR) and `needs-help` (set by the reviewer after round 3). Create `builder`, `needs-help`, `security`, `needs-info` and `duplicate` in the target repo once. There is no "ready for merge" label: a clean review is the comment review `Reviewer: ready to merge.` on the PR, and the PR already exists by then.
+Labels: `triage`, `bug`, `wayfinder`, `security`, `needs-info`, `duplicate`, `agent-fix`, `blocked`, `wayfinder:map`, `to-spec`, `specced`, `to-tickets`, `planned`, `ready-for-agent`, plus `builder` (on every builder PR) `needs-help` (set by the reviewer after round 3) and `ready-to-merge` (set by the reviewer on a clean review, next to the comment review `Reviewer: ready to merge.`). Create `builder`, `needs-help`, `ready-to-merge`, `security`, `needs-info` and `duplicate` in the target repo once.
 
 ### Handoffs
 
@@ -129,7 +129,7 @@ flowchart LR
 flowchart LR
   I[issue_number] --> BA[builder mode A<br/>branch builder/issue-n<br/>tests + build<br/>PR: Summary, Evidence,<br/>Merge Danger, Fixes #n]
   BA -->|issue_number, round 1| R[reviewer]
-  R -->|clean| C[COMMENT<br/>Reviewer: ready to merge.]
+  R -->|clean| C[COMMENT<br/>Reviewer: ready to merge.<br/>+ label ready-to-merge]
   R -->|findings, round 1-2<br/>COMMENT changes needed + inline| BB[builder mode B<br/>pr_number, round<br/>push fix to same branch]
   BB -->|pr_number, round + 1| R
   R -->|findings, round 3| NH[needs-help + comment<br/>open points per axis,<br/>what each round tried,<br/>what is needed]
