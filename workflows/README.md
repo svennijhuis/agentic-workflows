@@ -22,6 +22,7 @@ Each file **must** have an `on:` trigger. Kebab-case stem becomes the `gh aw add
 | [retro.md](retro.md) | After a builder PR is merged: read the run logs, open a core issue when the flow can do better |
 | [wf-to-spec.md](wf-to-spec.md), [wf-spec.md](wf-spec.md), [wf-plan.md](wf-plan.md), [wf-delivery.md](wf-delivery.md) | Wayfinder chain: map to spec, tickets, builder per ticket |
 | [agents-md-sync.md](agents-md-sync.md) | Write or update AGENTS.md from main commits |
+| [token-audit.md](token-audit.md) | Daily AIC report per workflow and per flow, trend in repo-memory |
 
 Shared fragments: [shared/](shared/). Validate in the layout of a target repo: `gh aw compile --dir workflows` fails on `dispatch-workflow`, because the compiler looks for dispatch targets in `.github/workflows/`. See the root [README](../README.md#validate).
 
@@ -32,35 +33,71 @@ flowchart TD
   T[label triage] --> TR[issue-triage<br/>label + reason comment]
   TR -->|bug| B[label bug]
   TR -->|wayfinder<br/>in doubt: wayfinder| W[label wayfinder]
-  W -->|Sven runs /wayfinder locally<br/>sets wayfinder:map + decisions| WM[wayfinder:map]
-  B -->|Sven adds agent-fix| IF[bug-fix<br/>blocker check]
-  WM -->|decisions closed| CH[wf-to-spec, wf-spec, wf-plan]
-  CH --> DL[wf-delivery<br/>next unblocked ticket]
+  W -->|A maintainer runs /wayfinder locally<br/>sets wayfinder:map + decisions| WM[wayfinder:map]
+  B -->|A maintainer adds agent-fix| IF[bug-fix<br/>blocker check]
+  WM -->|decisions closed| CH[wf-to-spec, wf-spec, wf-plan<br/>each dispatches the next]
+  CH -->|dispatch| DL[wf-delivery<br/>next unblocked ticket]
   IF --> BU[builder<br/>PR on builder/*, label builder]
   DL --> BU
   BU --> RV[reviewer<br/>standards, spec, deslop]
   RV -->|findings, round 1 or 2| BU
   RV -->|findings, round 3| NH[label needs-help<br/>comment why, stop]
-  RV -->|clean| OK[COMMENT: klaar voor Sven<br/>PR already open, no label]
-  OK --> M[Sven merges]
+  RV -->|clean| OK[COMMENT: ready to merge<br/>PR already open, no label]
+  OK --> M[A maintainer merges]
   NH --> M
   M --> RE[retro<br/>run logs of the whole flow]
   RE -->|core can do better| CI[issue in<br/>svennijhuis/agentic-workflows]
   M -->|wayfinder ticket| DL
 ```
 
-Sven always merges. Nothing in this folder merges, approves, or assigns Copilot.
+A maintainer always merges. Nothing in this folder merges, approves, or assigns Copilot.
 
 Auth and secrets, names only:
 
 - Engine: built for an org. Every workflow sets `copilot-requests: write`, so Copilot runs on the Actions `GITHUB_TOKEN` and is billed to the org. Needs org Copilot policy "Allow use of Copilot CLI billed to the organization". `COPILOT_GITHUB_TOKEN` is then ignored for inference and not needed.
 - `AW_CORE_ISSUES_TOKEN`: only for `retro`, a fine-grained token with Issues read and write on `svennijhuis/agentic-workflows`.
 
-Labels: `triage`, `bug`, `wayfinder`, `agent-fix`, `blocked`, `wayfinder:map`, `to-spec`, `specced`, `to-tickets`, `planned`, `ready-for-agent`, plus `builder` (on every builder PR) and `needs-help` (set by the reviewer after round 3). Create `builder` and `needs-help` in the target repo once. There is no "ready for merge" label: a clean review is the comment `Reviewer: klaar voor Sven.` on the PR, and the PR already exists by then.
+Labels: `triage`, `bug`, `wayfinder`, `agent-fix`, `blocked`, `wayfinder:map`, `to-spec`, `specced`, `to-tickets`, `planned`, `ready-for-agent`, plus `builder` (on every builder PR) and `needs-help` (set by the reviewer after round 3). Create `builder` and `needs-help` in the target repo once. There is no "ready for merge" label: a clean review is the comment review `Reviewer: ready to merge.` on the PR, and the PR already exists by then.
+
+### Handoffs
+
+Every write by a workflow uses the Actions `GITHUB_TOKEN`, and GitHub starts no workflow from an event made with that token: a label set by `wf-spec` does not start `wf-plan`. A `workflow_dispatch` is the exception. So every handoff is a `dispatch_workflow`: wf-to-spec to wf-spec to wf-plan to wf-delivery, bug-fix and wf-delivery to builder, builder and reviewer to each other. The label stays as the state; the dispatch is the start signal. Human events (a label, a comment, a merge) start workflows as usual.
+
+### Markers
+
+Visible lines at the start of a comment or review body, written by `github-actions[bot]`, are the contract between the workflows. Not HTML comments: GitHub strips those from review bodies.
+
+| Marker | Written by | Read by |
+| --- | --- | --- |
+| `Builder started: <run>` | bug-fix, wf-delivery, with the dispatch | bug-fix, wf-delivery: a build runs, start no second one (after 90 minutes without PR it counts as failed) |
+| `Builder question:` | builder, when it stops on an unclear issue | wf-delivery: wait until a human comments, then start the builder again |
+| `Reviewer: changes needed, round <n>.` | reviewer, findings in round 1 or 2 | builder (work list, round check), reviewer (round count) |
+| `Reviewer: ready to merge.` | reviewer, clean | wf-delivery: ticket waits for a maintainer's merge |
+
+### Cost caps
+
+1 AI Credit (AIC) is $0.01, an estimate from public model pricing. gh-aw defaults are 1000 AIC per run and 5000 per workflow per day; these start values sit below that and get tuned from [token-audit](#token-audit) after one or two weeks of real runs.
+
+| Workflow | `max-ai-credits` per run | `max-daily-ai-credits` | `max-turns` | `timeout-minutes` |
+| --- | --- | --- | --- | --- |
+| issue-triage | 50 | 500 | 20 | 10 |
+| bug-fix, wf-to-spec | 75 | 750 | 30 | 10 |
+| wf-delivery | 200 | 2000 | 60 | 20 |
+| wf-spec | 500 | 3000 | 100 | 30 |
+| wf-plan | 500 | 3000 | 120 | 40 |
+| builder | 1000 | 6000 | 200 | 50 |
+| reviewer (three sub-agents) | 600 | 4000 | 120 | 30 |
+| retro | 300 | 1500 | 60 | 20 |
+| agents-md-sync | 300 | 900 | 80 | 20 |
+| token-audit | 150 | 300 | 40 | 15 |
+
+gh-aw skips `max-daily-ai-credits` for a run dispatched by another agentic workflow. For builder, reviewer and the chain steps the per-run cap and the round limit are the real bound.
+
+Empty runs cost nothing: `if:` filters on the event (bot comments never start wf-delivery, wf-spec or wf-plan), and [shared/has-work.md](shared/has-work.md) runs `gh issue list` before the engine and writes a `noop` when no open issue carries the labels the workflow needs. The copilot harness then exits without inference. `gh issue list` reads live data; the search API behind `skip-if-no-match` can lag behind a label the previous step set a moment ago.
 
 ## issue-triage
 
-[issue-triage.md](issue-triage.md) runs on the label `triage` (or manually with an issue number). It picks `bug` or `wayfinder`, sets that label and posts one comment with the reason. For a bug it asks for repro steps when they are missing. It starts nothing: no tokens spent until Sven adds the next label.
+[issue-triage.md](issue-triage.md) runs on the label `triage` (or manually with an issue number). It picks `bug` or `wayfinder`, sets that label and posts one comment with the reason. For a bug it asks for repro steps when they are missing. It starts nothing: no tokens spent until a maintainer adds the next label.
 
 ## bug-fix
 
@@ -73,8 +110,9 @@ flowchart LR
   B -->|no| D[dispatch builder<br/>issue_number]
 ```
 
-- Blocked: the label `blocked`, an open `blocked_by` dependency, or a predecessor PR that is not merged. Clear the blockers and add `agent-fix` again.
-- One active ticket at a time: stops when the issue already has an open `builder` PR, or another `agent-fix` issue has one.
+- Blocked: the label `blocked`, an open `blocked_by` dependency, or a predecessor PR that is not merged. Nothing re-checks when a blocker clears: remove and add `agent-fix` again.
+- One active ticket at a time: stops when this or another `agent-fix` issue has an open `builder` PR, a `Builder started:` comment under 90 minutes old without a PR, or an unanswered `Builder question:`.
+- With the dispatch it posts `Builder started: <run>` on the issue.
 
 ## builder and reviewer
 
@@ -84,8 +122,8 @@ flowchart LR
 flowchart LR
   I[issue_number] --> BA[builder mode A<br/>branch builder/issue-n<br/>tests + build<br/>PR: Summary, Evidence,<br/>Merge Danger, Fixes #n]
   BA -->|issue_number, round 1| R[reviewer]
-  R -->|clean| C[COMMENT<br/>Reviewer: klaar voor Sven.]
-  R -->|findings, round 1-2<br/>REQUEST_CHANGES + inline| BB[builder mode B<br/>pr_number, round<br/>push fix to same branch]
+  R -->|clean| C[COMMENT<br/>Reviewer: ready to merge.]
+  R -->|findings, round 1-2<br/>COMMENT changes needed + inline| BB[builder mode B<br/>pr_number, round<br/>push fix to same branch]
   BB -->|pr_number, round + 1| R
   R -->|findings, round 3| NH[needs-help + comment<br/>open points per axis,<br/>what each round tried,<br/>what is needed]
 ```
@@ -93,8 +131,8 @@ flowchart LR
 Builder:
 
 - Skills: `implement`, `tdd`, `pr` (imported from [shared/skills/](shared/skills/)).
-- Mode A (issue number): smallest change, the repo's own tests and build, one non-draft PR on `builder/issue-<n>` with label `builder`. Body per the `pr` skill plus `Fixes #n`, and `Parent: #map` for wayfinder tickets. Asks one question on the issue instead of guessing.
-- Mode B (PR number plus round): reads the open `REQUEST_CHANGES` review, pushes the fix to the same branch, posts a round comment.
+- Mode A (issue number): smallest change, the repo's own tests and build, one non-draft PR on `builder/issue-<n>` with label `builder`. Body per the `pr` skill plus `Fixes #n`, and `Parent: #map` for wayfinder tickets. Asks one question on the issue (`Builder question:`) instead of guessing. wf-delivery restarts it after a human answer; for a bug, a maintainer re-adds `agent-fix`.
+- Mode B (PR number plus round): reads the latest `Reviewer: changes needed, round <n>.` review, pushes the fix to the same branch, posts a round comment.
 - Always starts the reviewer at the end. The PR is emitted before the dispatch, and a failed PR cancels the dispatch.
 - Network: gh-aw defaults. A target repo that installs packages adds its ecosystem (for example `node`) under `network.allowed` in its copy.
 
@@ -102,14 +140,14 @@ Reviewer:
 
 - Three axes, each in its own inline sub-agent with a fresh context: **Standards** (`code-review` skill, repo rules plus smell baseline), **Spec** (`code-review` skill, does the diff do what the issue or ticket asks, not more), **Deslop** (`deslop` skill). Parallel when the engine allows, otherwise one after another in the same run.
 - Rounds: 1 after the build, 2 and 3 after fix rounds. So the builder gets at most two send-backs: at most 3 builder runs and 3 reviewer runs per PR.
-- No endless loop: an `if:` on both workflows lets the builder start only for a new build or fix round 1 or 2, and the reviewer only for round 1 to 3. On top, both count the reviewer's earlier `REQUEST_CHANGES` reviews instead of trusting the round input.
-- A clean review supersedes earlier `REQUEST_CHANGES` reviews from this workflow (`supersede-older-reviews`).
+- No endless loop: an `if:` on both workflows lets the builder start only for a new build or fix round 1 or 2, and the reviewer only for round 1 to 3. On top, both count the reviewer's earlier `Reviewer: changes needed` reviews instead of trusting the round input.
+- Every review is a `COMMENT` (`allowed-events: [COMMENT]`). The builder opens the PR as `github-actions[bot]` and the reviewer reviews as the same account; GitHub rejects `REQUEST_CHANGES` on your own PR. Reviews therefore never block a merge in branch protection: a maintainer is the gate.
 
 PRs opened with `GITHUB_TOKEN` do not trigger `pull_request` workflows, which is why the builder starts the reviewer through dispatch.
 
 ## retro
 
-[retro.md](retro.md) runs when Sven merges a PR with label `builder` (or manually with a PR number).
+[retro.md](retro.md) runs when a maintainer merges a PR with label `builder` (or manually with a PR number).
 
 - Skills: `retro` and `writing-for-agents`.
 - Input: the run logs (`agentic-workflows` tools `logs` and `audit`, `actions: read`) of the whole flow for that PR: triage, bug-fix or the wf-* chain, every builder and reviewer round, plus the PR timeline.
@@ -127,7 +165,7 @@ Four workflows copied from [pascalvanderheiden/turbo-agent-skills-cli](https://g
 | [wf-plan.md](wf-plan.md) | `.github/workflows/wayfinder-plan.md` |
 | [wf-delivery.md](wf-delivery.md) | `.github/workflows/wayfinder-delivery.md` |
 
-That repo has no license; Sven confirmed copying is fine (2026-11-03).
+That repo has no license; the repo owner confirmed copying is fine (2026-11-03).
 
 ```mermaid
 flowchart LR
@@ -136,18 +174,19 @@ flowchart LR
   SP --> PL[wf-plan<br/>ordered sub-issues<br/>ready-for-agent + blocked_by<br/>to-tickets to planned]
   PL --> DL[wf-delivery<br/>first unblocked ticket<br/>dispatch builder]
   DL --> BR[builder + reviewer]
-  BR -->|clean review on current head| SV[Sven merges]
+  BR -->|clean review on current head| SV[A maintainer merges]
   SV --> DL
 ```
 
-Start: run `/wayfinder` locally. It creates the parent issue with label `wayfinder:map` and the decision sub-issues. Alternative: `to-spec` on an ordinary issue to skip the decision step. The workflows set the rest. Nobody opens the builder PR by hand; the builder does.
+Start: run `/wayfinder` locally. It creates the parent issue with label `wayfinder:map` and the decision sub-issues. It writes with your own `gh` login, so its events (closing a decision ticket) start workflows as usual. Use the GitHub tracker of `/setup-matt-pocock-skills` with native sub-issues: wf-to-spec reads the map's sub-issues, not the task-list fallback. wf-to-spec only wakes on a closed or reopened `wayfinder:*` ticket or the `wayfinder:map` label; map edits, new tickets and claims start nothing. Alternative: `to-spec` on an ordinary issue to skip the decision step. The workflows set the rest. Nobody opens the builder PR by hand; the builder does.
 
 Changed from the source (house rules, applied to all four):
 
 - Renamed to `wf-*`: file, concurrency group and markers (`wf-spec:v1`, `wf-plan:v1`).
-- `schedule: every 30 minutes` removed from all four. Event triggers and `workflow_dispatch` stay.
+- `schedule: every 30 minutes` removed from all four. Upstream used it to recover label events made with `GITHUB_TOKEN`; here each step dispatches the next instead. Event triggers and `workflow_dispatch` stay, filtered by `if:` and [shared/has-work.md](shared/has-work.md).
 - `wf-spec` and `wf-plan` import `to-spec` and `to-tickets` from [shared/skills/](shared/skills/).
-- `wf-delivery`: starts the builder per ticket (`issue_number`, `parent_issue`). The gate for a ticket is a clean reviewer review (`Reviewer: klaar voor Sven.`) on the current head, then it waits for Sven's merge. A `needs-help` PR waits for Sven. The Copilot assignment, draft-to-ready, Copilot code review wait and merge text are gone.
+- `wf-delivery`: starts the builder per ticket (`issue_number`, `parent_issue`). With the dispatch it posts `Builder started: <run>` on the ticket. A ticket is active while its builder PR is open, its build runs (under 90 minutes) or its `Builder question:` is unanswered; a build without PR after 90 minutes is retried once, then reported to a maintainer. The gate for a ticket is a clean reviewer review (`Reviewer: ready to merge.`) on the current head, then it waits for a maintainer's merge. A `needs-help` PR waits for a maintainer. The Copilot assignment, draft-to-ready, Copilot code review wait and merge text are gone.
+- All four: `shared/defaults.md` (pinned engine), caps, and GitHub tools as `gh-proxy` with explicit toolsets instead of `[default]`.
 
 ### Version lock
 
@@ -169,9 +208,18 @@ flowchart LR
   C --> F[set marker to main SHA]
   E --> F
   F --> G[one PR, only AGENTS.md<br/>table: commit to change]
-  G --> H[Sven merges]
+  G --> H[A maintainer merges]
 ```
 
 - Marker: last line `<!-- agents-md-sync: <sha> -->`. No marker yet: the file counts as handwritten, the agent only adds what is missing.
-- The PR may only change `AGENTS.md` (`allowed-files`). `AGENTS.md` is a protected file in gh-aw, so the PR gets a caution block and a request-changes review: expected, Sven reviews and merges.
+- The PR may only change `AGENTS.md` (`allowed-files`). `AGENTS.md` is a protected file in gh-aw, so the PR gets a caution block and a request-changes review: expected, a maintainer reviews and merges.
 - Nothing changed: no PR.
+
+## token-audit
+
+[token-audit.md](token-audit.md) reports AI Credit use. Start: daily around 07:00 (fuzzy schedule) and manual. Adapted from gh-aw's own `agentic-token-audit` (origin `githubnext/agentic-ops@c611242`, MIT).
+
+- A pre-agent step runs `gh aw logs --start-date -1d --json` and aggregates with `jq`: per workflow (runs, total, average and max AIC, turns, failures) and per flow (gh-aw episodes, such as triage to builder to reviewer rounds). No runs in the window: `noop`, no inference.
+- The agent keeps a daily snapshot and a rolling 90-day summary on the branch `memory/token-audit` (repo-memory) and writes one issue `[token-audit] ...`. Older ones are closed; each expires after 7 days.
+- Observations: a workflow above 30% of the total, a run at 80% of its cap or more, a workflow that stays under 20% of its cap (the cap can come down), failures. Use those to tune the [cost caps](#cost-caps).
+- Upstream also draws charts with Python (pandas, matplotlib, seaborn from PyPI). Left out here to keep the network closed.

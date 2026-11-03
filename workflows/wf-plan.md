@@ -7,6 +7,15 @@ on:
   issue_comment:
     types: [created]
   workflow_dispatch:
+# Only a human event (label, edit, comment) on a specced issue, or a dispatch from wf-spec.
+if: >-
+  github.event_name == 'workflow_dispatch' ||
+  (github.event.sender.type != 'Bot' &&
+   contains(github.event.issue.labels.*.name, 'specced'))
+max-ai-credits: 500
+max-daily-ai-credits: 3000
+max-turns: 120
+timeout-minutes: 40
 concurrency:
   group: wf-plan
   queue: max
@@ -19,8 +28,12 @@ permissions:
 tools:
   github:
     mode: gh-proxy
-    toolsets: [default]
+    toolsets: [repos, issues]
 imports:
+  - shared/defaults.md
+  - uses: shared/has-work.md
+    with:
+      label-sets: "specced,to-tickets,-planned|specced,to-plan,-planned"
   - shared/skills/to-tickets/SKILL.md
 safe-outputs:
   create-issue:
@@ -45,6 +58,9 @@ safe-outputs:
     target: "*"
     required-labels: [specced]
     max: 1
+  dispatch-workflow:
+    workflows: [wf-delivery]
+    max: 1
   noop:
     report-as-issue: false
     max: 1
@@ -56,8 +72,9 @@ network:
 
 Find the oldest open issue labelled `specced` and either `to-tickets` or the
 legacy alias `to-plan`, excluding `planned`. Paginate candidates and native
-sub-issues. Do not require a triggering issue: schedules and manual dispatch
-must recover missed or bot-generated label events. Ordinary issues as well as
+sub-issues. Do not require a triggering issue: the dispatch from `wf-spec` and
+manual dispatch carry no issue, and bot-generated label events never start this
+workflow. Ordinary issues as well as
 wayfinder maps are supported.
 
 Read the complete spec from its body/comments. Recognize the marker
@@ -100,7 +117,11 @@ The replacement tool accepts ONE label to add and ONE to remove, not arrays.
 If both queue labels were present, remove the remaining one only after that
 transition. Never emit that
 label transition if any ticket or dependency edge is omitted from the outputs.
+After the label transition, emit `dispatch_workflow` for `wf-delivery` (no
+inputs). Labels set by this workflow do not start other workflows; the dispatch
+does.
 
 Do not start the builder, merge pull requests, or close the map in this workflow.
 If no ticket needs creation and the existing plan is complete, only post the
-index if missing and transition the label. Otherwise call `noop`.
+index if missing, transition the label and dispatch `wf-delivery`. Otherwise
+call `noop`.

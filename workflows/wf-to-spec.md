@@ -5,10 +5,28 @@ on:
   issues:
     types: [closed, edited, labeled, unlabeled, reopened]
   workflow_dispatch:
+# /wayfinder (run locally with the user's gh) closes each decision ticket, then edits the map. Only a
+# closed or reopened wayfinder:* ticket, or the wayfinder:map label itself, can make a map ready.
+# Map edits, ticket creation and claims do not, so they start nothing.
+if: >-
+  github.event_name == 'workflow_dispatch' ||
+  ((github.event.action == 'closed' || github.event.action == 'reopened') &&
+   contains(toJSON(github.event.issue.labels.*.name), 'wayfinder:')) ||
+  ((github.event.action == 'labeled' || github.event.action == 'unlabeled') &&
+   github.event.label.name == 'wayfinder:map')
+max-ai-credits: 75
+max-daily-ai-credits: 750
+max-turns: 30
+timeout-minutes: 10
 concurrency:
   group: wf-to-spec
   queue: max
   job-discriminator: ${{ github.run_id }}
+imports:
+  - shared/defaults.md
+  - uses: shared/has-work.md
+    with:
+      label-sets: "wayfinder:map,-to-spec,-specced,-to-tickets,-to-plan,-planned"
 permissions:
   copilot-requests: write
   contents: read
@@ -17,7 +35,7 @@ permissions:
 tools:
   github:
     mode: gh-proxy
-    toolsets: [default]
+    toolsets: [repos, issues]
 safe-outputs:
   add-labels:
     target: "*"
@@ -26,6 +44,9 @@ safe-outputs:
     issues: true
     pull-requests: false
     create-if-missing: true
+    max: 1
+  dispatch-workflow:
+    workflows: [wf-spec]
     max: 1
   noop:
     report-as-issue: false
@@ -47,7 +68,10 @@ A map becomes eligible for the specification gate when:
 - the map itself is still open; and
 - it does not already have a spec marker or a follow-on planning state.
 
-When such a map is found, add the label `to-spec` and stop. Do not close the
+When such a map is found, add the label `to-spec`, then emit `dispatch_workflow`
+for `wf-spec` (no inputs), and stop. A label set by this workflow does not start
+other workflows (GitHub ignores events made with `GITHUB_TOKEN`); the dispatch
+does. Do not close the
 map, do not create a planning ticket, and do not publish a spec from this
 workflow.
 

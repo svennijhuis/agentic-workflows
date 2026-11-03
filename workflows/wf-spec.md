@@ -7,6 +7,16 @@ on:
   issue_comment:
     types: [created]
   workflow_dispatch:
+# Only a human event (label, edit, comment) on an issue in the spec queue, or a dispatch from wf-to-spec.
+if: >-
+  github.event_name == 'workflow_dispatch' ||
+  (github.event.sender.type != 'Bot' &&
+   (contains(github.event.issue.labels.*.name, 'to-spec') ||
+    contains(github.event.issue.labels.*.name, 'specced')))
+max-ai-credits: 500
+max-daily-ai-credits: 3000
+max-turns: 100
+timeout-minutes: 30
 concurrency:
   group: wf-spec
   queue: max
@@ -19,8 +29,12 @@ permissions:
 tools:
   github:
     mode: gh-proxy
-    toolsets: [default]
+    toolsets: [repos, issues]
 imports:
+  - shared/defaults.md
+  - uses: shared/has-work.md
+    with:
+      label-sets: "to-spec|specced,-to-tickets,-to-plan,-planned"
   - shared/skills/to-spec/SKILL.md
 safe-outputs:
   add-comment:
@@ -38,6 +52,9 @@ safe-outputs:
     target: "*"
     allowed: [ready-for-agent, to-spec, to-plan]
     max: 3
+  dispatch-workflow:
+    workflows: [wf-plan]
+    max: 1
   noop:
     report-as-issue: false
     max: 1
@@ -67,7 +84,8 @@ spec. Recognize `<!-- wf-spec:v1 -->` OR the complete `to-spec` template:
 the only identity. Do not mistake a decision-resolution comment for that spec.
 
 If a complete spec already exists, do not publish another. Repair the handoff by
-adding `specced` and `to-tickets` and removing stale queue labels, then stop.
+adding `specced` and `to-tickets` and removing stale queue labels, then emit
+`dispatch_workflow` for `wf-plan` and stop.
 Never requeue an issue labelled `planned`.
 
 Read the map body, all resolution comments on its closed decision sub-issues,
@@ -84,6 +102,8 @@ specification format, with this workflow-specific publishing override:
   `specced` and `to-tickets` (the limit is two labels, not one). Finally remove
   `to-spec`, `to-plan`, and `ready-for-agent` when present. Never emit `specced`
   without the ticket queue.
+- last, emit `dispatch_workflow` for `wf-plan` (no inputs). Labels set by this
+  workflow do not start other workflows; the dispatch does.
 
 Only mutate an issue selected by the eligibility rules above. A `specced` issue
 with no complete spec must be reported as inconsistent once, not sent to
