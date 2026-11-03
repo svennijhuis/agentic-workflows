@@ -53,16 +53,24 @@ tools:
   edit:
   bash: [":*"]
 safe-outputs:
+  # PRs and pushes made with GITHUB_TOKEN start no CI. An org GitHub App pushes one extra empty
+  # commit so the repo's pull_request checks run. Missing app keys: falls back to GITHUB_TOKEN, no CI.
+  github-app:
+    client-id: ${{ vars.APP_ID }}
+    private-key: ${{ secrets.APP_PRIVATE_KEY }}
+    ignore-if-missing: true
   create-pull-request:
     title-prefix: "[builder] "
     labels: [builder]
     draft: false
     allowed-branches: ["builder/*"]
     auto-close-issue: false
+    github-token-for-extra-empty-commit: app
     max: 1
   push-to-pull-request-branch:
     target: "*"
     required-labels: [builder]
+    github-token-for-extra-empty-commit: app
     max: 1
   add-comment:
     target: "*"

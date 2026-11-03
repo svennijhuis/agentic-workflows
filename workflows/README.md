@@ -9,7 +9,7 @@ git add .github/workflows
 git commit -m "add <name>"
 ```
 
-`gh aw add` also fetches the relative `imports:` (shared fragments and the skill copies under [shared/skills/](shared/skills/)) and every workflow named in `dispatch-workflow`, so `builder` brings `reviewer` and the other way round. Commit everything it writes under `.github/workflows/`, including `shared/`: imports are read at runtime from there.
+`gh aw add` also fetches the relative `imports:` (shared fragments and the skill copies under [shared/skills/](shared/skills/)) and every workflow named in `dispatch-workflow`, so `issue-builder` brings `pr-reviewer` and the other way round. Commit everything it writes under `.github/workflows/`, including `shared/`: imports are read at runtime from there.
 
 Each file **must** have an `on:` trigger. Kebab-case stem becomes the `gh aw add` id. Each workflow sets cost caps, permissions, and network in frontmatter.
 
@@ -57,9 +57,10 @@ Auth and secrets, names only (steps in [docs/install.md](../docs/install.md)):
 
 - Engine: built for an org. Every workflow sets `copilot-requests: write`, so Copilot runs on the Actions `GITHUB_TOKEN` and is billed to the org. Needs org Copilot policy "Allow use of Copilot CLI billed to the organization". `COPILOT_GITHUB_TOKEN` is then ignored for inference and not needed.
 - `NUGET_FEED_TOKEN` (secret) and `NUGET_FEED_URL`, `NUGET_FEED_USER` (variables): only for C# repos with a private NuGet feed, used by `shared/nuget-auth.md`, which you add to `issue-builder` in C# repos.
+- `APP_ID` (variable) and `APP_PRIVATE_KEY` (secret): org GitHub App for `issue-builder`, so builder PRs run the repo's CI. Optional: without them the builder falls back to `GITHUB_TOKEN` and CI does not start.
 - `AW_CORE_ISSUES_TOKEN`: only for `retro`, a fine-grained token with Issues read and write on `svennijhuis/agentic-workflows`.
 
-Labels: `triage`, `bug`, `wayfinder`, `security`, `needs-info`, `duplicate`, `agent-fix`, `blocked`, `wayfinder:map`, `to-spec`, `specced`, `to-tickets`, `planned`, `ready-for-agent`, plus `builder` (on every builder PR) `needs-help` (set by the reviewer after round 3) and `ready-to-merge` (set by the reviewer on a clean review, next to the comment review `Reviewer: ready to merge.`). Create `builder`, `needs-help`, `ready-to-merge`, `security`, `needs-info` and `duplicate` in the target repo once.
+Labels: `triage`, `bug`, `wayfinder`, `security`, `needs-info`, `duplicate`, `agent-fix`, `blocked`, `wayfinder:map`, `to-spec`, `specced`, `to-tickets`, `planned`, `to-plan`, `ready-for-agent`, plus `builder` (on every builder PR) `needs-help` (set by the reviewer after round 3) and `ready-to-merge` (set by the reviewer on a clean review, next to the comment review `Reviewer: ready to merge.`). Create `builder`, `needs-help`, `ready-to-merge`, `security`, `needs-info` and `duplicate` in the target repo once.
 
 ### Handoffs
 
@@ -67,7 +68,7 @@ Every write by a workflow uses the Actions `GITHUB_TOKEN`, and GitHub starts no 
 
 ### Markers
 
-Visible lines at the start of a comment or review body, written by `github-actions[bot]`, are the contract between the workflows. Not HTML comments: GitHub strips those from review bodies.
+Visible lines at the start of a comment or review body, written by `github-actions[bot]` (or the org's builder app, see [install guide](../docs/install.md#github-app-builder-prs-run-ci)), are the contract between the workflows. Not HTML comments: GitHub strips those from review bodies.
 
 | Marker | Written by | Read by |
 | --- | --- | --- |
@@ -145,16 +146,16 @@ Builder:
 - Mode B (PR number plus round): reads the latest `Reviewer: changes needed, round <n>.` review, pushes the fix to the same branch, posts a round comment.
 - Always starts the reviewer at the end. The PR is emitted before the dispatch, and a failed PR cancels the dispatch.
 - C#: add [shared/nuget-auth.md](shared/nuget-auth.md) (pre-agent step adds the private feed from `NUGET_FEED_URL`, `NUGET_FEED_USER` variables and the `NUGET_FEED_TOKEN` secret, then `dotnet restore`) (skips in repos without a C# project). The [dotnet-format hook](../hooks/README.md) runs `dotnet format` after each `.cs` edit; copy it into the target repo. Custom MCP server: see [install guide](../docs/install.md#custom-mcp-server).
-- Network: gh-aw defaults plus the `dotnet` ecosystem. The private feed host is added under `network.allowed` in the target repo copy. Other ecosystems (for example `node`) likewise.
+- Network: gh-aw `defaults` only. Add the repo's package ecosystem (for example `node`, `python`, `dotnet`) under `network.allowed` in the target repo copy, or install and test fail. `shared/nuget-auth.md` adds `dotnet`; the private feed host is added the same way.
 
 Reviewer:
 
 - Axes, each in its own inline sub-agent with a fresh context: **Standards** (`code-review` skill, repo rules including Copilot instruction files plus smell baseline), **Spec** (`code-review` skill, does the diff do what the issue or ticket asks, not more), **Deslop** (`deslop` skill, plus: a comment stays only for a non-obvious why), **Blast radius** (what breaks outside the diff, and the one fact the change is safe because of, proven or unproven), and **Security** only when the diff touches a trust boundary (endpoint, auth, permissions or scopes, workflow files, dependencies, secrets or config, shell, file paths, network, deserialization): OWASP Top 10 plus widened scope, findings only with `path:line` evidence. Parallel when the engine allows, otherwise one after another in the same run.
 - Rounds: 1 after the build, 2 and 3 after fix rounds. So the builder gets at most two send-backs: at most 3 builder runs and 3 reviewer runs per PR.
 - No endless loop: an `if:` on both workflows lets the builder start only for a new build or fix round 1 or 2, and the reviewer only for round 1 to 3. On top, both count the reviewer's earlier `Reviewer: changes needed` reviews instead of trusting the round input.
-- Every review is a `COMMENT` (`allowed-events: [COMMENT]`). The builder opens the PR as `github-actions[bot]` and the reviewer reviews as the same account; GitHub rejects `REQUEST_CHANGES` on your own PR. Reviews therefore never block a merge in branch protection: a maintainer is the gate.
+- Every review is a `COMMENT` (`allowed-events: [COMMENT]`). Without the builder app the builder opens the PR as `github-actions[bot]` and the reviewer reviews as the same account; GitHub rejects `REQUEST_CHANGES` on your own PR. With the app it would work, but reviews still never block a merge in branch protection: a maintainer is the gate.
 
-PRs opened with `GITHUB_TOKEN` do not trigger `pull_request` workflows, which is why the builder starts the reviewer through dispatch.
+PRs opened with `GITHUB_TOKEN` do not trigger `pull_request` workflows, which is why the builder starts the reviewer through dispatch. The repo's own CI does not start either, unless the org's builder app is configured: then the builder's safe outputs run as the app and push one extra empty commit, so CI runs ([install guide](../docs/install.md#github-app-builder-prs-run-ci)).
 
 ## retro
 

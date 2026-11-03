@@ -64,7 +64,7 @@ Also stop with one comment when this issue or another issue with label `agent-fi
 
 - an open PR with label `builder` closes it;
 - its newest comment starting with `Builder started:` (written by `github-actions[bot]`) is less than 90 minutes old and no builder PR for it exists yet: a build is still running;
-- its newest comment starting with `Builder question:` (written by `github-actions[bot]`) has no comment from a human account after it.
+- its newest comment starting with `Builder question:` (written by a bot account: `github-actions[bot]`, or the org's builder app) has no comment from a human account after it.
 
 A `Builder started:` comment of 90 minutes or older without a builder PR is a failed build: it does not block a new start.
 
