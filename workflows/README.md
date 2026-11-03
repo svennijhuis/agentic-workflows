@@ -33,15 +33,16 @@ flowchart TD
   T[label triage] --> TR[issue-triage<br/>label + reason comment]
   TR -->|bug| B[label bug]
   TR -->|wayfinder<br/>in doubt: wayfinder| W[label wayfinder]
+  W -->|Sven runs /wayfinder locally<br/>sets wayfinder:map + decisions| WM[wayfinder:map]
   B -->|Sven adds agent-fix| IF[issue-fix<br/>blocker check]
-  W -->|Sven adds to-spec<br/>or wayfinder:map| CH[wf-to-spec, wf-spec, wf-plan]
+  WM -->|decisions closed| CH[wf-to-spec, wf-spec, wf-plan]
   CH --> DL[wf-delivery<br/>next unblocked ticket]
   IF --> BU[builder<br/>PR on builder/*, label builder]
   DL --> BU
   BU --> RV[reviewer<br/>standards, spec, deslop]
   RV -->|findings, round 1 or 2| BU
   RV -->|findings, round 3| NH[label needs-help<br/>comment why, stop]
-  RV -->|clean| OK[COMMENT: klaar voor Sven]
+  RV -->|clean| OK[COMMENT: klaar voor Sven<br/>PR already open, no label]
   OK --> M[Sven merges]
   NH --> M
   M --> RE[retro<br/>run logs of the whole flow]
@@ -56,7 +57,7 @@ Auth and secrets, names only:
 - Engine: built for an org. Every workflow (except `pr-review`) sets `copilot-requests: write`, so Copilot runs on the Actions `GITHUB_TOKEN` and is billed to the org. Needs org Copilot policy "Allow use of Copilot CLI billed to the organization". `COPILOT_GITHUB_TOKEN` is then ignored for inference and not needed.
 - `AW_CORE_ISSUES_TOKEN`: only for `retro`, a fine-grained token with Issues read and write on `svennijhuis/agentic-workflows`.
 
-Labels: `triage`, `bug`, `wayfinder`, `agent-fix`, `blocked`, `wayfinder:map`, `to-spec`, `specced`, `to-tickets`, `planned`, `ready-for-agent`, plus `builder` (on every builder PR) and `needs-help` (set by the reviewer after round 3). Create `builder` and `needs-help` in the target repo once.
+Labels: `triage`, `bug`, `wayfinder`, `agent-fix`, `blocked`, `wayfinder:map`, `to-spec`, `specced`, `to-tickets`, `planned`, `ready-for-agent`, plus `builder` (on every builder PR) and `needs-help` (set by the reviewer after round 3). Create `builder` and `needs-help` in the target repo once. There is no "ready for merge" label: a clean review is the comment `Reviewer: klaar voor Sven.` on the PR, and the PR already exists by then.
 
 ## issue-triage
 
@@ -131,7 +132,7 @@ flowchart LR
   SV --> DL
 ```
 
-Labels you set: `wayfinder:map` on the parent issue (with decision sub-issues, made with the `wayfinder` skill locally), or `to-spec` on an ordinary issue to skip the decision step. The workflows set the rest.
+Start: run `/wayfinder` locally. It creates the parent issue with label `wayfinder:map` and the decision sub-issues. Alternative: `to-spec` on an ordinary issue to skip the decision step. The workflows set the rest. Nobody opens the builder PR by hand; the builder does.
 
 Changed from the source:
 
