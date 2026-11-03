@@ -23,6 +23,7 @@ tools:
 safe-outputs:
   assign-to-agent:
     allowed: [copilot]
+    custom-agent: squad
     target: "*"
     max: 1
   add-comment:

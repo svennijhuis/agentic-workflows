@@ -53,7 +53,7 @@ flowchart TD
 flowchart LR
   A[label agent-fix<br/>or workflow_dispatch] --> B{blocked?<br/>label, open blocked_by,<br/>unmerged predecessor PR}
   B -->|yes| C[comment with blockers, stop]
-  B -->|no| D[assign-to-agent: copilot]
+  B -->|no| D[assign-to-agent: copilot<br/>custom-agent: squad]
   D --> E[Copilot opens PR<br/>Fixes #issue]
   E --> F[run again: @copilot comment<br/>for open review points]
   F --> G[Sven reviews and merges]
@@ -64,6 +64,7 @@ flowchart LR
 - One active ticket at a time. Not blocked: the issue is assigned to `copilot` with instructions (this ticket only, smallest validation, a PR that closes the issue, ask on the issue when unsure).
 - Follow-ups: run it again and open review points go back as one `@copilot` comment. Optional Copilot code review via `add-reviewer`.
 - No `merge-pull-request`: Sven merges. Network closed.
+- Builder profile: Copilot works as the `squad` custom agent ([agents/squad.agent.md](../agents/squad.agent.md)): read issue, small plan, smallest change, run the repo's tests and build, slop self-check, follow AGENTS.md, one PR per issue with proof in the body. On install, copy `agents/squad.agent.md` to `.github/agents/squad.agent.md` in the target repo, on the default branch. Without that file Copilot falls back to its default behavior. Squad v2 from agentPacks replaces this compact version later, same name.
 - Requirements: the Copilot cloud agent must be enabled on the repo, and every assignment costs Copilot premium requests.
 - Token: `GH_AW_AGENT_TOKEN` (Sven sets it as an Actions secret) is only needed for the optional `add-reviewer`.
 - Not compiled yet: run `gh aw compile issue-fix` before it can run.
