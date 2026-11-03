@@ -7,7 +7,7 @@ Library of [GitHub Agentic Workflows](https://github.github.com/gh-aw/) by svenn
 | [`aw.yml`](aw.yml) | Package manifest for `gh aw add` |
 | [`workflows/`](workflows/) | Installable workflows, flows and diagrams in [workflows/README.md](workflows/README.md) |
 | [`workflows/shared/`](workflows/shared/) | Importable fragments, including local skill copies in [`shared/skills/`](workflows/shared/skills/) |
-| [`docs/examples/`](docs/examples/) | Copilot instruction templates a target repo copies (`.github/copilot-instructions.md`, `.github/instructions/*.instructions.md`) |
+| [`docs/install.md`](docs/install.md) | Install in an org: prerequisites, tokens, secrets, labels, first run |
 
 ## Validate
 
@@ -20,7 +20,7 @@ T=$(mktemp -d) && mkdir -p "$T/.github/workflows" "$T/.github/aw" && cp -R workf
 
 ## Install
 
-In a target repo:
+Full org setup (Copilot policy, tokens, secrets, labels): [docs/install.md](docs/install.md). Short form, in a target repo:
 
 ```bash
 gh aw add svennijhuis/agentic-workflows/workflows/<name>.md@<tag>
