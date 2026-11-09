@@ -8,7 +8,7 @@ imports:
   - svennijhuis/agentic-workflows/workflows/shared/defaults.md@v1.0.0
 ```
 
-gh-aw v0.93.4 requires shared files under `workflows/shared/` (imports outside `workflows/` fail compile).
+gh-aw v1.0.1 requires shared files under `workflows/shared/` (imports outside `workflows/` fail compile).
 
 ## Fragments
 

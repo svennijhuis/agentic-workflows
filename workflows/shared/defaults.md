@@ -2,7 +2,7 @@
 description: Catalog defaults imported by every workflow. Engine copilot (pinned version). No tools and no caps here.
 engine:
   id: copilot
-  version: "1.0.101"
+  version: "1.0.103"
 ---
 
 Catalog defaults (C03). Engine: copilot, version pinned here (C06). Every workflow declares its own GitHub tools as `mode: gh-proxy` with an explicit toolset list; writes only through the importing workflow's safe-outputs.

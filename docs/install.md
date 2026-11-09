@@ -12,7 +12,7 @@ How to use this library in a GitHub org: what to switch on, which tokens and sec
 | `gh-aw` extension, pinned to the version in [`aw.yml`](../aw.yml) | Installs and compiles workflows |
 
 ```bash
-gh extension install github/gh-aw --pin v0.93.4
+gh extension install github/gh-aw --pin v1.0.1
 ```
 
 ## 1. Org settings (once per org)

@@ -203,7 +203,7 @@ Changed from the source (house rules, applied to all four):
 
 ### Version lock
 
-The gh-aw setup action is pinned in [.github/aw/actions-lock.json](../.github/aw/actions-lock.json): `github/gh-aw-actions/setup@v0.93.4` at commit `40fb427c047bb9f77324054adeb574e04c9481aa`. Compile uses that SHA, so every lock file gets the same setup action.
+The gh-aw setup actions are pinned in [.github/aw/actions-lock.json](../.github/aw/actions-lock.json): `github/gh-aw-actions/setup@v1.0.1` and `github/gh-aw-actions/setup-cli@v1.0.1`, both at commit `221ba4f4319de6b8e809d1a15528b3ae6a818aa5`. Compile uses that SHA, so every lock file gets the same setup actions.
 
 To update: pick the new tag, get its commit with `gh api repos/github/gh-aw-actions/git/ref/tags/<tag>` (for an annotated tag, follow `.object.sha` with `gh api repos/github/gh-aw-actions/git/tags/<sha>`), put version and sha in the file, then recompile.
 
