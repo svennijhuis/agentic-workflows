@@ -2,12 +2,46 @@
 
 How to use this library in a GitHub org: what to switch on, which tokens and secrets exist, where to get them, and how to check it works. Workflow behavior is in [workflows/README.md](../workflows/README.md).
 
+## Quick start
+
+The shortest path to a working bug-to-PR flow. Each step links to the details below. Everything else is in [Later improvements](#later-improvements).
+
+### Do now
+
+| # | Step | Who | Time |
+| --- | --- | --- | --- |
+| 1 | **Copilot billing.** Org **Settings** → **Copilot** → **Policies**: set **Copilot CLI** and **Allow use of Copilot CLI billed to the organization** to **Enabled**. [Details](#option-a-copilot-billed-to-the-org-default) | Org owner | 1 min |
+| 2 | **PRs from Actions.** Org and repo **Settings** → **Actions** → **General** → **Workflow permissions**: tick **Allow GitHub Actions to create and approve pull requests**. [Details](#actions) | Org owner, then repo admin | 2 min |
+| 3 | **Install.** In the target repo: `gh aw add` for `issue-triage`, `bug-fix`, `issue-builder`, `pr-reviewer`, then `gh aw compile`, commit and push. [Details](#2-install-into-a-target-repo) | You | 5 min |
+| 4 | **Builder network.** Add the repo's ecosystem (`node`, `dotnet`, ...) under `network.allowed` in `issue-builder.md`, compile again. Without it the builder cannot install packages. [Details](#builder-network) | You | 2 min |
+| 5 | **Labels.** Run the label loop once. [Details](#4-labels-once-per-target-repo) | You | 1 min |
+| 6 | **CI on builder PRs.** Fine-grained PAT with **Contents: Read and write** on the repo, stored as `CI_TRIGGER_TOKEN`. Skip it and CI does not run on builder PRs: then close and reopen a PR by hand. [Details](#builder-ci-personal-token) | You make the token, a repo admin sets the secret, org owner approves if required | 5 min |
+| 7 | **Test.** New issue with label `triage`, then `agent-fix`. [Details](#6-check-it-works) | You | — |
+
+So you ask an org owner for steps 1 and 2 (and to approve the token in step 6). You need no other token: Copilot runs on the Actions `GITHUB_TOKEN`. Do not create `COPILOT_GITHUB_TOKEN`, `APP_ID`, `APP_PRIVATE_KEY` or `AW_CORE_ISSUES_TOKEN` for the quick start.
+
+No org owner for step 1? Use [option B](#option-b-personal-token-copilot_github_token): your own Copilot token. It costs one extra edit per workflow.
+
+### Later improvements
+
+None of these block the quick start. Do them when the flow runs.
+
+| Improvement | Why | Details |
+| --- | --- | --- |
+| GitHub App instead of the personal CI token | Does not hang on one person, short-lived tokens, builder acts as the app | [Next improvement: GitHub App](#next-improvement-github-app) |
+| Service account for tokens | A token on your own account stops when you leave or it expires | [Builder CI](#builder-ci-personal-token) |
+| Repo rules (`AGENTS.md`, Copilot instructions) | Builder and reviewer follow your standards | [Repo rules](#5-repo-rules-optional-recommended) |
+| Wayfinder flow (plan to PRs) | Bigger work split into tickets | [Workflow sets](#2-install-into-a-target-repo) |
+| `agentic-token-audit` | Daily cost report, to tune the caps | [workflows/README.md](../workflows/README.md#agentic-token-audit) |
+| `retro` | Learns from each merged PR, needs `AW_CORE_ISSUES_TOKEN` | [AW_CORE_ISSUES_TOKEN](#aw_core_issues_token-only-for-retro) |
+| C# extras: private NuGet feed, `dotnet format` hook, custom MCP server | Only for C# repos | [Private NuGet feed](#private-nuget-feed-c-repos) |
+
 ## What you need
 
 | Need | Why |
 | --- | --- |
-| Org owner (or admin on the target repo) | Org Copilot policy, org secrets, Actions settings |
-| GitHub Copilot on the org (Business or Enterprise) | Every workflow runs the `copilot` engine |
+| Org owner (or admin on the target repo) | Org Copilot policy (option A), org secrets, Actions settings |
+| GitHub Copilot on the org (Business or Enterprise), or a personal Copilot license | Every workflow runs the `copilot` engine. See [Copilot auth](#copilot-auth-pick-one-option) |
 | [`gh` CLI](https://cli.github.com/), logged in with `gh auth login` | `gh aw add`, `gh aw compile`, `gh secret`, `gh label` |
 | `gh-aw` extension, pinned to the version in [`aw.yml`](../aw.yml) | Installs and compiles workflows |
 
@@ -17,17 +51,61 @@ gh extension install github/gh-aw --pin v0.93.4
 
 ## 1. Org settings (once per org)
 
-### Copilot billed to the org
+### Copilot auth: pick one option
 
-The workflows set `copilot-requests: write`. Copilot then runs on the Actions `GITHUB_TOKEN` and is billed to the org. No personal token is needed for inference.
+Every workflow runs the `copilot` engine and needs a way to pay for inference. There are two options. Pick one per target repo.
 
-1. Open `https://github.com/<org>`, click **Settings** (top tab row of the org page).
-2. Left sidebar: **Copilot** → **Policies**. Direct link: `https://github.com/organizations/<org>/settings/copilot/policies`.
-3. Find **Allow use of Copilot CLI billed to the organization** and set it to **Enabled**.
+| | Option A: org billing (default) | Option B: personal token |
+| --- | --- | --- |
+| Who pays | The org's Copilot plan | The Copilot license of the account that owns the token |
+| What you set up | Org Copilot policy (org owner) | `COPILOT_GITHUB_TOKEN` repo secret (repo admin) |
+| Workflow change | None: the workflows ship with `copilot-requests: write` | Remove `copilot-requests: write` from your copies, then compile |
+| Use when | The org has Copilot Business or Enterprise and an org owner can switch the policy on | Option A is not possible: no org owner available, policy stays off, or the run fails at the Copilot step |
 
-No Copilot entry in the sidebar: the org has no Copilot plan. Buy or enable one first under **Settings → Billing and plans**.
+#### Option A: Copilot billed to the org (default)
 
-`COPILOT_GITHUB_TOKEN` is ignored for inference. Do not create it.
+The workflows set `copilot-requests: write`. Copilot then runs on the Actions `GITHUB_TOKEN` and is billed to the org. No personal token is needed for inference. This needs an org owner once.
+
+Only an org owner can do this. Click path:
+
+1. Your profile picture top right → **Organizations** → pick the org. Or open `https://github.com/<org>`.
+2. Click **Settings** under the org name (top tab row). Not visible: open the **⋯** dropdown at the end of the tab row and click **Settings** there. Still missing: you are not an org owner.
+3. Left sidebar, section **Code, planning, and automation**: click **Copilot**, then **Policies**. Direct link: `https://github.com/organizations/<org>/settings/copilot/policies`.
+4. In the policy list find **Copilot CLI** and set it to **Enabled**. This turns on the Copilot CLI that gh-aw runs on the runner.
+5. Right below, find **Allow use of Copilot CLI billed to the organization** and set it to **Enabled**. With **Copilot CLI** already on, this one is usually on by default: check it anyway.
+6. The page saves each change right away. No save button.
+
+Turn nothing else on or off for the workflows: other Copilot policies (models, coding agent, code review) do not matter here.
+
+- No **Copilot** entry in the sidebar: the org has no Copilot plan. Buy or enable one first under **Settings → Billing and plans**.
+- A policy is greyed out or shows it is set by the enterprise: the org belongs to an enterprise that decides this policy. An enterprise owner turns it on in the enterprise settings under the Copilot policies, or leaves the choice to the org.
+
+With `copilot-requests: write` set, `COPILOT_GITHUB_TOKEN` is ignored for inference. Do not create it for option A.
+
+Check it: the first run gets past the Copilot step. When the Actions token has no Copilot access through the org, the run fails at that step (often `403 Forbidden`). Then fix the policy, or switch to option B.
+
+#### Option B: personal token (`COPILOT_GITHUB_TOKEN`)
+
+Copilot runs on a fine-grained personal access token of one account and is billed to that account's Copilot license. Use it when org billing is not available. The account needs an active Copilot license.
+
+1. Create the token: your avatar top right → **Settings** → left sidebar bottom **Developer settings** → **Personal access tokens** → **Fine-grained tokens** → **Generate new token**. Direct link: <https://github.com/settings/personal-access-tokens/new>.
+   - **Token name**: for example `copilot-aw-<target-repo>`.
+   - **Resource owner**: your own user account, not the org.
+   - **Expiration**: set one and note the date. After it expires every workflow fails at the Copilot step.
+   - **Permissions** → **Account permissions** → **Copilot Requests**: **Read**. Leave the rest.
+   - **Generate token** and copy the `github_pat_...` value. GitHub shows it once. A classic or OAuth token (`ghp_`, `gho_`) does not work.
+2. Store it as a secret in the target repo. `gh` asks for the value:
+
+   ```bash
+   gh secret set COPILOT_GITHUB_TOKEN --repo <org>/<target-repo>
+   ```
+
+3. In your copy of every installed workflow under `.github/workflows/`, delete the line `copilot-requests: write` under `permissions:`. Leave the other permissions as they are. While that line is there, the token is ignored.
+4. `gh aw compile` and commit the `.md` and `.lock.yml` files.
+
+`gh aw update` brings `copilot-requests: write` back from the library. Delete it again after each update, before you compile.
+
+Rotate by creating a new token and running the same `gh secret set` again. Usage is billed to the token owner, so use an account that is meant for it, not a colleague's.
 
 ### Actions
 
@@ -84,15 +162,52 @@ Workflow sets (pick what you need):
 | Name | Needed by | Required | Where it lives |
 | --- | --- | --- | --- |
 | `GITHUB_TOKEN` | every workflow | yes, automatic | Provided by Actions. Nothing to create |
-| `APP_ID` (variable), `APP_PRIVATE_KEY` (secret) | `issue-builder` | recommended: without it builder PRs start no CI | Repo or org Actions variable and secret |
+| `CI_TRIGGER_TOKEN` (placeholder name) | `issue-builder`, `agents-md-sync` | recommended: without it builder PRs start no CI | Repo Actions secret. See [Builder CI](#builder-ci-personal-token) |
 | `AW_CORE_ISSUES_TOKEN` | `retro` only | only if you install `retro` | Repo or org Actions secret |
 | `NUGET_FEED_TOKEN` | `issue-builder` in C# repos | only with a private NuGet feed | Repo or org Actions secret |
 | `NUGET_FEED_URL`, `NUGET_FEED_USER` | `issue-builder` in C# repos | only with a private NuGet feed | Repo or org Actions variables (not secret) |
-| `COPILOT_GITHUB_TOKEN` | nothing | no | Not used, see above |
+| `COPILOT_GITHUB_TOKEN` | every workflow, option B only | only with option B | Repo Actions secret. Ignored with option A, see [Copilot auth](#copilot-auth-pick-one-option) |
 
-### GitHub App (builder PRs run CI)
+| `APP_ID` (variable), `APP_PRIVATE_KEY` (secret) | `issue-builder` | no: only for the [next improvement](#next-improvement-github-app) | Repo or org Actions variable and secret |
 
-Every write runs on the Actions `GITHUB_TOKEN`, and GitHub starts no workflow from an event made with that token. So a builder PR gets no `pull_request` run of the repo's own CI: required status checks stay on *Expected — waiting for status* and the PR cannot be merged without an admin bypass. `issue-builder` therefore takes an org GitHub App, as gh-aw recommends ([Triggering CI](https://github.github.com/gh-aw/reference/triggering-ci/)): its safe outputs mint a short-lived app token, open the PR and push as the app, and push one extra empty commit so CI starts. No app configured: it falls back to `GITHUB_TOKEN` and works as before, without CI.
+### Builder CI: personal token
+
+Every write runs on the Actions `GITHUB_TOKEN`, and GitHub starts no workflow from an event made with that token. So a builder PR gets no `pull_request` run of the repo's own CI: required status checks stay on *Expected — waiting for status* and the PR cannot be merged without an admin bypass. gh-aw fixes this by pushing one extra empty commit with a token whose events do start workflows. See [Triggering CI](https://github.github.io/gh-aw/reference/triggering-ci) in the gh-aw docs.
+
+`issue-builder` and `agents-md-sync` (the two workflows that open PRs) push that commit with the token in secret `CI_TRIGGER_TOKEN`. They name it in frontmatter as `github-token-for-extra-empty-commit: ${{ secrets.CI_TRIGGER_TOKEN }}`. `CI_TRIGGER_TOKEN` is a placeholder name for now: to use another name, change it in those three lines (two in `issue-builder.md`, one in `agents-md-sync.md`) and in this guide. Set the secret before the first run: what gh-aw does when the named secret is empty is not verified here. The PR itself is still opened by `github-actions[bot]`. No GitHub App and no **Administration** permission needed.
+
+1. Create a fine-grained token: your avatar top right → **Settings** → **Developer settings** → **Personal access tokens** → **Fine-grained tokens** → **Generate new token**. Direct link: <https://github.com/settings/personal-access-tokens/new>.
+   - **Token name**: for example `aw-ci-trigger-<target-repo>`.
+   - **Resource owner**: the org that owns the target repo.
+   - **Expiration**: set one and note the date. After it expires builder PRs start no CI again.
+   - **Repository access**: **Only select repositories** → the target repo.
+   - **Permissions** → **Repository permissions** → **Contents**: **Read and write**. Leave the rest. **Metadata: Read** is added automatically.
+   - **Generate token**, copy the `github_pat_...` value.
+2. Org requires approval for fine-grained tokens: the token stays *pending* until an org owner approves it at `https://github.com/organizations/<org>/settings/personal-access-tokens/pending_requests`. That is one click for the owner.
+3. Store it in the target repo (needs admin on the repo). The token's own name in GitHub can be anything; the secret name must match the name in the workflows (`CI_TRIGGER_TOKEN`). `gh` asks for the value:
+
+   ```bash
+   gh secret set CI_TRIGGER_TOKEN --repo <org>/<target-repo>
+   ```
+
+4. Run `gh aw compile`. If it stops on a new secret, check that `CI_TRIGGER_TOKEN` is only used for the extra empty commit in the `.lock.yml`, then `gh aw compile --approve`. Commit.
+
+Check it: on a builder PR the **Checks** tab shows your CI, and in the repo **Actions** tab the CI run for the last (empty) commit has the token owner as actor, not `github-actions[bot]`. Not verified against a live run here.
+
+What it does not change: the PR, comments and dispatches stay on `github-actions[bot]`, so the builder, reviewer and `wf-delivery` treat them as before. The empty commit starts no agentic workflow (none listens to `push` or `pull_request` `opened`/`synchronize`), only the repo's own CI. `wf-delivery` accepts a reviewer review on the commit before the empty commit as a review of the head.
+
+The empty commit carries the token owner's name, and CI stops when that account leaves or the token expires. Use a service account when the org has one. Rotate by creating a new token and running the same `gh secret set` again.
+
+#### No token: reopen by hand
+
+Without the secret, a maintainer can start CI on a builder PR by clicking **Close pull request** at the bottom of the PR and then **Reopen pull request**. A reopen by a person fires `pull_request` (`reopened`), so CI starts.
+
+- Works only when the repo's CI listens to the default `pull_request` events (`opened`, `synchronize`, `reopened`). A CI with `types: [opened]` only does not start.
+- Each new builder push (fix round) needs another close and reopen.
+
+### Next improvement: GitHub App
+
+The personal token works but hangs on one account. The next step is an org GitHub App, as gh-aw recommends in [Triggering CI](https://github.github.io/gh-aw/reference/triggering-ci): it does not depend on a person, its tokens live minutes, and the builder's PR, pushes, comments and dispatches all run as the app. It needs an org owner once. Not part of the default setup yet.
 
 Create the app once per org (org owner):
 
@@ -119,13 +234,28 @@ gh secret set APP_PRIVATE_KEY --repo <org>/<target-repo> < path/to/key.pem
 
 Then delete the local `.pem`. Rotate by generating a new key on the app page, `gh secret set` again, and deleting the old key there.
 
-`gh aw compile` stops on `issue-builder` with *New restricted secret(s): APP_PRIVATE_KEY*. Check it is only used by the `Generate GitHub App token` steps in the `.lock.yml`, then `gh aw compile --approve` and commit.
+Switch `issue-builder.md` to the app. Under `safe-outputs:` add the `github-app:` block, and change the two `github-token-for-extra-empty-commit` lines under `create-pull-request` and `push-to-pull-request-branch` to `app`:
+
+```yaml
+safe-outputs:
+  github-app:
+    client-id: ${{ vars.APP_ID }}
+    private-key: ${{ secrets.APP_PRIVATE_KEY }}
+    ignore-if-missing: true
+  create-pull-request:
+    # ...existing fields
+    github-token-for-extra-empty-commit: app
+  push-to-pull-request-branch:
+    # ...existing fields
+    github-token-for-extra-empty-commit: app
+```
+
+`gh aw compile` stops with *New restricted secret(s): APP_PRIVATE_KEY*. Check it is only used by the `Generate GitHub App token` steps in the `.lock.yml`, then `gh aw compile --approve` and commit. Keep `CI_TRIGGER_TOKEN` for `agents-md-sync`, or switch that workflow to the app the same way. Once tested, this belongs in the library's `issue-builder.md` as the default.
 
 What changes:
 
 - The builder's PR, pushes, comments (`Builder question:`) and dispatches show the app as author instead of `github-actions[bot]`. The other workflows treat both as bot accounts.
 - Events made by the app do start workflows. That is the point for CI; `wf-delivery` ignores bot comments, so no loop starts.
-- Check it: on a builder PR the **Checks** tab shows your CI. In the repo **Actions** tab the CI run for the last (empty) commit has the app as actor, not `github-actions[bot]`. Not verified against a live run here.
 
 ### `AW_CORE_ISSUES_TOKEN` (only for `retro`)
 
@@ -249,10 +379,11 @@ A maintainer always merges. Nothing here merges or approves.
 
 | Symptom | Likely cause |
 | --- | --- |
-| Run fails at the Copilot step with a billing or policy error | Org policy *Allow use of Copilot CLI billed to the organization* is off, or the org has no Copilot plan |
+| Run fails at the Copilot step with a billing or policy error (option A) | Org policy *Copilot CLI* or *Allow use of Copilot CLI billed to the organization* is off, or the org has no Copilot plan. Or switch to option B |
+| Run fails at the Copilot step with an auth error (option B) | `COPILOT_GITHUB_TOKEN` missing, expired, not fine-grained, or lacks **Copilot Requests**. Or `copilot-requests: write` is still in the workflow, so the token is ignored |
 | Builder finishes but no PR | *Allow GitHub Actions to create and approve pull requests* is off |
-| Builder PR shows no CI checks | No builder app: `APP_ID` or `APP_PRIVATE_KEY` unset, so it fell back to `GITHUB_TOKEN`. Or the app is not installed on this repo |
-| Builder run fails at *Generate GitHub App token* | Wrong Client ID or key, or the app lacks one of the permissions in [GitHub App](#github-app-builder-prs-run-ci) |
+| Builder PR shows no CI checks | `CI_TRIGGER_TOKEN` missing, expired, still *pending* org approval, or without **Contents: Read and write** on this repo. With the app: `APP_ID` or `APP_PRIVATE_KEY` unset, or the app is not installed on this repo |
+| Builder run fails at *Generate GitHub App token* (app only) | Wrong Client ID or key, or the app lacks one of the permissions in [Next improvement: GitHub App](#next-improvement-github-app) |
 | A label set by one workflow does not start the next | Expected: events made with `GITHUB_TOKEN` start nothing. The flow hands off by `workflow_dispatch` instead |
 | `retro` fails on `create-issue` | `AW_CORE_ISSUES_TOKEN` missing, expired, or lacks Issues write on the target repo |
 | `gh aw compile` complains about `dispatch-workflow` | Dispatch targets are not all in `.github/workflows/`. Install both `issue-builder` and `pr-reviewer` |
@@ -264,4 +395,4 @@ gh aw update
 gh aw compile
 ```
 
-Commit the result. Read the release notes of the new tag first: caps, labels and secrets can change.
+Commit the result. Read the release notes of the new tag first: caps, labels and secrets can change. Option B: delete `copilot-requests: write` again before `gh aw compile`.
