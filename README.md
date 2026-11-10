@@ -14,8 +14,8 @@ Library of [GitHub Agentic Workflows](https://github.github.com/gh-aw/) by svenn
 The compiler checks `dispatch-workflow` targets in `.github/workflows/`, so validate in a scratch repo with that layout:
 
 ```bash
-gh extension install github/gh-aw --pin v0.93.4
-T=$(mktemp -d) && mkdir -p "$T/.github/workflows" "$T/.github/aw" && cp -R workflows/. "$T/.github/workflows/" && cp .github/aw/actions-lock.json "$T/.github/aw/" && (cd "$T" && git init -q && gh aw compile --no-emit)
+gh extension install github/gh-aw --pin v1.0.1
+T=$(mktemp -d) && mkdir -p "$T/.github/workflows" "$T/.github/aw" && cp -R workflows/. "$T/.github/workflows/" && cp .github/aw/actions-lock.json "$T/.github/aw/" && (cd "$T" && git init -q && gh aw compile --strict --no-emit)
 ```
 
 ## Install

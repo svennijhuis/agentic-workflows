@@ -46,7 +46,7 @@ None of these block the quick start. Do them when the flow runs.
 | `gh-aw` extension, pinned to the version in [`aw.yml`](../aw.yml) | Installs and compiles workflows |
 
 ```bash
-gh extension install github/gh-aw --pin v0.93.4
+gh extension install github/gh-aw --pin v1.0.1
 ```
 
 ## 1. Org settings (once per org)
